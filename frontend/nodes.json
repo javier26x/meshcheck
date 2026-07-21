@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-21T21:33:02.190Z",
+  "generated": "2026-07-21T22:38:45.945Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 288,
   "nodes": {
@@ -9,2304 +9,2555 @@
       "name": "CLCCPLT-02",
       "lat": -33.4078421,
       "lon": -70.7153924,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "06QXMvxF28IZLgZh5IK0": {
       "id": "06QXMvxF28IZLgZh5IK0",
       "name": "RCJ 0248",
       "lat": -33.357824,
       "lon": -70.5101824,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "0248",
+      "role": "CLIENT"
     },
     "0Dy0ew2Le6m973cFJIcV": {
       "id": "0Dy0ew2Le6m973cFJIcV",
       "name": "Meshtastic ff46",
       "lat": -33.4090414,
       "lon": -70.5750096,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ff46",
+      "role": "CLIENT"
     },
     "0GmmdBlMhjxK2aF3ebzp": {
       "id": "0GmmdBlMhjxK2aF3ebzp",
       "name": "Nodo Viña Alto",
       "lat": -33.0406668,
       "lon": -71.5577723,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "vin1",
+      "role": "CLIENT"
     },
     "0JYa9PCMnTUPBvtSzPL0": {
       "id": "0JYa9PCMnTUPBvtSzPL0",
       "name": "Meshtastic Magus01",
       "lat": -33.45141584868638,
       "lon": -70.64069515472546,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "0MsoBy5Wi7IvcMfftqGK": {
       "id": "0MsoBy5Wi7IvcMfftqGK",
       "name": "Juancho módulo 1",
       "lat": -33.520747,
       "lon": -70.59921,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "J001",
+      "role": "CLIENT"
     },
     "0NuW1xe0zH3R6bXivNUa": {
       "id": "0NuW1xe0zH3R6bXivNUa",
       "name": "Base Familia Monsalve Ravello",
       "lat": -35.42936,
       "lon": -71.61009,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "BMFR",
+      "role": "CLIENT"
     },
     "0Q2mnWEpw7cl4EN8uRLo": {
       "id": "0Q2mnWEpw7cl4EN8uRLo",
       "name": "GluguiGO",
       "lat": -39.642792365907205,
       "lon": -72.32678388835889,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TGG",
+      "role": "CLIENT_MUTE"
     },
     "0wsqV7L8iR0EgE10qthr": {
       "id": "0wsqV7L8iR0EgE10qthr",
       "name": "Cone",
       "lat": -32.934069,
       "lon": -71.53561,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "role": "CLIENT"
     },
     "1Jr9SINUK7Yg6llQxStA": {
       "id": "1Jr9SINUK7Yg6llQxStA",
       "name": "RAK 4631 LOS ÁNGELES / CHILE",
       "lat": -37.46068995865274,
       "lon": -72.36001420004179,
-      "role": "REPEATER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "MLVS",
+      "role": "REPEATER"
     },
     "1WSE4nIMnHMHjinU4MXN": {
       "id": "1WSE4nIMnHMHjinU4MXN",
       "name": "Talca City",
       "lat": -35.437825,
       "lon": -71.6379837,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TA01",
+      "role": "CLIENT"
     },
     "239IEWsWzrMfmKwN9asJ": {
       "id": "239IEWsWzrMfmKwN9asJ",
       "name": "IKARI",
       "lat": -33.5434813426053,
       "lon": -70.77517280347284,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "EV01",
+      "role": "CLIENT"
     },
     "29FA5XxtyzuqZdEwzl7h": {
       "id": "29FA5XxtyzuqZdEwzl7h",
       "name": "jtrnode",
       "lat": -33.4800084,
       "lon": -70.515326,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "jtr",
+      "role": "CLIENT"
     },
     "2hJVJ3EfITBae0NsVPbb": {
       "id": "2hJVJ3EfITBae0NsVPbb",
       "name": "MARIO CE2",
       "lat": -33.074069,
       "lon": -71.625071,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2MGP",
+      "role": "CLIENT"
     },
     "2hVR9zIEhwS3uRcZSjKd": {
       "id": "2hVR9zIEhwS3uRcZSjKd",
       "name": "n3v_huechu02",
       "lat": -33.38454,
       "lon": -70.609809,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "n3h2",
+      "role": "CLIENT"
     },
     "2qX1A8GjTKNs9t8kioys": {
       "id": "2qX1A8GjTKNs9t8kioys",
       "name": "matamua",
       "lat": -33.456128,
       "lon": -70.6543616,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "2vMmXGpGaLz3kPWlhi5E": {
       "id": "2vMmXGpGaLz3kPWlhi5E",
       "name": "KF4ZCL UNIT1",
       "lat": 25.8647384,
       "lon": -80.3136396,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ZCL1",
+      "role": "CLIENT"
     },
     "3PCjscreQCYdBCtstqoS": {
       "id": "3PCjscreQCYdBCtstqoS",
       "name": "CA4TQY-3",
       "lat": -34.177024,
       "lon": -70.7067904,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TQY3",
+      "role": "CLIENT"
     },
     "3SEKomhJIXUhObPI83Td": {
       "id": "3SEKomhJIXUhObPI83Td",
       "name": "LU2HXF 1",
       "lat": -32.4075895,
       "lon": -63.2368616,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "HXF1",
+      "role": "CLIENT"
     },
     "3X5XVxYuwnwuSPDFclag": {
       "id": "3X5XVxYuwnwuSPDFclag",
       "name": "Elonso",
       "lat": -20.2264,
       "lon": -70.1409,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Elo",
+      "role": "CLIENT"
     },
     "3sknl3dGaQaalI7ET796": {
       "id": "3sknl3dGaQaalI7ET796",
       "name": "Tracker T1000E",
       "lat": -33.4433608,
       "lon": -70.7162593,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "c344",
+      "role": "CLIENT"
     },
     "4F72zdK29oBBHveElG3j": {
       "id": "4F72zdK29oBBHveElG3j",
       "name": "CE3UOB-2",
       "lat": -33.408514,
       "lon": -71.1305655,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "UOB2",
+      "role": "CLIENT"
     },
     "4iASn9Xvf7D3bWRsNsgF": {
       "id": "4iASn9Xvf7D3bWRsNsgF",
       "name": "CD3PIT-M",
       "lat": -33.4311,
       "lon": -70.6045,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CL27",
+      "role": "CLIENT"
     },
     "4kkeN668m9uaxay7Y83u": {
       "id": "4kkeN668m9uaxay7Y83u",
       "name": "QUINTERO1_PWM",
       "lat": -32.7897909,
       "lon": -71.5130329,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2SLJ",
+      "role": "CLIENT"
     },
     "4oL3U2Ulr9S7XZilWQdu": {
       "id": "4oL3U2Ulr9S7XZilWQdu",
       "name": "Nodo Prueba Las Cruces",
       "lat": -33.49692622283166,
       "lon": -71.62861868947286,
-      "role": "ROUTER_CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CRUC",
+      "role": "ROUTER_CLIENT"
     },
     "4sVtHZ3H1ADv8rB6sChH": {
       "id": "4sVtHZ3H1ADv8rB6sChH",
       "name": "Maipu270",
       "lat": -33.52509739664494,
       "lon": -70.79217686121206,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "M270",
+      "role": "CLIENT"
     },
     "52nIQmRJlbbuuF3fPj58": {
       "id": "52nIQmRJlbbuuF3fPj58",
       "name": "UWA Dv1",
       "lat": -36.7743104,
       "lon": -73.0988035,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "0f71",
+      "role": "CLIENT"
     },
     "5Ppllkm63bHdBemI9Zxv": {
       "id": "5Ppllkm63bHdBemI9Zxv",
       "name": "TEBO_4938",
       "lat": -33.5258489,
       "lon": -70.5847745,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "5fse93eKs4iW6msZ9hXE": {
       "id": "5fse93eKs4iW6msZ9hXE",
       "name": "Heltec V3 - 02",
       "lat": -29.96,
       "lon": -71.23,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "V3-2",
+      "role": "CLIENT"
     },
     "5q6PO3sUqiw28QFBqtB9": {
       "id": "5q6PO3sUqiw28QFBqtB9",
       "name": "IL01 6a46",
       "lat": -33.4444,
       "lon": -70.57,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "6a46",
+      "role": "CLIENT"
     },
     "650rjwGxu4Vlie77gxkt": {
       "id": "650rjwGxu4Vlie77gxkt",
       "name": "C6MJS",
       "lat": -38.729516,
       "lon": -72.5996,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "6MJS",
+      "role": "CLIENT"
     },
     "66I30s4pAmYDbtuL95wV": {
       "id": "66I30s4pAmYDbtuL95wV",
       "name": "JF - Estación Cumberland",
       "lat": -33.642894,
       "lon": -78.836105,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "APJF",
+      "role": "CLIENT"
     },
     "6QzDZyQe0ccHnExoTzBc": {
       "id": "6QzDZyQe0ccHnExoTzBc",
       "name": "APaDu_Home",
       "lat": -33.42154666093564,
       "lon": -70.67440390975256,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "apdh",
+      "role": "CLIENT"
     },
     "6cD7n5o6V4AENBmDhKvO": {
       "id": "6cD7n5o6V4AENBmDhKvO",
       "name": "Prueba1",
       "lat": -33.50599878234544,
       "lon": -70.66209475469564,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "P01",
+      "role": "CLIENT"
     },
     "785fZ1YAt01a4G7qb6DT": {
       "id": "785fZ1YAt01a4G7qb6DT",
       "name": "Meshtastic Cabrero",
       "lat": -37.0361396,
       "lon": -72.3981549,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CL8V",
+      "role": "CLIENT"
     },
     "7KqQkHFtXZfpQZfKeBfI": {
       "id": "7KqQkHFtXZfpQZfKeBfI",
       "name": "Thno 1/2 Camino ",
       "lat": -36.7753527,
       "lon": -73.0848274,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Thno",
+      "role": "CLIENT"
     },
     "7M06S8GN8S0mJ1GJEk98": {
       "id": "7M06S8GN8S0mJ1GJEk98",
       "name": "Meshtastic a679",
       "lat": -33.04350186441343,
       "lon": -71.6320102815408,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "🦉",
+      "role": "CLIENT"
     },
     "7Q1upabfEdYKqnt1ANDC": {
       "id": "7Q1upabfEdYKqnt1ANDC",
       "name": "CD2GBS BASE PAN DE AZUCAR CQBO",
       "lat": -30.030772740200057,
       "lon": -71.23668525979994,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GSD1",
+      "role": "CLIENT"
     },
     "7VZsP8RZuv0xt9ffRLV7": {
       "id": "7VZsP8RZuv0xt9ffRLV7",
       "name": "CE3CUP#1",
       "lat": -33.5646215,
       "lon": -70.5590979,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3CUP",
+      "role": "CLIENT"
     },
     "7frLuRvhoWLdBnc3cxfr": {
       "id": "7frLuRvhoWLdBnc3cxfr",
       "name": "Mi primer Nodo :)",
       "lat": -33.3617,
       "lon": -70.47813,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "a3rm",
+      "role": "CLIENT"
     },
     "8ab4ef9NvMAuyQMNw2Hv": {
       "id": "8ab4ef9NvMAuyQMNw2Hv",
       "name": "EASS-CD3IMT",
       "lat": -36.628651,
       "lon": -71.835945,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "EASS",
+      "role": "CLIENT"
     },
     "8dMfPaxpKKciwSUM0EcO": {
       "id": "8dMfPaxpKKciwSUM0EcO",
       "name": "Pablo casa",
       "lat": -36.849407,
       "lon": -73.130343,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "494a",
+      "role": "CLIENT"
     },
     "8nzGUSvrRmSjlnQgdKrN": {
       "id": "8nzGUSvrRmSjlnQgdKrN",
       "name": "CD6RRH-Pucon",
       "lat": -39.27667,
       "lon": -71.97444,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ZPC",
+      "role": "CLIENT"
     },
     "96clK5dq8CtZgTjtgYwT": {
       "id": "96clK5dq8CtZgTjtgYwT",
       "name": "Machicura",
       "lat": -33.4552028,
       "lon": -70.6588448,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "a4d8",
+      "role": "CLIENT"
     },
     "9TfsKln0QGaFidI9kuCY": {
       "id": "9TfsKln0QGaFidI9kuCY",
       "name": "R2D2",
       "lat": -33.5917,
       "lon": -70.5133,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "role": "CLIENT"
     },
     "9dMrSS9xk8KBm5ljh5U7": {
       "id": "9dMrSS9xk8KBm5ljh5U7",
       "name": "Bio-Itu",
       "lat": -33.57,
       "lon": -70.68,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Bitu",
+      "role": "CLIENT"
     },
     "Ah5HF91wCue5ELTk0YqZ": {
       "id": "Ah5HF91wCue5ELTk0YqZ",
       "name": "dpto_gatos",
       "lat": -33.50783723714328,
       "lon": -70.59034946175798,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "gato",
+      "role": "CLIENT"
     },
     "Ak2MyzU3EvKt52nOIo2R": {
       "id": "Ak2MyzU3EvKt52nOIo2R",
       "name": "HIP01",
       "lat": -33.519604,
       "lon": -70.536285,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "Aq8OLsAKU2cdHG5OqXLd": {
       "id": "Aq8OLsAKU2cdHG5OqXLd",
       "name": "FischerLopez 02",
       "lat": -33.42762644734285,
       "lon": -70.62766974681224,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FL02",
+      "role": "CLIENT_MUTE"
     },
     "Cu7DFdsXS3zuHC8gPy6M": {
       "id": "Cu7DFdsXS3zuHC8gPy6M",
       "name": "HXC_TTY",
       "lat": -33.518013,
       "lon": -70.602046,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "Cztp7hObymmemcIdDESk": {
       "id": "Cztp7hObymmemcIdDESk",
       "name": "godie.cl-antofagasta",
       "lat": -23.679,
       "lon": -70.409,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GODI",
+      "role": "CLIENT"
     },
     "DNcD1iVHFXZciaZROhPQ": {
       "id": "DNcD1iVHFXZciaZROhPQ",
       "name": "Router CE1RLP",
       "lat": -23.58232,
       "lon": -70.33427,
-      "role": "ROUTER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "rrlp",
+      "role": "ROUTER"
     },
     "DilQZY0QkYqhPBeMNJcD": {
       "id": "DilQZY0QkYqhPBeMNJcD",
       "name": "iguldman02",
       "lat": -33.41258804,
       "lon": -70.5743298,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "DkyFu3PZqvPXec74j5FA": {
       "id": "DkyFu3PZqvPXec74j5FA",
       "name": "LU1YDH",
       "lat": -40.1553804389026,
       "lon": -71.34980164171903,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "LU1Y",
+      "role": "CLIENT"
     },
     "DuCuEQgSHATaUjnniiNa": {
       "id": "DuCuEQgSHATaUjnniiNa",
       "name": "ThinkNode-M1 ",
       "lat": -29.912458,
       "lon": -71.2422372,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "DMR1",
+      "role": "CLIENT"
     },
     "E3xDjWqDEtCMBQ4MuYu2": {
       "id": "E3xDjWqDEtCMBQ4MuYu2",
       "name": "NodoD",
       "lat": -33.4176286,
       "lon": -70.610373,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "51ad",
+      "role": "CLIENT"
     },
     "EDd1acxOq9nPXpOm6D1c": {
       "id": "EDd1acxOq9nPXpOm6D1c",
       "name": "Zaphod BBX",
       "lat": -33.436237753646004,
       "lon": -70.65832602895578,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ZBBX",
+      "role": "CLIENT"
     },
     "EEs9qwLRMGqlXtpw99Qe": {
       "id": "EEs9qwLRMGqlXtpw99Qe",
       "name": "Pau Node01",
       "lat": -33.434451437499995,
       "lon": -70.55744125,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Pau1",
+      "role": "CLIENT_MUTE"
     },
     "ESGphPRkhLtJJKZ8ZMsn": {
       "id": "ESGphPRkhLtJJKZ8ZMsn",
       "name": "CE3CUP-3 Portatil",
       "lat": -33.5740928,
       "lon": -70.565888,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "T114",
+      "role": "CLIENT"
     },
     "EYFjEUpP6X4ipljVHaLg": {
       "id": "EYFjEUpP6X4ipljVHaLg",
       "name": "T-Echo / Móvil",
       "lat": -37.46069412434105,
       "lon": -72.35995387922885,
-      "role": "TRACKER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "MLVS",
+      "role": "TRACKER"
     },
     "EYl4PL6xracvBmZPbWxA": {
       "id": "EYl4PL6xracvBmZPbWxA",
       "name": "CD2GBS TRACKER PAN DE AZUCAR",
       "lat": -30.030774629520916,
       "lon": -71.23668588738109,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GSD2",
+      "role": "CLIENT"
     },
     "EbS7oxETkFfBlajmJbHt": {
       "id": "EbS7oxETkFfBlajmJbHt",
       "name": "Chumito22",
       "lat": -33.4663348,
       "lon": -70.7598485,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Chum",
+      "role": "CLIENT"
     },
     "F9YbwO0Yq75KvxgyurxT": {
       "id": "F9YbwO0Yq75KvxgyurxT",
       "name": "CE4RAY - Pelluhue",
       "lat": -35.744103,
       "lon": -72.502361,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RAY2",
+      "role": "CLIENT"
     },
     "FBsBZrETkTtxBsRJv4al": {
       "id": "FBsBZrETkTtxBsRJv4al",
       "name": "CE3VNA 4bf4",
       "lat": -33.4706702,
       "lon": -70.7396539,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4bf4",
+      "role": "CLIENT"
     },
     "FHaMf5wqZccRZ5CT2Rpl": {
       "id": "FHaMf5wqZccRZ5CT2Rpl",
       "name": "Meshtastic 3b5c",
       "lat": -31.7882122,
       "lon": -70.971118,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3b5c",
+      "role": "CLIENT"
     },
     "FWlSyRYHAErUm2HI7CQL": {
       "id": "FWlSyRYHAErUm2HI7CQL",
       "name": "C3PO",
       "lat": -33.5917,
       "lon": -70.5133,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "role": "CLIENT"
     },
     "FnBBrARPvosR73xVtXfw": {
       "id": "FnBBrARPvosR73xVtXfw",
       "name": "CE1HLS",
       "lat": 20.257749,
       "lon": 70.1266789,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "HLS",
+      "role": "CLIENT"
     },
     "GumxPF6uhFHOyXcIod1K": {
       "id": "GumxPF6uhFHOyXcIod1K",
       "name": "CE4NBE mOVIL 2",
       "lat": -34.9722399,
       "lon": -71.2590546,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Mov2",
+      "role": "CLIENT"
     },
     "HFzuZCJKjCkKIY9GDh6X": {
       "id": "HFzuZCJKjCkKIY9GDh6X",
       "name": "FpmCL V3",
       "lat": -33.3361873,
       "lon": -70.7724811,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Fpm",
+      "role": "CLIENT"
     },
     "HPFF0FHQxgcddcCDHHQU": {
       "id": "HPFF0FHQxgcddcCDHHQU",
       "name": "2IEN-915",
       "lat": -33.02,
       "lon": -71.55,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "Hgr6ac1fXaqXIB9BlptI": {
       "id": "Hgr6ac1fXaqXIB9BlptI",
       "name": "Talca City",
       "lat": -35.437729,
       "lon": -71.637969,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TA02",
+      "role": "CLIENT"
     },
     "I19rm704MFrfzvOB4i7p": {
       "id": "I19rm704MFrfzvOB4i7p",
       "name": "sguldman04",
       "lat": -33.4223428,
       "lon": -70.5809653,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "IGzWc18sEITxu75r2sV4": {
       "id": "IGzWc18sEITxu75r2sV4",
       "name": "Bicubico",
       "lat": -35.4091008,
       "lon": -71.6537856,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "b1cu",
+      "role": "CLIENT"
     },
     "IKkqas7z3kWMymCxWAgl": {
       "id": "IKkqas7z3kWMymCxWAgl",
       "name": "DUOC Sede Valpo ",
       "lat": -33.044341,
       "lon": -71.61546,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "IT6QO64egHOS7qey5WVL": {
       "id": "IT6QO64egHOS7qey5WVL",
       "name": "Portátil morada 💜",
       "lat": -32.6849281,
       "lon": -70.7552667,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "cd84",
+      "role": "CLIENT_MUTE"
     },
     "IydpPIgUD4ea2T14bZkc": {
       "id": "IydpPIgUD4ea2T14bZkc",
       "name": "Mesh_HH-01",
       "lat": -32.4506234,
       "lon": -70.6546603,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "HH01",
+      "role": "CLIENT"
     },
     "Izokqf1apOSiR6KuLBzl": {
       "id": "Izokqf1apOSiR6KuLBzl",
       "name": "JNT-MALLOCO-01",
       "lat": -33.6043057,
       "lon": -70.8530587,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "J2EhdwDql98M3caZPpUO": {
       "id": "J2EhdwDql98M3caZPpUO",
       "name": "CD5HXO",
       "lat": -33.440628009497416,
       "lon": -70.65344632603934,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "clay",
+      "role": "CLIENT"
     },
     "J2XY6hNxEKQTmHeFdo8c": {
       "id": "J2XY6hNxEKQTmHeFdo8c",
       "name": "Navarrex77 0ae4",
       "lat": -33.46924,
       "lon": -70.5495,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1",
+      "role": "CLIENT"
     },
     "JN6I5isldC744CFm8ycq": {
       "id": "JN6I5isldC744CFm8ycq",
       "name": "AB4OD Sebring MQTT ",
       "lat": 27.4346,
       "lon": -81.5002,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "8be4",
+      "role": "CLIENT"
     },
     "JUlK7UDO3J5LOJiQeFjh": {
       "id": "JUlK7UDO3J5LOJiQeFjh",
       "name": "NodoProvidencia_LoRa",
       "lat": -33.43452838169717,
       "lon": -70.61171714178357,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "PrSt",
+      "role": "CLIENT"
     },
     "JpQwcccnTLO26PyGzbTr": {
       "id": "JpQwcccnTLO26PyGzbTr",
       "name": "DEFMT TUCCO V2",
       "lat": -33.46542,
       "lon": -70.56617,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2DEF",
+      "role": "CLIENT"
     },
     "Jr2B73JQm7MiCHILnCQa": {
       "id": "Jr2B73JQm7MiCHILnCQa",
       "name": "RPTILRJ",
       "lat": -33.412566,
       "lon": -70.586844,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RPIR",
+      "role": "CLIENT"
     },
     "KCZaeEDGJQRCm3U07aS2": {
       "id": "KCZaeEDGJQRCm3U07aS2",
       "name": "Meshtastic ce4lap",
       "lat": -34.178,
       "lon": -70.7497,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4lap",
+      "role": "CLIENT"
     },
     "KLEfSpTwrbh8UCXc9LZA": {
       "id": "KLEfSpTwrbh8UCXc9LZA",
       "name": "ANIABAL 8a0c (MQTT) SL Mini",
       "lat": -33.4054054054054,
       "lon": -70.55724526736499,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "AV3M",
+      "role": "CLIENT"
     },
     "KLcf6EBGqxvSGQa5pNz2": {
       "id": "KLcf6EBGqxvSGQa5pNz2",
       "name": "FGBS HQ",
       "lat": -33.5992,
       "lon": -70.8635,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "13a8",
+      "role": "CLIENT"
     },
     "KLnjeDYSWdpbnBU1TQQo": {
       "id": "KLnjeDYSWdpbnBU1TQQo",
       "name": "2IEN-433",
       "lat": -33.03256,
       "lon": -71.55851,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "KfNvtTmhvcsD5wCxGLU4": {
       "id": "KfNvtTmhvcsD5wCxGLU4",
       "name": "Kcf4fle Miami ",
       "lat": 25.903709246898885,
       "lon": -80.33184428710948,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4fle",
+      "role": "CLIENT"
     },
     "KvRoFzt8FTIjDa1w9gXP": {
       "id": "KvRoFzt8FTIjDa1w9gXP",
       "name": "Aky Movil 1",
       "lat": -36.43341628456106,
       "lon": -71.95552802836262,
-      "role": "TRACKER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "AKYM",
+      "role": "TRACKER"
     },
     "KyDjOxkjLtUXIZw4INSe": {
       "id": "KyDjOxkjLtUXIZw4INSe",
       "name": "Meshtastic 3784",
       "lat": -33.5013722,
       "lon": -70.6222423,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3784",
+      "role": "CLIENT"
     },
     "L9nFnojN5ZFs1DCdqOIx": {
       "id": "L9nFnojN5ZFs1DCdqOIx",
       "name": "CD3DEY_Solar ",
       "lat": -33.41589050757208,
       "lon": -70.58837936817378,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CD3S",
+      "role": "CLIENT"
     },
     "LFuQbrR38LovM8IZNppC": {
       "id": "LFuQbrR38LovM8IZNppC",
       "name": "Peña-Alto",
       "lat": -33.4813934,
       "lon": -70.5270808,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Peña",
+      "role": "CLIENT"
     },
     "LSXh9nw87thcZ2b9OcJ9": {
       "id": "LSXh9nw87thcZ2b9OcJ9",
       "name": "Meshtastic c6sax",
       "lat": -38.74181868695175,
       "lon": -72.63462651323691,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "6sax",
+      "role": "CLIENT"
     },
     "LpW80GVvbsjzdWqAIuZz": {
       "id": "LpW80GVvbsjzdWqAIuZz",
       "name": "Viernez13",
       "lat": -33.5183872,
       "lon": -70.631424,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "v13",
+      "role": "CLIENT_MUTE"
     },
     "LxsDprb2iiaXjaV7gwUq": {
       "id": "LxsDprb2iiaXjaV7gwUq",
       "name": "Meshtastic dbcc",
       "lat": -33.5008354,
       "lon": -70.6223854,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "dbcc",
+      "role": "CLIENT"
     },
     "MC7FVP47JFq525LJlJuS": {
       "id": "MC7FVP47JFq525LJlJuS",
       "name": "Chiloe_1",
       "lat": -33.4488897,
       "lon": -70.6692655,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "7bfc",
+      "role": "CLIENT"
     },
     "MR8P800PWFdiBy4tWj76": {
       "id": "MR8P800PWFdiBy4tWj76",
       "name": "CA4SLC-2",
       "lat": -34.41110391956197,
       "lon": -70.86229142717038,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "SLC2",
+      "role": "CLIENT"
     },
     "MZ2d1LLGY3WtxbNSumBC": {
       "id": "MZ2d1LLGY3WtxbNSumBC",
       "name": "GILGAMESH",
       "lat": -33.6068608,
       "lon": -70.69696,
-      "role": "ROUTER_CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GMSH",
+      "role": "ROUTER_CLIENT"
     },
     "Me9zCJgG7AmgMbXdKlLB": {
       "id": "Me9zCJgG7AmgMbXdKlLB",
       "name": "HIP1",
       "lat": -33.5196,
       "lon": -70.5365,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "MqJpWnTxxLt31ox98SmP": {
       "id": "MqJpWnTxxLt31ox98SmP",
       "name": "CE4NBE Ccó Movil",
       "lat": -34.9722253,
       "lon": -71.259012,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Ccó",
+      "role": "CLIENT"
     },
     "Mv6DWH9Y5DMhnO8Zkbk4": {
       "id": "Mv6DWH9Y5DMhnO8Zkbk4",
       "name": "aliasgg",
       "lat": -33.5324308,
       "lon": -70.5852314,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "gg",
+      "role": "CLIENT"
     },
     "N8pHgP8Mcy3Qg2dsxsts": {
       "id": "N8pHgP8Mcy3Qg2dsxsts",
       "name": "ocarranzio",
       "lat": -33.4900123,
       "lon": -70.6161826,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "e418",
+      "role": "CLIENT"
     },
     "NRWgWVKs8A2MXjcbjqNp": {
       "id": "NRWgWVKs8A2MXjcbjqNp",
       "name": "Meshtastic Collao01",
       "lat": -33.48630246602054,
       "lon": -70.57617391552508,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "O58E9RiPGi8CiwyT5Z3y": {
       "id": "O58E9RiPGi8CiwyT5Z3y",
       "name": "CA3AID Lampa",
       "lat": -33.3235998,
       "lon": -70.7548938,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3AID",
+      "role": "CLIENT"
     },
     "O7zanKUmfD2mQlCVZ9vF": {
       "id": "O7zanKUmfD2mQlCVZ9vF",
       "name": "n3v-provi00",
       "lat": -33.431488,
       "lon": -70.62386,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "n3p0",
+      "role": "client"
     },
     "ObewsCCwMeeC5in2aY3m": {
       "id": "ObewsCCwMeeC5in2aY3m",
       "name": "CD3NEB Las Condes",
       "lat": -33.4114626,
       "lon": -70.5611927,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3NEB",
+      "role": "CLIENT"
     },
     "OgzGI3DRi7urNTB6YYjh": {
       "id": "OgzGI3DRi7urNTB6YYjh",
       "name": "CD7EQG ALVERICH APU0",
       "lat": -41.6189625,
       "lon": -73.6031775,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "APU0",
+      "role": "CLIENT"
     },
     "OoKDigqEZislRCEQnLZX": {
       "id": "OoKDigqEZislRCEQnLZX",
       "name": "joyarzun - Puerto Varas",
       "lat": -41.3361082556527,
       "lon": -72.97874300557103,
-      "role": "ROUTER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "pv01",
+      "role": "ROUTER"
     },
     "OvnAQ6OYJvOBcHLr7EAp": {
       "id": "OvnAQ6OYJvOBcHLr7EAp",
       "name": "Kayak 2",
       "lat": -33.67567567567568,
       "lon": -71.16794680671165,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "K2",
+      "role": "CLIENT"
     },
     "OyVOBUTbnIjQsZkg5PgT": {
       "id": "OyVOBUTbnIjQsZkg5PgT",
       "name": "CA3AID Movil",
       "lat": -33.3235998,
       "lon": -70.7548938,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4AID",
+      "role": "CLIENT"
     },
     "P7AjBCt6qCRPkOB1oyFQ": {
       "id": "P7AjBCt6qCRPkOB1oyFQ",
       "name": "Meshtastic Collao02",
       "lat": -33.48630246602054,
       "lon": -70.57617391552508,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "PHm7imvvfG5TXbg7ulfs": {
       "id": "PHm7imvvfG5TXbg7ulfs",
       "name": "PabloT",
       "lat": -33.3842652,
       "lon": -70.5713492,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "PDT1",
+      "role": "CLIENT"
     },
     "PLXXNiU9f3YZVR0eDcGF": {
       "id": "PLXXNiU9f3YZVR0eDcGF",
       "name": "CD3BFM b47c",
       "lat": -33.198185123212454,
       "lon": -70.69923016779705,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "b47c",
+      "role": "CLIENT"
     },
     "PS3ruFaUnEcI2wvA1JcG": {
       "id": "PS3ruFaUnEcI2wvA1JcG",
       "name": "VictLabra",
       "lat": -33.690228999999995,
       "lon": 70.335779,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Vl",
+      "role": "CLIENT"
     },
     "QXMDB27ePwV7yu3ZjA1f": {
       "id": "QXMDB27ePwV7yu3ZjA1f",
       "name": "Leito PMC",
       "lat": -33.4528512,
       "lon": -70.6510848,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "a7dc",
+      "role": "CLIENT"
     },
     "Qew4WgjGg7W4bi4H3lUa": {
       "id": "Qew4WgjGg7W4bi4H3lUa",
       "name": "CD6ORK VALD",
       "lat": -39.84447,
       "lon": -73.21479,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "lib3",
+      "role": "CLIENT"
     },
     "R6isbFXP1lXrnWArgwQP": {
       "id": "R6isbFXP1lXrnWArgwQP",
       "name": "Nodo NAOJ",
       "lat": 35.675162,
       "lon": 139.53721,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "csna",
+      "role": "CLIENT"
     },
     "RQRmiBons9N9UTAx2yJ4": {
       "id": "RQRmiBons9N9UTAx2yJ4",
       "name": "CA3GZK Base ",
       "lat": -33.455683,
       "lon": -70.617439,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GZKB",
+      "role": "client"
     },
     "S8nwTiLFWHlr8nTxcZgT": {
       "id": "S8nwTiLFWHlr8nTxcZgT",
       "name": "iguldman01",
       "lat": -33.4832032,
       "lon": -70.6062354,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "SXIP15q1Wn07hhlwb5X1": {
       "id": "SXIP15q1Wn07hhlwb5X1",
       "name": "AYANAMI ",
       "lat": -33.543594236892986,
       "lon": -70.77489921816088,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "EV00",
+      "role": "CLIENT"
     },
     "SgGks2bw5yjkHUThbZv5": {
       "id": "SgGks2bw5yjkHUThbZv5",
       "name": "LFMOPortatil",
       "lat": -35.4346602,
       "lon": -71.6182663,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "LFMO",
+      "role": "CLIENT"
     },
     "TGB1JKAYBzraOjkGswuG": {
       "id": "TGB1JKAYBzraOjkGswuG",
       "name": "Huaiqui-House",
       "lat": -37.05289,
       "lon": -72.22074,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "jhr",
+      "role": "CLIENT"
     },
     "TXQt0ZNzc3kpxNfzHN2U": {
       "id": "TXQt0ZNzc3kpxNfzHN2U",
       "name": "FischerLopez00",
       "lat": -33.521072,
       "lon": -70.6090848,
-      "role": "ROUTER_CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FL00",
+      "role": "ROUTER_CLIENT"
     },
     "TY27lz5zsu43lKPLkgWD": {
       "id": "TY27lz5zsu43lKPLkgWD",
       "name": "KQK V1",
       "lat": -33.4828734,
       "lon": -70.5968401,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "KQK1",
+      "role": "CLIENT"
     },
     "TbQC2DYjO49VtA6tgMD3": {
       "id": "TbQC2DYjO49VtA6tgMD3",
       "name": "MyM0 Independencia_Stgo",
       "lat": -33.413426467027215,
       "lon": -70.65636974383395,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "MyM0",
+      "role": "CLIENT"
     },
     "Tio8N5q3FhJEKkoMm9Vz": {
       "id": "Tio8N5q3FhJEKkoMm9Vz",
       "name": "CE3VNA dd38",
       "lat": -33.2854402,
       "lon": -70.4904039,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "dd38",
+      "role": "CLIENT"
     },
     "Ts1yA4uZJ0mf1IniAEYh": {
       "id": "Ts1yA4uZJ0mf1IniAEYh",
       "name": "Nodo Prueba Blue Metrics",
       "lat": -29.970229225098766,
       "lon": -71.29581880889701,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "BM01",
+      "role": "CLIENT"
     },
     "TsAO1lpGLnB9gNfSbGBb": {
       "id": "TsAO1lpGLnB9gNfSbGBb",
       "name": "moko3889",
       "lat": -34.183429,
       "lon": -70.653251,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "moko",
+      "role": "CLIENT"
     },
     "TuyPOA5o1JzDWw8WrDuU": {
       "id": "TuyPOA5o1JzDWw8WrDuU",
       "name": "CA4TQY-4",
       "lat": -34.177024,
       "lon": -70.7067904,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TQY4",
+      "role": "CLIENT"
     },
     "U0vOCNuRcxjV32Z6G8IA": {
       "id": "U0vOCNuRcxjV32Z6G8IA",
       "name": "Casa Francisco",
       "lat": -23.5666589,
       "lon": -70.3939378,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CFV",
+      "role": "CLIENT"
     },
     "U7b6Zh5xzvbqs32WN1dU": {
       "id": "U7b6Zh5xzvbqs32WN1dU",
       "name": "CD1DIL - Copiapó",
       "lat": -27.3696627,
       "lon": -70.3266597,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1DIL",
+      "role": "CLIENT"
     },
     "UCOUTp87Png82YjhE9hn": {
       "id": "UCOUTp87Png82YjhE9hn",
       "name": "CA1ILI-1",
       "lat": -20.2440704,
       "lon": -70.1366272,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ILI1",
+      "role": "CLIENT"
     },
     "UM2ziE1LzVhgSg0wNMT1": {
       "id": "UM2ziE1LzVhgSg0wNMT1",
       "name": "Tracker_1193",
       "lat": -33.429,
       "lon": -70.609,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1193",
+      "role": "CLIENT"
     },
     "Utqv69gnclpO1Zspp3qV": {
       "id": "Utqv69gnclpO1Zspp3qV",
       "name": "CA4TQY-2",
       "lat": -34.1787,
       "lon": -70.7149,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TQY2",
+      "role": "CLIENT"
     },
     "UurXyMqE9ncrfLIicNUQ": {
       "id": "UurXyMqE9ncrfLIicNUQ",
       "name": "DcMesh 3b0c",
       "lat": -33.460279315931324,
       "lon": -70.72523914771112,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3b0c",
+      "role": "CLIENT"
     },
     "VPZoxgoWbTSETB7cIZhS": {
       "id": "VPZoxgoWbTSETB7cIZhS",
       "name": "CD2GBS GSMITH PARANAL",
       "lat": -24.63959757523605,
       "lon": -70.38612111369564,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GSD3",
+      "role": "CLIENT"
     },
     "VolP0Xtv5grEvzi3YTLi": {
       "id": "VolP0Xtv5grEvzi3YTLi",
       "name": "Meshtastic Magus01",
       "lat": -33.451385500494055,
       "lon": -70.6407471639074,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "W4KIC4d5SnXJHmaAKcwJ": {
       "id": "W4KIC4d5SnXJHmaAKcwJ",
       "name": "CE1HLS Movil",
       "lat": -20.25770663953455,
       "lon": -70.12669688474085,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "HLS2",
+      "role": "CLIENT_MUTE"
     },
     "W9qWV3OhhHeDHG2GXnuM": {
       "id": "W9qWV3OhhHeDHG2GXnuM",
       "name": "Centro CE1RLP",
       "lat": -23.645,
       "lon": -70.3986,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "crlp",
+      "role": "CLIENT"
     },
     "WmhnwIdwb7ojgjfsBSDK": {
       "id": "WmhnwIdwb7ojgjfsBSDK",
       "name": "FischerLopez 01",
       "lat": -33.42760661232533,
       "lon": -70.62765378663366,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FL01",
+      "role": "CLIENT_MUTE"
     },
     "X0k1JbnHMlafju3JsknC": {
       "id": "X0k1JbnHMlafju3JsknC",
       "name": "n3v_cl-bot",
       "lat": -33.384538,
       "lon": -70.609803,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "nbot",
+      "role": "client"
     },
     "X2gSBqwJ8LArLxb0aXe1": {
       "id": "X2gSBqwJ8LArLxb0aXe1",
       "name": "X2gSBqwJ8LArLxb0aXe1",
       "lat": -33.48766127869681,
       "lon": -70.6009106289776,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "XophKZTsTlIu4MWSfow2": {
       "id": "XophKZTsTlIu4MWSfow2",
       "name": "XtnR_Caja_Ext_QPV",
       "lat": -41.34011,
       "lon": -72.95468,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "XwcNDRmGPCkTtgbf9d2G": {
       "id": "XwcNDRmGPCkTtgbf9d2G",
       "name": "Meshtastic_b22c",
       "lat": -33.4918968,
       "lon": -71.62825417,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "b22c",
+      "role": "CLIENT"
     },
     "Y7Mbd6siWUUMdD8jyQ7M": {
       "id": "Y7Mbd6siWUUMdD8jyQ7M",
       "name": "NodoValdivia",
       "lat": -39.84429,
       "lon": -73.21381,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "lib1",
+      "role": "CLIENT"
     },
     "Y9OZUbrlH3BWysXz6CtJ": {
       "id": "Y9OZUbrlH3BWysXz6CtJ",
       "name": "jtr2-node",
       "lat": -33.4800084,
       "lon": -70.515326,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "jtr2",
+      "role": "CLIENT"
     },
     "YGxKvs30ao8MrCQsCp3I": {
       "id": "YGxKvs30ao8MrCQsCp3I",
       "name": "TEBO_433",
       "lat": -33.4521288,
       "lon": -70.6011664,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "YpJkDHINVlxSUbNE1JCp": {
       "id": "YpJkDHINVlxSUbNE1JCp",
       "name": "Pedro palacios",
       "lat": -38.6318155,
       "lon": -73.3114619,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ppm1",
+      "role": "CLIENT"
     },
     "ZGTFnGT9rZl9aWP7PrVk": {
       "id": "ZGTFnGT9rZl9aWP7PrVk",
       "name": "KC4GYB Miami SOLAR Node",
       "lat": 25.7553703,
       "lon": -80.3622522,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "nGYB",
+      "role": "CLIENT"
     },
     "ZJnEJfCPPxhRaYHrcOS7": {
       "id": "ZJnEJfCPPxhRaYHrcOS7",
       "name": "Young Ears",
       "lat": -42.48,
       "lon": -73.742,
-      "role": "TRACKER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "48f2",
+      "role": "TRACKER"
     },
     "ZMCCSNsm7qPe2KiOf7Ro": {
       "id": "ZMCCSNsm7qPe2KiOf7Ro",
       "name": "CA4SLC-1",
       "lat": -34.411063109880885,
       "lon": -70.86231195915114,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "SLC1",
+      "role": "CLIENT"
     },
     "ZZof1sNVmlqJsjopaDRg": {
       "id": "ZZof1sNVmlqJsjopaDRg",
       "name": "CE3UOB-3",
       "lat": -33.52469705082955,
       "lon": -70.94579787312536,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "UOB3",
+      "role": "CLIENT"
     },
     "Zii1ZrLdxqhiwaoNUSpO": {
       "id": "Zii1ZrLdxqhiwaoNUSpO",
       "name": "Base 🏡",
       "lat": -32.6845446,
       "lon": -70.7557473,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Fee9",
+      "role": "CLIENT"
     },
     "a7fpcPqQLaIfr14UjMfv": {
       "id": "a7fpcPqQLaIfr14UjMfv",
       "name": "CA3VVO-1 Ñuñoa Solar 🗼",
       "lat": -33.4508777,
       "lon": -70.6216548,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "VVO1",
+      "role": "client"
     },
     "aJNPHx2y7zkYAJs2HWp7": {
       "id": "aJNPHx2y7zkYAJs2HWp7",
       "name": "MeshtasticHuife",
       "lat": -39.23323469329868,
       "lon": -71.76200390985642,
-      "role": "router",
-      "placeholder": false
+      "placeholder": false,
+      "role": "router"
     },
     "aLGjQUp6CzCxwGajY1fq": {
       "id": "aLGjQUp6CzCxwGajY1fq",
       "name": "CHOPNECK T-Deck",
       "lat": -33.410988351209554,
       "lon": -70.559286614068,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CN_T",
+      "role": "CLIENT"
     },
     "aWP63aZnR6iWKcVu6dgR": {
       "id": "aWP63aZnR6iWKcVu6dgR",
       "name": "CD7EQG alverich apu1",
       "lat": -41.6188811,
       "lon": -73.6031603,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "apu1",
+      "role": "CLIENT"
     },
     "aZ3ctChGnPIhdfkQRJV8": {
       "id": "aZ3ctChGnPIhdfkQRJV8",
       "name": "HuemulCorps_1",
       "lat": -33,
       "lon": -70,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2b5c",
+      "role": "CLIENT"
     },
     "abXoESUyWUp9KkkGwULK": {
       "id": "abXoESUyWUp9KkkGwULK",
       "name": "NODO IoT",
       "lat": 20.64208,
       "lon": -100.457993,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "IoT",
+      "role": "CLIENT"
     },
     "adZQkdkfeCEt9cXP6OOZ": {
       "id": "adZQkdkfeCEt9cXP6OOZ",
       "name": "CD5AIF Concepción",
       "lat": -36.812758,
       "lon": -73.036207,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "LILA",
+      "role": "CLIENT"
     },
     "ajRtseXhxdyP0mkmlgZJ": {
       "id": "ajRtseXhxdyP0mkmlgZJ",
       "name": "CE4NBE V3",
       "lat": -34.5835,
       "lon": -71.1555,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4NBE",
+      "role": "CLIENT"
     },
     "au9xrKkzmauCldr3nJUP": {
       "id": "au9xrKkzmauCldr3nJUP",
       "name": "Ce4ray - Talca",
       "lat": -35.421711,
       "lon": -71.7060999,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RAY5",
+      "role": "CLIENT"
     },
     "awdylFvdncr3ZMrjROcs": {
       "id": "awdylFvdncr3ZMrjROcs",
       "name": "Jose.O",
       "lat": -33.507016,
       "lon": -70.722215,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "C3R2",
+      "role": "CLIENT"
     },
     "b9BIfT8IRE9NBOHeDqmT": {
       "id": "b9BIfT8IRE9NBOHeDqmT",
       "name": "esch_telefono",
       "lat": -33.4401615,
       "lon": -70.6579547,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "bBREr7Fhqu9tQL1ZaM01": {
       "id": "bBREr7Fhqu9tQL1ZaM01",
       "name": "kayak de mar ",
       "lat": -33.67567567567568,
       "lon": -71.16794680671165,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Kmar",
+      "role": "CLIENT"
     },
     "bJfpcdOnf2cYb3PtHEIw": {
       "id": "bJfpcdOnf2cYb3PtHEIw",
       "name": "CD3PFL Radioaficion para todos",
       "lat": -33.58600941989897,
       "lon": -70.5854898445817,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3PFL",
+      "role": "CLIENT_MUTE"
     },
     "baV3FVWc5nVR5nRryqTr": {
       "id": "baV3FVWc5nVR5nRryqTr",
       "name": "CLCCPLT-00",
       "lat": -33.4078438,
       "lon": -70.7153999,
-      "role": "router",
-      "placeholder": false
+      "placeholder": false,
+      "role": "router"
     },
     "be7ykgukfcwvXLht6uwn": {
       "id": "be7ykgukfcwvXLht6uwn",
       "name": "JLTH Home",
       "lat": -33.41784,
       "lon": -70.5697283,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "JLTH",
+      "role": "CLIENT"
     },
     "bgnrLDYeARUKNQwrLi3m": {
       "id": "bgnrLDYeARUKNQwrLi3m",
       "name": "CA1AJV bb81",
       "lat": -20.247027661340248,
       "lon": -70.13096783435121,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "bb81",
+      "role": "CLIENT"
     },
     "brzxLLeEHgx7q0P3cYQt": {
       "id": "brzxLLeEHgx7q0P3cYQt",
       "name": "CE2OVP qap",
       "lat": -30.64749,
       "lon": -71.23378,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "OVPq",
+      "role": "CLIENT"
     },
     "cxgBeu3XST290VJPRtbS": {
       "id": "cxgBeu3XST290VJPRtbS",
       "name": "CCP📡📶",
       "lat": -36.861109582074285,
       "lon": -73.10152723503649,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CCP",
+      "role": "CLIENT"
     },
     "d3WLmDKd8GLohdiaW3XD": {
       "id": "d3WLmDKd8GLohdiaW3XD",
       "name": "Talca-nono-01",
       "lat": -35.43,
       "lon": -71.65,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Nono",
+      "role": "CLIENT"
     },
     "dD6cWePVjvHWs9SScUoN": {
       "id": "dD6cWePVjvHWs9SScUoN",
       "name": "Base PMC b234",
       "lat": -33.4528512,
       "lon": -70.6510848,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "b234",
+      "role": "CLIENT"
     },
     "dSTXcPo2Zn5jgwHfUzMY": {
       "id": "dSTXcPo2Zn5jgwHfUzMY",
       "name": "Mesh Patracio",
       "lat": -40.335296176231196,
       "lon": -72.95410958915483,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Pato",
+      "role": "CLIENT"
     },
     "dYVnrQCTuZsJRBCyK2PJ": {
       "id": "dYVnrQCTuZsJRBCyK2PJ",
       "name": "Mesh_HH-02",
       "lat": -33.4805983,
       "lon": -71.6546744,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "HH02",
+      "role": "CLIENT"
     },
     "deIPR3wZvjvMfCaBtN7D": {
       "id": "deIPR3wZvjvMfCaBtN7D",
       "name": "CD2KYS LEO V3",
       "lat": -33.0696269,
       "lon": -71.5851442,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1KYS",
+      "role": "CLIENT"
     },
     "dfXFMjU6Cj29xTpaz2hc": {
       "id": "dfXFMjU6Cj29xTpaz2hc",
       "name": "CA2RDP TELECO NRDP ",
       "lat": -29.873366,
       "lon": -71.2705331,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "NRDP",
+      "role": "CLIENT"
     },
     "dnKlgKCYiGWzoTvEJrZ3": {
       "id": "dnKlgKCYiGWzoTvEJrZ3",
       "name": "Meshtastic",
       "lat": -33.14790166666666,
       "lon": -70.28607166666666,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4JVU",
+      "role": "CLIENT"
     },
     "dsA2Rp3luF30F89tmui2": {
       "id": "dsA2Rp3luF30F89tmui2",
       "name": "QTH_Curico_001",
       "lat": -33.99155251517639,
       "lon": -71.21176221157259,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "dslHGoWUYz3E5X2RFk2Q": {
       "id": "dslHGoWUYz3E5X2RFk2Q",
       "name": "Felipe Base",
       "lat": -36.8476718,
       "lon": -73.1158105,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "🏠",
+      "role": "CLIENT"
     },
     "egtZ5b6qAO89lXa6ZpoA": {
       "id": "egtZ5b6qAO89lXa6ZpoA",
       "name": "Kayak 3",
       "lat": -33.67567567567568,
       "lon": -71.16794680671165,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "K3",
+      "role": "CLIENT"
     },
     "fCTcMO6HYUjzxcCzxHYW": {
       "id": "fCTcMO6HYUjzxcCzxHYW",
       "name": "CA6MCT-5",
       "lat": -37.48421,
       "lon": -72.368963,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "0f9a",
+      "role": "CLIENT"
     },
     "fWx9l7BIY90D6yAO5a23": {
       "id": "fWx9l7BIY90D6yAO5a23",
       "name": "Caze57 V3",
       "lat": -33.4249247,
       "lon": -70.5901561,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1957",
+      "role": "CLIENT"
     },
     "fYCCnPm8UtzhnL49cDMR": {
       "id": "fYCCnPm8UtzhnL49cDMR",
       "name": "JF - Estación M1",
       "lat": -33.642953,
       "lon": -78.836106,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "JFM1",
+      "role": "CLIENT"
     },
     "faDyTpOmJBnzsxXBZKy3": {
       "id": "faDyTpOmJBnzsxXBZKy3",
       "name": "Meshtastic nod1",
       "lat": -33.431141753090564,
       "lon": -70.60294527840786,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "nod1",
+      "role": "CLIENT"
     },
     "fdRznVsHwJFk1UhgMbdV": {
       "id": "fdRznVsHwJFk1UhgMbdV",
       "name": "esch tablet",
       "lat": -33.4401909,
       "lon": -70.6579754,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "g0vdgpXZC8eg3GQcuOFy": {
       "id": "g0vdgpXZC8eg3GQcuOFy",
       "name": "Meshtastic ed54",
       "lat": -29.972807832338592,
       "lon": -71.31105526905019,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2REF",
+      "role": "CLIENT"
     },
     "gp13kWnWIsbGSux189xy": {
       "id": "gp13kWnWIsbGSux189xy",
       "name": "KakoPedreros4484",
       "lat": -29.8976334,
       "lon": -71.2693999,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "KPDR",
+      "role": "CLIENT"
     },
     "hmF3C7vv6FaRo6zT1ScS": {
       "id": "hmF3C7vv6FaRo6zT1ScS",
       "name": "Jim Calama",
       "lat": -22.4535983,
       "lon": -68.9780833,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "41D0",
+      "role": "client"
     },
     "hqHtExvErdWLvF8EdXKf": {
       "id": "hqHtExvErdWLvF8EdXKf",
       "name": "Hospital CE1RLP",
       "lat": -23.6243,
       "lon": -70.3986,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "hrlp",
+      "role": "CLIENT"
     },
     "hzVrd5uhdZO695Ji5n2G": {
       "id": "hzVrd5uhdZO695Ji5n2G",
       "name": "Meshtastic 58eb",
       "lat": -41.33,
       "lon": -72.96,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "58eb",
+      "role": "CLIENT_MUTE"
     },
     "iEcEg4emEr5HszRgPWx4": {
       "id": "iEcEg4emEr5HszRgPWx4",
       "name": "CA5HAM heraldo",
       "lat": -36.5953669,
       "lon": -72.9529193,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RX4",
+      "role": "CLIENT"
     },
     "iEcZmoNMEScPixisrjYN": {
       "id": "iEcZmoNMEScPixisrjYN",
       "name": "Rokodoko-THNO-bb",
       "lat": -36.748354,
       "lon": -73.096235,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RKTH",
+      "role": "CLIENT"
     },
     "jA5wa1G8qFPpPM1fWS4A": {
       "id": "jA5wa1G8qFPpPM1fWS4A",
       "name": "CE4UGK V3",
       "lat": -34.5806526,
       "lon": -70.9949093,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4UGK",
+      "role": "CLIENT"
     },
     "jLLjwWAd6weTbPpTOTvd": {
       "id": "jLLjwWAd6weTbPpTOTvd",
       "name": "Nodo Principal",
       "lat": -33.5964823,
       "lon": -70.8530192,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FFAC",
+      "role": "CLIENT"
     },
     "jMrb9EV5eh2t7aByMEer": {
       "id": "jMrb9EV5eh2t7aByMEer",
       "name": "Meshtastic a5e0",
       "lat": -33.437103289849695,
       "lon": -70.63788604464055,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "a5e0",
+      "role": "CLIENT"
     },
     "jOSZhPZp7ZdSSVaPit5N": {
       "id": "jOSZhPZp7ZdSSVaPit5N",
       "name": "FamiliaMonsalveRavello",
       "lat": -35.42936,
       "lon": -71.61009,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FAMR",
+      "role": "CLIENT"
     },
     "jbMDXRngVA5Iv6PKOcbb": {
       "id": "jbMDXRngVA5Iv6PKOcbb",
       "name": "CD5AIF Torreones",
       "lat": -36.7795037026447,
       "lon": -73.03037056105828,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "AIF1",
+      "role": "CLIENT"
     },
     "jyaoZAZIQ3ELPFbQ6wqF": {
       "id": "jyaoZAZIQ3ELPFbQ6wqF",
       "name": "Punta olivo ",
       "lat": -32.7182674,
       "lon": -70.7416172,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3b7f",
+      "role": "CLIENT"
     },
     "k7LLDXS0EHKjwIpk2hVe": {
       "id": "k7LLDXS0EHKjwIpk2hVe",
       "name": "IG88",
       "lat": -33.5917,
       "lon": -70.5133,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "role": "CLIENT"
     },
     "kIfemFUGUh77E6YSsnKx": {
       "id": "kIfemFUGUh77E6YSsnKx",
       "name": "Nodo V2",
       "lat": -33.0399744,
       "lon": -71.5849728,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "V2",
+      "role": "CLIENT"
     },
     "kRELultKGgvOnFxYEptu": {
       "id": "kRELultKGgvOnFxYEptu",
       "name": "Parque CE1RLP",
       "lat": -23.5934,
       "lon": -70.3938,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "prlp",
+      "role": "CLIENT"
     },
     "kW7LosMBHEMj6g3ZM3er": {
       "id": "kW7LosMBHEMj6g3ZM3er",
       "name": "CD6RRH-LA",
       "lat": -37.4707,
       "lon": -72.3517,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "LSQ",
+      "role": "CLIENT"
     },
     "kWwbM4VfbD89mhdlOjN3": {
       "id": "kWwbM4VfbD89mhdlOjN3",
       "name": "CD2GBS GSMITH LA HERRADURA",
       "lat": -29.980123,
       "lon": -71.371079,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "GSD2",
+      "role": "CLIENT"
     },
     "koJZ7QtdQc6HnwkC5q3T": {
       "id": "koJZ7QtdQc6HnwkC5q3T",
       "name": "Rensouhou n1",
       "lat": -33.515693129449055,
       "lon": -70.60605699516691,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "REN1",
+      "role": "CLIENT"
     },
     "kptrc23YyumEI7hjs4ag": {
       "id": "kptrc23YyumEI7hjs4ag",
       "name": "TEST-MAIPU ",
       "lat": -33.5039272,
       "lon": -70.7904328,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "kt4Us263xI5ks6JifB6f": {
       "id": "kt4Us263xI5ks6JifB6f",
       "name": "CA1AJV 42e0",
       "lat": -20.246997824712924,
       "lon": -70.13095508077338,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "42e0",
+      "role": "CLIENT_MUTE"
     },
     "ktaFvdMz6XbYiwtvU2us": {
       "id": "ktaFvdMz6XbYiwtvU2us",
       "name": "Meshtastic_d03c",
       "lat": -33.406,
       "lon": -70.552,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "d03c",
+      "role": "CLIENT"
     },
     "kxfMWSvvrniCf6fYGs0o": {
       "id": "kxfMWSvvrniCf6fYGs0o",
       "name": "Meshtastic 96d0",
       "lat": -31.7882421,
       "lon": -70.9710728,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "96d0",
+      "role": "CLIENT"
     },
     "l7WIuuYmBBRT0G0OwSB0": {
       "id": "l7WIuuYmBBRT0G0OwSB0",
       "name": "CE4PKZ MOVIL 1",
       "lat": -34.7031,
       "lon": -71.5591,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4PKZ",
+      "role": "CLIENT"
     },
     "mASrA15q2kxTqlZY3due": {
       "id": "mASrA15q2kxTqlZY3due",
       "name": "HXC_Base",
       "lat": -33.51801329348308,
       "lon": -70.60204561080099,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "mDuGxGchX5TsRWVYa9d4": {
       "id": "mDuGxGchX5TsRWVYa9d4",
       "name": "Ambiramus",
       "lat": -27.35749023965942,
       "lon": -70.3101732322972,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "otep",
+      "role": "CLIENT"
     },
     "mXp8fKd20kTbG3aL5eVx": {
       "id": "mXp8fKd20kTbG3aL5eVx",
       "name": "CERRO VISTA HERMOSA",
       "lat": -39.288979,
       "lon": -72.23699,
-      "role": "REPEATER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "5580",
+      "role": "REPEATER"
     },
     "mg1eyFS8BkynlMwIYP36": {
       "id": "mg1eyFS8BkynlMwIYP36",
       "name": "CasaZura",
       "lat": -35.8454907,
       "lon": -71.5842527,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "muk3IuOe8GfJoY2A1Ctk": {
       "id": "muk3IuOe8GfJoY2A1Ctk",
       "name": "corgdeck",
       "lat": -33.404579367090186,
       "lon": -70.60066681535301,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "corg",
+      "role": "CLIENT"
     },
     "n7RX0psB5EyLob27hGWr": {
       "id": "n7RX0psB5EyLob27hGWr",
       "name": "Sechastic",
       "lat": -32.997471,
       "lon": -71.233121,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "SEP8",
+      "role": "CLIENT"
     },
     "nEMzPHm9f4r0qC7xMcE8": {
       "id": "nEMzPHm9f4r0qC7xMcE8",
       "name": "Barad-dûr",
       "lat": -34.22403716999999,
       "lon": -70.97029875999999,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "7c22",
+      "role": "CLIENT"
     },
     "nT4Z1g7Q34r9uNqvg50o": {
       "id": "nT4Z1g7Q34r9uNqvg50o",
       "name": "Sierra Charlie",
       "lat": -32.9389632,
       "lon": -71.5273075,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "nXVvpthwEqZ21TWZwnV9": {
       "id": "nXVvpthwEqZ21TWZwnV9",
       "name": "Jorge V1",
       "lat": -34.3906203,
       "lon": -71.1740668,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "JSF1",
+      "role": "CLIENT"
     },
     "nba7lqoJnHYEUz55CZ6M": {
       "id": "nba7lqoJnHYEUz55CZ6M",
       "name": "PDC3 cd44",
       "lat": -33.384266,
       "lon": -70.5713624,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "PDC3",
+      "role": "CLIENT"
     },
     "njl17foMZZsgElOIkTvI": {
       "id": "njl17foMZZsgElOIkTvI",
       "name": "JLTM GPS",
       "lat": -36.530258,
       "lon": -72.9310608,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "JLTM",
+      "role": "CLIENT"
     },
     "nscgizNF5VIaNNc1fNmo": {
       "id": "nscgizNF5VIaNNc1fNmo",
       "name": "Nodo_A2",
       "lat": -36.762498,
       "lon": -73.1024921,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Thn2",
+      "role": "CLIENT"
     },
     "oJCJnOmWqyXrI2QJ85C3": {
       "id": "oJCJnOmWqyXrI2QJ85C3",
       "name": "CE4RAY - Curico",
       "lat": -34.9709338,
       "lon": -71.2228068,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RAY1",
+      "role": "CLIENT"
     },
     "oKwlKGkkgLxS38osRKP5": {
       "id": "oKwlKGkkgLxS38osRKP5",
       "name": "Peñalolen_CE3JEL",
       "lat": -33.495414,
       "lon": -70.549423,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1488",
+      "role": "CLIENT"
     },
     "oVdTL8YbbiCf8qrCrSl3": {
       "id": "oVdTL8YbbiCf8qrCrSl3",
       "name": "CA3JBR- 1 Watt",
       "lat": -33.43442416666666,
       "lon": -70.5574515,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Ta1W",
+      "role": "CLIENT"
     },
     "oiLaDwU3tBu1QrQhi9Ws": {
       "id": "oiLaDwU3tBu1QrQhi9Ws",
       "name": "CLCCPLT-01",
       "lat": -33.4078356,
       "lon": -70.7153696,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "paaDTWqYR8o8nbiH4Lnj": {
       "id": "paaDTWqYR8o8nbiH4Lnj",
       "name": "FORESTMESH1-CD3IMT",
       "lat": -36.62848666018349,
       "lon": -71.83585636146788,
-      "role": "ROUTER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "EASS",
+      "role": "ROUTER"
     },
     "pc2JFsCVT8htjJFofSyM": {
       "id": "pc2JFsCVT8htjJFofSyM",
       "name": "KC4GYB - Miami ",
       "lat": 25.7553703,
       "lon": -80.3622522,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "4GYB",
+      "role": "CLIENT_MUTE"
     },
     "ph5OPGftntSeoJVGQc5g": {
       "id": "ph5OPGftntSeoJVGQc5g",
       "name": "Heltec V3 FSM",
       "lat": -33.026895459951625,
       "lon": -71.5439682690155,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FSM",
+      "role": "CLIENT"
     },
     "q0ZQoTIOnmAJXiMfMofR": {
       "id": "q0ZQoTIOnmAJXiMfMofR",
       "name": "Meshtastic Suzakun",
       "lat": -33.38982100412618,
       "lon": -70.78178345810403,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Suza",
+      "role": "CLIENT"
     },
     "q1OOkBcaMOmcD42C9bbF": {
       "id": "q1OOkBcaMOmcD42C9bbF",
       "name": "CE4RAY - Cauquenes",
       "lat": -35.951346,
       "lon": -72.377093,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RAY4",
+      "role": "CLIENT"
     },
     "qWBmW6ydY5RYSqcuu4U6": {
       "id": "qWBmW6ydY5RYSqcuu4U6",
       "name": "Aky Movil 2",
       "lat": -36.433318729765695,
       "lon": -71.9558644427124,
-      "role": "TRACKER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "AKYM",
+      "role": "TRACKER"
     },
     "qkZuG1twxKZlvlW7XksA": {
       "id": "qkZuG1twxKZlvlW7XksA",
       "name": "Cris 1b64",
       "lat": -33.44059512,
       "lon": -70.664584,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "1b64",
+      "role": "CLIENT"
     },
     "r5DoDE6LrN2V4Odv7VAa": {
       "id": "r5DoDE6LrN2V4Odv7VAa",
       "name": "CD6RRH-ECLA",
       "lat": -37.4707,
       "lon": -72.3517,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "LSQ",
+      "role": "CLIENT"
     },
     "rZcaoABRpJAoRAwitjfw": {
       "id": "rZcaoABRpJAoRAwitjfw",
       "name": "MyM1 Stgo",
       "lat": -33.413426467027215,
       "lon": -70.65636974383395,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "MyM1",
+      "role": "CLIENT"
     },
     "rcEwQkucOcbvov3tLVFg": {
       "id": "rcEwQkucOcbvov3tLVFg",
       "name": "CE3OWA",
       "lat": -33.45240845650364,
       "lon": -70.61974238535318,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "OWA1",
+      "role": "CLIENT"
     },
     "riWQMMNgkZYR5edgRhdA": {
       "id": "riWQMMNgkZYR5edgRhdA",
       "name": "Tracker ILRJ",
       "lat": -33.412566,
       "lon": -70.586844,
-      "role": "TRACKER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "trk3",
+      "role": "TRACKER"
     },
     "rpIARYQvEZ3YHlkzaq9r": {
       "id": "rpIARYQvEZ3YHlkzaq9r",
       "name": "Camilo TDeck",
       "lat": 35.674889,
       "lon": 139.535535,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CSTD",
+      "role": "CLIENT"
     },
     "rrNGDIOhUcWjflPT5LVF": {
       "id": "rrNGDIOhUcWjflPT5LVF",
       "name": "Charger 0d94",
       "lat": -33.4406,
       "lon": -70.6646,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "0d94",
+      "role": "CLIENT"
     },
     "rzbHLb6nG1e8wxewl9Ra": {
       "id": "rzbHLb6nG1e8wxewl9Ra",
       "name": "preuba1",
       "lat": -33.2955648,
       "lon": -70.6772992,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "PRB!",
+      "role": "CLIENT"
     },
     "sJxiScc7MeqR0neogxSN": {
       "id": "sJxiScc7MeqR0neogxSN",
       "name": "CA3ILJ",
       "lat": -33.412566,
       "lon": -70.586844,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ILJ",
+      "role": "CLIENT"
     },
     "sR6BpLnl84DV7ENfJtUU": {
       "id": "sR6BpLnl84DV7ENfJtUU",
       "name": "kayak 1",
       "lat": -33.67567567567568,
       "lon": -71.1895981443468,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "k1",
+      "role": "CLIENT"
     },
     "sRwd5yYCyJO83AvzgOmM": {
       "id": "sRwd5yYCyJO83AvzgOmM",
       "name": "CE3CUP-2 Nodo Móvil",
       "lat": -33.5740928,
       "lon": -70.565888,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CUP2",
+      "role": "CLIENT"
     },
     "sYLumzI9eFW5zRvA12lo": {
       "id": "sYLumzI9eFW5zRvA12lo",
       "name": "Angello_st01",
       "lat": -32.85524625094785,
       "lon": -70.58882223065076,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "AG02",
+      "role": "CLIENT"
     },
     "scuQ2F1nigwLkCg8ssMz": {
       "id": "scuQ2F1nigwLkCg8ssMz",
       "name": "bamff90",
       "lat": -33.39969774977276,
       "lon": -70.56023161,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "bam4",
+      "role": "CLIENT"
     },
     "tMtPtyoluYi8E5Qb6Cri": {
       "id": "tMtPtyoluYi8E5Qb6Cri",
       "name": "Angello_movil01",
       "lat": -32.8551010487419,
       "lon": -70.58823603083384,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "AG01",
+      "role": "CLIENT"
     },
     "tNYLPsSRCuAr2WhLmyUi": {
       "id": "tNYLPsSRCuAr2WhLmyUi",
       "name": "ILS01 c344",
       "lat": -33.444592,
       "lon": -70.570584,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "c344",
+      "role": "CLIENT"
     },
     "tOjOW61NEQNpkWqZr9mZ": {
       "id": "tOjOW61NEQNpkWqZr9mZ",
       "name": "CE4UGK_Movil",
       "lat": -34.584997,
       "lon": -70.985524,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "UGKM",
+      "role": "CLIENT"
     },
     "uDI4ytJhurYkIIqILQTG": {
       "id": "uDI4ytJhurYkIIqILQTG",
       "name": "Marcelo - CA6VVJ - FF30vr",
       "lat": -39.287758,
       "lon": -72.199652,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "bb54",
+      "role": "CLIENT"
     },
     "uJymchDpBdTH3PwsYgQL": {
       "id": "uJymchDpBdTH3PwsYgQL",
       "name": "Kotteshiro",
       "lat": -41.3663232,
       "lon": -73.3478912,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "🐄",
+      "role": "CLIENT"
     },
     "uYPO9cvkZrfOmRrjo4aO": {
       "id": "uYPO9cvkZrfOmRrjo4aO",
       "name": "CE3UOB-1",
       "lat": -33.39164612547447,
       "lon": -71.1294562770481,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "UOB1",
+      "role": "CLIENT"
     },
     "uenljucwmlIoc4jsNbMK": {
       "id": "uenljucwmlIoc4jsNbMK",
       "name": "Geofront ",
       "lat": -33.54348246037072,
       "lon": -70.77505478627987,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "NERV",
+      "role": "CLIENT"
     },
     "ugFvOwfajM5IFSJKcGje": {
       "id": "ugFvOwfajM5IFSJKcGje",
       "name": "CA3JBR= Node 1",
       "lat": -33.43448660000001,
       "lon": -70.55746690000001,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Tat1",
+      "role": "CLIENT_MUTE"
     },
     "v1tOMxufASmSJXLCw4gM": {
       "id": "v1tOMxufASmSJXLCw4gM",
       "name": "Salamanca1.0",
       "lat": -31.7728105,
       "lon": -70.9793918,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "JC1",
+      "role": "CLIENT"
     },
     "v8EO6UpSTttVfR7J7q5r": {
       "id": "v8EO6UpSTttVfR7J7q5r",
       "name": "NodoKris",
       "lat": -33.4176252,
       "lon": -70.6103713,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2c56",
+      "role": "CLIENT"
     },
     "vEE973VcMu3oEgGMfuQB": {
       "id": "vEE973VcMu3oEgGMfuQB",
       "name": "DarkWolfJasiel",
       "lat": -32.7782768,
       "lon": -71.1862096,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "dwj8",
+      "role": "CLIENT"
     },
     "vGbR6nK5J7s9meEWsoAw": {
       "id": "vGbR6nK5J7s9meEWsoAw",
       "name": "CE4RAY - rpt 147.270+",
       "lat": -35.1273,
       "lon": -70.9886,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "RAY3",
+      "role": "CLIENT"
     },
     "vMalOwR4o8QlDzLOaFom": {
       "id": "vMalOwR4o8QlDzLOaFom",
       "name": "CA1AJV dec0",
       "lat": -20.24704328178952,
       "lon": -70.13102450773157,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "dec0",
+      "role": "CLIENT"
     },
     "vNasIPtoi8P9ATI7YxDD": {
       "id": "vNasIPtoi8P9ATI7YxDD",
       "name": "CHOPNECK Portatil",
       "lat": -33.410997894924236,
       "lon": -70.55922107786641,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CN_P",
+      "role": "CLIENT"
     },
     "vmeYRIccYUQKJGK3pgfg": {
       "id": "vmeYRIccYUQKJGK3pgfg",
       "name": "La Vírgen Táctica ⛰️",
       "lat": -38.45407,
       "lon": -71.90856,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "VRGN",
+      "role": "CLIENT"
     },
     "vzgpi5Lf14Te7Dfmejr4": {
       "id": "vzgpi5Lf14Te7Dfmejr4",
       "name": "CD3RUP",
       "lat": -33.452,
       "lon": -70.6536,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "3RUP",
+      "role": "CLIENT"
     },
     "w0yCR5lXo6qXlINziLrh": {
       "id": "w0yCR5lXo6qXlINziLrh",
       "name": "MeSHill",
       "lat": -33.42336,
       "lon": -70.700237,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "mSH2",
+      "role": "CLIENT"
     },
     "wDa7nC80aE8X132CboIn": {
       "id": "wDa7nC80aE8X132CboIn",
       "name": "Ovalle - CE2OVP rpt",
       "lat": -30.64741,
       "lon": -71.23422,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "OVPr",
+      "role": "CLIENT"
     },
     "wFQVdujlLAOlBtq4SvMX": {
       "id": "wFQVdujlLAOlBtq4SvMX",
       "name": "FischerLopez 03",
       "lat": -33.521072,
       "lon": -70.6090848,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "FL03",
+      "role": "CLIENT_MUTE"
     },
     "wMDPqW0ieWJV0ATFmyUV": {
       "id": "wMDPqW0ieWJV0ATFmyUV",
       "name": "CA3CYJ-WisMesh",
       "lat": -33.7313792,
       "lon": -70.7493888,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "wism",
+      "role": "CLIENT"
     },
     "wUTahUZNTRQo6dwQbFQ0": {
       "id": "wUTahUZNTRQo6dwQbFQ0",
       "name": "Nico 2bf4",
       "lat": -36.861118531817446,
       "lon": -73.10153227118592,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "🛰️",
+      "role": "CLIENT"
     },
     "wksX2sU2XgVEdVbsePJD": {
       "id": "wksX2sU2XgVEdVbsePJD",
       "name": "CHOPNECK BASE",
       "lat": -33.4054054054054,
       "lon": -70.55724526736499,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CN_B",
+      "role": "CLIENT"
     },
     "wmlV22CK3SxYQNvxcPMB": {
       "id": "wmlV22CK3SxYQNvxcPMB",
       "name": "MentorT34",
       "lat": -33.412566,
       "lon": -70.586844,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "MT34",
+      "role": "CLIENT"
     },
     "x0Mz1z7gG6yqhfMTtsx6": {
       "id": "x0Mz1z7gG6yqhfMTtsx6",
       "name": "Yv4dhs ",
       "lat": -33.4996716,
       "lon": -70.535838,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Yv4",
+      "role": "CLIENT"
     },
     "x7OpzBgxXTKgUHRuqhyD": {
       "id": "x7OpzBgxXTKgUHRuqhyD",
       "name": "PIFOX ",
       "lat": -33.44497779377335,
       "lon": -70.53635322627646,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "PiFo",
+      "role": "CLIENT"
     },
     "xWaTdTMv7kBkz1dPABor": {
       "id": "xWaTdTMv7kBkz1dPABor",
       "name": "Calle Uribe Edificio Sur",
       "lat": -23.649,
       "lon": -70.401,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "MT01",
+      "role": "CLIENT"
     },
     "xjGDpG6zylBDWvVZV074": {
       "id": "xjGDpG6zylBDWvVZV074",
       "name": "CE2SYR",
       "lat": -33.02893175,
       "lon": -71.535225,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "SYR",
+      "role": "CLIENT"
     },
     "xw6iAaJO6TmwZVYF5kEv": {
       "id": "xw6iAaJO6TmwZVYF5kEv",
       "name": "ocarranzio",
       "lat": -33.491283,
       "lon": -70.616257,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "617c",
+      "role": "CLIENT"
     },
     "y2ihsJ01JWuZ4OtlDOZA": {
       "id": "y2ihsJ01JWuZ4OtlDOZA",
       "name": "Eluveitie",
       "lat": -27.3571015,
       "lon": -70.3101103,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Elu7",
+      "role": "CLIENT"
     },
     "y6dKsWMu3e1IrNlmwJZi": {
       "id": "y6dKsWMu3e1IrNlmwJZi",
       "name": "CD3DEY_LAS CONDES",
       "lat": -33.4157991764179,
       "lon": -70.58814465205043,
-      "role": "CLIENT_MUTE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "CD3D",
+      "role": "CLIENT_MUTE"
     },
     "yJ8BhGnUQ7OAoWPyGXy1": {
       "id": "yJ8BhGnUQ7OAoWPyGXy1",
       "name": "CA4TQY-1",
       "lat": -34.1787,
       "lon": -70.7149,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "TQY1",
+      "role": "CLIENT"
     },
     "yMSNTB2hlEq4GD6mrArA": {
       "id": "yMSNTB2hlEq4GD6mrArA",
       "name": "Mesh-Edo00",
       "lat": -30.470498,
       "lon": -70.765378,
-      "role": "CLIENT_BASE",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ed00",
+      "role": "CLIENT_BASE"
     },
     "yZzcts4zZaWGsRXdnkDa": {
       "id": "yZzcts4zZaWGsRXdnkDa",
       "name": "MARIO VIÑA CE",
       "lat": -33.007062,
       "lon": -71.5056284,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "2MGP",
+      "role": "CLIENT"
     },
     "ycZnMqWRq9uZzSoSeE1N": {
       "id": "ycZnMqWRq9uZzSoSeE1N",
       "name": "Mpx0",
       "lat": -33.12845,
       "lon": -71.55876,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "role": "CLIENT"
     },
     "ydQGFIb5BcPvqzV3c6Qr": {
       "id": "ydQGFIb5BcPvqzV3c6Qr",
       "name": "Base Berger ",
       "lat": -33.022087,
       "lon": -71.562756,
-      "role": "client",
-      "placeholder": false
+      "placeholder": false,
+      "role": "client"
     },
     "ypAxqWVjjXRjkhRZ922I": {
       "id": "ypAxqWVjjXRjkhRZ922I",
       "name": "Nodo Maipunk",
       "lat": -33.547687,
       "lon": -70.793383,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "Jaus",
+      "role": "CLIENT"
     },
     "yrymR1jAQPwZyFKCO0xF": {
       "id": "yrymR1jAQPwZyFKCO0xF",
       "name": "K2SO",
       "lat": -33.5917,
       "lon": -70.5133,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "role": "CLIENT"
     },
     "yynUxZQ4Wk88OUGirI6P": {
       "id": "yynUxZQ4Wk88OUGirI6P",
       "name": "Nodo Principal CA5RMZ Fajro",
       "lat": -36.832181,
       "lon": -73.0589943,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "5RMZ",
+      "role": "CLIENT"
     },
     "yzxhhpK99UfblN7SMAto": {
       "id": "yzxhhpK99UfblN7SMAto",
       "name": "KF4ZCL UNIT2 ",
       "lat": 25.8647384,
       "lon": -80.3136396,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "ZCL2",
+      "role": "CLIENT"
     },
     "zG3YHfTEzJvyX7IGnG5h": {
       "id": "zG3YHfTEzJvyX7IGnG5h",
       "name": "darkwolfjasielEcho",
       "lat": -32.77869176802124,
       "lon": -71.18640611823565,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "dwjE",
+      "role": "CLIENT"
     },
     "zIlRxo1orduWSUSXhYLU": {
       "id": "zIlRxo1orduWSUSXhYLU",
       "name": "Mecha LEGO",
       "lat": 33.4181,
       "lon": 70.6019,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "LEGO",
+      "role": "CLIENT"
     },
     "zUvk6vCkTVNmsBopbexL": {
       "id": "zUvk6vCkTVNmsBopbexL",
       "name": "Old Ears",
       "lat": -42.4935,
       "lon": -73.7411,
-      "role": "TRACKER",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "0bab",
+      "role": "TRACKER"
     },
     "zssottcQzAnPxsHx0Nqy": {
       "id": "zssottcQzAnPxsHx0Nqy",
       "name": "LU2HXF 3",
       "lat": -32.4075895,
       "lon": -63.2368616,
-      "role": "CLIENT",
-      "placeholder": false
+      "placeholder": false,
+      "alias": "HXF3",
+      "role": "CLIENT"
     }
   }
 }
