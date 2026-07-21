@@ -152,6 +152,22 @@ function fsVal(v) {
 }
 function fsFlat(fields) { const o = {}; for (const k in fields) o[k] = fsVal(fields[k]); return o; }
 
+// El nº de nodo Meshtastic suele venir como "!hexid" o 8 hex en algún campo.
+// Lo buscamos para que el snapshot use el MISMO id que el MQTT (decimal).
+function scanNodeId(o, depth = 0) {
+  if (!o || typeof o !== "object" || depth > 2) return undefined;
+  for (const k in o) {
+    const v = o[k];
+    if (typeof v === "string") {
+      const m = /^!?([0-9a-fA-F]{8})$/.exec(v.trim());
+      if (m) return String(parseInt(m[1], 16));
+    } else if (v && typeof v === "object") {
+      const r = scanNodeId(v, depth + 1); if (r) return r;
+    }
+  }
+  return undefined;
+}
+
 async function fetchFirestoreCollection(cfg, col) {
   let out = [], pageToken = "", pages = 0;
   process.stdout.write(`  → firestore ${cfg.projectId}/${col} `);
@@ -166,6 +182,9 @@ async function fetchFirestoreCollection(cfg, col) {
     if (!data) { console.log("[no-json]"); return null; }
     for (const d of (data.documents || [])) {
       const o = fsFlat(d.fields || {});
+      // preferir el nº de nodo Meshtastic (calza con el MQTT); si no, el auto-id
+      const nid = pick(o, ["node_id", "nodeId", "num", "nodeNum"]) != null ? null : scanNodeId(o);
+      if (nid && o.num == null) o.num = nid;
       if (o.id == null && d.name) o.id = d.name.split("/").pop();
       out.push(o);
     }
@@ -174,6 +193,12 @@ async function fetchFirestoreCollection(cfg, col) {
   }
   if (!out.length) { console.log("[vacía]"); return null; }
   const nodes = out.map(normNode).filter(Boolean);
+  // inventario de campos (para diagnosticar de dónde sale/no sale el nº de nodo)
+  const keys = [...new Set(out.flatMap((o) => Object.keys(o)))];
+  console.log(`\n    campos vistos: ${keys.join(", ")}`);
+  const numeric = nodes.filter((n) => /^\d+$/.test(n.id)).length;
+  console.log(`    con nº de nodo Meshtastic: ${numeric}/${nodes.length}` +
+    (numeric === 0 ? "  ← NINGUNO calza con el MQTT (corre --sample y pásalo a Claude)" : ""));
   if (!nodes.length) {
     console.log(`[${out.length} docs sin lat/lon reconocible]`);
     console.log(`    muestra: ${JSON.stringify(out[0]).slice(0, 300)}`);
