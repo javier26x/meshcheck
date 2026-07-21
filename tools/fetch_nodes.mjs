@@ -97,7 +97,10 @@ function finish(x) {
   const lat = coord(x.lat), lon = coord(x.lon);
   if (lat == null || lon == null) return null;
   if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
-  const id = x.id != null ? String(x.id) : `${lat.toFixed(5)},${lon.toFixed(5)}`;
+  let id = x.id != null ? String(x.id) : `${lat.toFixed(5)},${lon.toFixed(5)}`;
+  // IDs hex tipo "!a1b2c3d4" → decimal, para calzar con el `from` del MQTT
+  const hex = /^!([0-9a-fA-F]{1,8})$/.exec(id);
+  if (hex) id = String(parseInt(hex[1], 16));
   const role = x.role != null ? String(x.role) : undefined;
   return { id, name: x.name != null ? String(x.name) : id, lat, lon, role, placeholder: false };
 }
