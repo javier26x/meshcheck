@@ -112,16 +112,22 @@ if (linkOwners === 0) problems.push("/links está VACÍO → nada que dibujar. C
 else if (drawable === 0) problems.push("Hay enlaces pero NINGUNO dibujable: los extremos no tienen posición conocida. Se arregla solo con tiempo (cuando los gateways publiquen posición) o resincronizando snapshot.");
 else oks.push(`${drawable} enlaces dibujables → deberían verse líneas de color en modo "Malla en vivo".`);
 
-/* 3. calce de IDs snapshot ↔ vivo -------------------------------------------- */
+/* 3. correlación directorio ↔ vivo (por NOMBRE; el directorio no tiene nº nodo) */
 if (snapCount && nodeIds.size) {
-  const overlap = [...nodeIds].filter((id) => snapIds.has(id)).length;
-  console.log(`\ncalce de IDs snapshot∩vivo: ${overlap}/${nodeIds.size}`);
-  const sample = [...snapIds].slice(0, 3);
-  if (overlap === 0) {
-    problems.push(`Los IDs del snapshot NO calzan con los del MQTT (muestra snapshot: ${sample.join(", ")}). ` +
-      "Los nodos saldrán duplicados y los enlaces de gateways solo se dibujarán con posiciones vivas. " +
-      "Pega esta salida a Claude para ajustar el mapeo de IDs del extractor.");
-  } else oks.push(`IDs calzan (${overlap} coincidencias) → snapshot y vivo se fusionan bien.`);
+  const snapNames = new Set();
+  try {
+    const snap = JSON.parse(readFileSync(resolve(ROOT, "frontend/nodes.json"), "utf8")).nodes || {};
+    for (const k in snap) { for (const nm of [snap[k].name, snap[k].alias]) if (nm) snapNames.add(String(nm).trim().toLowerCase()); }
+  } catch { /* */ }
+  let byName = 0;
+  for (const id in nodes) {
+    const nm = (nodes[id]?.name || "").trim().toLowerCase();
+    const al = (nodes[id]?.sn || "").trim().toLowerCase();
+    if ((nm && snapNames.has(nm)) || (al && snapNames.has(al))) byName++;
+  }
+  console.log(`\ncorrelación por nombre directorio∩vivo: ${byName}/${nodeIds.size} nodos vivos calzan con una estación registrada`);
+  if (byName > 0) oks.push(`${byName} nodos vivos se posicionan vía el directorio (heredan coords) → sus enlaces se vuelven dibujables.`);
+  else console.log("  (los nombres vivos aún no calzan con el directorio; se dibujarán cuando publiquen posición propia)");
 }
 
 /* 4. veredicto ---------------------------------------------------------------- */

@@ -373,42 +373,45 @@ function fmtKm(km) { return km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-/* ---- 5. Set activo de nodos (union snapshot + vivos + repetidores) --------
- * El snapshot de Firestore usa auto-IDs de documento, no el numero de nodo
- * Meshtastic; los vivos del MQTT usan el numero decimal. Para no duplicar el
- * mismo nodo fisico, ademas del calce por id se dedup-lica por NOMBRE:
- * si un vivo tiene el mismo nombre que uno del snapshot, el vivo lo reemplaza
- * (heredando rol del snapshot si el vivo no trae). */
+/* ---- 5. Set activo de nodos (union directorio + vivos + repetidores) ------
+ * El "snapshot" de meshchile es un DIRECTORIO de estaciones registradas a mano
+ * (nombre + ubicación), sin número de nodo Meshtastic. Los vivos del MQTT usan
+ * el número de nodo. Se correlacionan por NOMBRE (longName o shortName):
+ *  - si un vivo calza por nombre con una estación del directorio, se fusiona
+ *    BAJO EL Nº DE NODO VIVO (para que los enlaces —que referencian números de
+ *    nodo— lo encuentren), heredando la posición del directorio si el vivo no
+ *    reporta GPS. La entrada del directorio se elimina para no duplicar.
+ *  - una estación del directorio sin vivo asociado queda "nominal" (plomo). */
 const normName = (s) => String(s || "").trim().toLowerCase();
 function activeNodes() {
   const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
   const now = Date.now();
   const out = {};
   const nameIdx = new Map();
+  const indexName = (nm, id) => { if (nm && nm !== id && !nameIdx.has(nm)) nameIdx.set(nm, id); };
   for (const id in embeddedNodes) {
     out[id] = embeddedNodes[id];
-    const nm = normName(embeddedNodes[id].name);
-    if (nm && nm !== id) nameIdx.set(nm, id);
+    indexName(normName(embeddedNodes[id].name), id);
+    indexName(normName(embeddedNodes[id].alias), id);   // shortName del directorio
   }
   let liveCount = 0;
   for (const id in liveNodes) {
     const n = liveNodes[id];
     if (!n || (n.t && now - n.t > ttlMs)) continue;
-    const hasPos = typeof n.lat === "number";
-    let base = out[id];
-    let sid = null;
-    const nm = normName(n.name);
-    if (!base && nm && nameIdx.has(nm)) { sid = nameIdx.get(nm); base = out[sid]; }
-    if (hasPos) {
-      if (sid) delete out[sid];              // el vivo reemplaza a su gemelo del snapshot
-      out[id] = Object.assign({}, base || {}, n);
-      liveCount++;
-    } else if (base) {
-      // vivo sin posición propia: "enciende" al gemelo (conserva coords snapshot)
-      Object.assign(base, compact({ t: n.t, role: n.role, hw: n.hw, batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil }));
-      liveCount++;
+    // gemelo en el directorio: por id directo, o por nombre/alias
+    let sid = out[id] ? id : null;
+    if (!sid) {
+      const key = nameIdx.get(normName(n.name)) || nameIdx.get(normName(n.alias));
+      if (key) sid = key;
     }
-    // vivo sin posición y sin gemelo: no hay dónde dibujarlo (queda invisible)
+    const twin = sid ? out[sid] : null;
+    // fusiona SIEMPRE bajo el nº de nodo vivo; hereda del gemelo lo que falte
+    const merged = Object.assign({}, twin || {}, compact(n));
+    merged.id = id;
+    if (typeof merged.lat !== "number") continue;   // sin posición (propia ni heredada): no dibujable
+    if (sid && sid !== id) delete out[sid];         // quita el duplicado del directorio
+    out[id] = merged;
+    liveCount++;
   }
   for (const r of hypRepeaters) out[r.id] = r;
   return { nodes: out, hasLive: liveCount > 0 };
@@ -877,7 +880,7 @@ async function loadEmbedded() {
       const n = raw[id];
       if (typeof (+n.lat) !== "number" || isNaN(+n.lat)) continue;
       embeddedNodes[String(id)] = {
-        id: String(id), name: n.name || String(id),
+        id: String(id), name: n.name || String(id), alias: n.alias,
         lat: +n.lat, lon: +n.lon, role: n.role, placeholder: n.placeholder !== false,
       };
     }
@@ -897,7 +900,7 @@ function normalizeLive(val) {
     const n = val[id];
     if (!n) continue;
     out[String(id)] = compact({
-      id: String(id), name: n.name || String(id),
+      id: String(id), name: n.name || String(id), alias: n.sn,
       lat: typeof n.lat === "number" ? n.lat : undefined,
       lon: typeof n.lon === "number" ? n.lon : undefined,
       t: n.t, role: n.role, alt: n.alt, hw: n.hw,

@@ -93,7 +93,8 @@ function normNode(o) {
   }
   return finish({
     id: pick(o, ["node_id", "nodeId", "num", "id", "!id", "hex_id", "nodeNum"]),
-    name: pick(o, ["long_name", "longName", "user.longName", "longname", "name", "short_name", "shortName", "user.shortName"]),
+    name: pick(o, ["long_name", "longName", "user.longName", "longname", "name"]),
+    alias: pick(o, ["short_name", "shortName", "user.shortName"]),
     role: pick(o, ["role", "user.role", "type", "hw_model", "hardware_model", "hardwareModel"]),
     lat: pick(o, LAT_KEYS),
     lon: pick(o, LON_KEYS),
@@ -106,8 +107,11 @@ function finish(x) {
   let id = x.id != null ? String(x.id) : `${lat.toFixed(5)},${lon.toFixed(5)}`;
   const hex = /^!([0-9a-fA-F]{1,8})$/.exec(id);
   if (hex) id = String(parseInt(hex[1], 16));
-  const role = x.role != null ? String(x.role) : undefined;
-  return { id, name: x.name != null ? String(x.name) : id, lat, lon, role, placeholder: false };
+  const name = x.name != null ? String(x.name) : (x.alias != null ? String(x.alias) : id);
+  const out = { id, name, lat, lon, placeholder: false };
+  if (x.alias != null && String(x.alias) !== name) out.alias = String(x.alias);
+  if (x.role != null) out.role = String(x.role);
+  return out;
 }
 function extractNodes(data) {
   const candidates = [];

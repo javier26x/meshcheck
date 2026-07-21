@@ -141,10 +141,11 @@ function processPacket(p) {
       upsertNode(p.from, f);
     }
 
-    // 2) nodeinfo → nombre / rol / hardware
+    // 2) nodeinfo → nombre / shortname / rol / hardware
     if (type === "nodeinfo") {
       const f = {};
       const nm = nameOf(p); if (nm) f.name = nm;
+      const sn = pl.shortname || pl.short_name; if (sn) f.sn = sn;
       if (pl.role !== undefined) f.role = pl.role;
       if (pl.hardware !== undefined) f.hw = pl.hardware;
       upsertNode(p.from, f);
