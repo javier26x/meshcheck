@@ -86,9 +86,12 @@ function nameOf(p) {
   return pl.longname || pl.long_name || pl.name || pl.shortname || pl.short_name || null;
 }
 
+// RTDB prohíbe . $ # [ ] / en nombres de clave → topics se guardan con "|"
+const safeKey = (s) => String(s).replace(/[.#$\[\]]/g, "_").replace(/\//g, "|").slice(0, 80) || "_";
+
 client.on("message", (topic, raw) => {
   // clasificar el topic (diagnóstico: cuánto llega en json vs cifrado vs map)
-  const tkey = topic.split("/").slice(0, 5).join("/");
+  const tkey = safeKey(topic.split("/").slice(0, 5).join("/"));
   if (topicCounts[tkey] != null || Object.keys(topicCounts).length < 40)
     topicCounts[tkey] = (topicCounts[tkey] || 0) + 1;
   if (!topic.includes("/json/")) return;   // protobuf/cifrado: solo contar
@@ -96,7 +99,7 @@ client.on("message", (topic, raw) => {
   try {
     const p = JSON.parse(raw.toString());
     if (sampled < 3) { sampled++; console.log(`muestra ${sampled} [${topic}]:`, raw.toString().slice(0, 350)); }
-    const type = p.type || "?";
+    const type = safeKey(p.type || "?");
     seenTypes[type] = (seenTypes[type] || 0) + 1;
     if (p.sender != null) fieldCounts.sender++;
     if (p.hops_away != null) fieldCounts.hops_away++;

@@ -50,7 +50,7 @@ if (!stats) {
     Object.entries(stats.topics).sort((a, b) => b[1] - a[1]).slice(0, 8)
       .forEach(([k, v]) => console.log(`   ${k}: ${v}`));
     const sum = (pred) => Object.entries(stats.topics)
-      .filter(([k]) => pred(k.split("/"))).reduce((s, [, v]) => s + v, 0);
+      .filter(([k]) => pred(k.split(/[|/]/))).reduce((s, [, v]) => s + v, 0);
     const js = sum((s) => s.includes("json")), enc = sum((s) => s.includes("e"));
     if (js === 0 && enc > 0)
       problems.push("TODO el tráfico va CIFRADO (…/e/…), no hay topic JSON → aplica el PASO 0 del brief (descifrar con la llave del canal).");

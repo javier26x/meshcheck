@@ -789,7 +789,7 @@ function updateDiag() {
   if (liveMeta.topics) {
     const agg = { json: 0, e: 0, map: 0, otro: 0 };
     for (const k in liveMeta.topics) {
-      const segs = k.split("/");
+      const segs = k.split(/[|/]/);   // el bridge guarda topics con "|" (RTDB prohíbe "/")
       if (segs.includes("json")) agg.json += liveMeta.topics[k];
       else if (segs.includes("e")) agg.e += liveMeta.topics[k];
       else if (segs.includes("map")) agg.map += liveMeta.topics[k];
