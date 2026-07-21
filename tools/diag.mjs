@@ -45,6 +45,15 @@ if (!stats) {
   if (!types.neighborinfo) console.log("  (neighborinfo: 0 — esperable, va apagado por default en la malla)");
   const f = stats.fields || {};
   console.log(`sobres: sender:${f.sender ?? "?"}  hops_away:${f.hops_away ?? "?"}  hop_start:${f.hop_start ?? "?"}  directos:${f.direct ?? "?"}  → gw-links acumulados: ${stats.gwLinks ?? "?"}`);
+  console.log(`descifrado: ${f.encOk ?? 0}/${f.enc ?? 0} paquetes cifrados decodificados (fallos: ${f.encFail ?? 0})`);
+  if (f.enc > 0) {
+    if ((f.encOk ?? 0) === 0)
+      problems.push("Llegan paquetes cifrados pero NINGUNO se descifra → la llave del canal NO es la default. " +
+        "Consíguela (Meshtastic → canal → 'Copiar QR/URL' o el PSK del canal) y ponla en CHANNEL_KEY (base64) del bridge.");
+    else if (f.encOk / f.enc < 0.5)
+      console.log(`  (ojo: solo se descifra ${Math.round(100 * f.encOk / f.enc)}% — puede haber otro canal con llave distinta)`);
+    else oks.push(`Descifrado funcionando (${f.encOk}/${f.enc}).`);
+  }
   if (stats.topics) {
     console.log("topics MQTT (top 8):");
     Object.entries(stats.topics).sort((a, b) => b[1] - a[1]).slice(0, 8)
@@ -52,10 +61,8 @@ if (!stats) {
     const sum = (pred) => Object.entries(stats.topics)
       .filter(([k]) => pred(k.split(/[|/]/))).reduce((s, [, v]) => s + v, 0);
     const js = sum((s) => s.includes("json")), enc = sum((s) => s.includes("e"));
-    if (js === 0 && enc > 0)
-      problems.push("TODO el tráfico va CIFRADO (…/e/…), no hay topic JSON → aplica el PASO 0 del brief (descifrar con la llave del canal).");
-    else if (enc > js * 3)
-      console.log(`  (ojo: tráfico cifrado ${enc} ≫ json ${js} — varios gateways no publican JSON; se pierde parte de la malla)`);
+    if (enc > js && (f.encOk ?? 0) > 0)
+      oks.push(`El grueso del tráfico va cifrado (${enc} vs json ${js}) y ahora lo estamos descifrando.`);
   }
   if (f.sender > 0 && !f.hops_away && !f.hop_start) {
     problems.push("Los sobres MQTT NO traen hops_away ni hop_start → no se puede certificar recepción " +

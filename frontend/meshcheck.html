@@ -797,7 +797,8 @@ function updateDiag() {
     }
     tmix = ` · topics[json:${agg.json} cifrado:${agg.e} map:${agg.map} otro:${agg.otro}]`;
   }
-  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links: ${liveMeta.gwLinks || 0}` +
+  const enc = f.enc ? ` · descifrados:${f.encOk || 0}/${f.enc}` : "";
+  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links: ${liveMeta.gwLinks || 0}${enc}` +
     (f.sender != null ? ` · sobres[sender:${f.sender} hops_away:${f.hops_away} directos:${f.direct}]` : "") + tmix;
 }
 

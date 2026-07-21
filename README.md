@@ -105,6 +105,17 @@ SNR: NeighborInfo del nodo **y** recepciones directas de cada gateway MQTT,
 `hops_away=0`) y `/meta/stats` (diagnóstico de tipos de mensaje, visible en el
 pie del panel del visor).
 
+**Descifrado**: el grueso del tráfico de MeshChile viaja cifrado en el topic
+`msh/CL/2/e/...`. `bridge/meshtastic.js` lo descifra (AES-CTR con la PSK pública
+del canal LongFast + parser protobuf, sin dependencias) para cosechar posición,
+nombre, rol, telemetría, NeighborInfo y traceroute. Si algún canal usa una llave
+propia y el diagnóstico muestra `descifrados 0/N`, pon su PSK (base64) en la env
+`CHANNEL_KEY` de `ecosystem.config.js`.
+
+**Diagnóstico**: `node tools/diag.mjs` lee la RTDB pública y dicta un veredicto
+(versión del bridge, tráfico por topic, descifrado, enlaces dibujables, calce de
+IDs snapshot↔vivo).
+
 ### 4. Frontend
 
 Edita `FIREBASE_CONFIG` al inicio del `<script>` en `frontend/meshcheck.html`

@@ -22,9 +22,11 @@
  *   text/otros   marcan actividad (t)
  * ========================================================================== */
 const mqtt = require("mqtt");
+const meshtastic = require("./meshtastic");
 
 const RTDB = process.env.RTDB_URL;
 const SECRET = process.env.FB_SECRET;
+const KEY = meshtastic.decodeKey(process.env.CHANNEL_KEY); // default: PSK pública LongFast
 
 if (!RTDB || !SECRET) {
   console.error("Falta RTDB_URL o FB_SECRET en el entorno. Revisa ecosystem.config.js.");
@@ -56,9 +58,9 @@ client.on("reconnect", () => console.log("reconnecting…"));
 client.on("error", (e) => console.error("mqtt err", e.message));
 
 let buf = {};
-const seenTypes = {};    // tipos de mensaje JSON vistos
+const seenTypes = {};    // tipos de mensaje vistos (json + descifrados)
 const topicCounts = {};  // tráfico por topic (json vs cifrado vs map…)
-const fieldCounts = { sender: 0, hops_away: 0, hop_start: 0, direct: 0 };
+const fieldCounts = { sender: 0, hops_away: 0, hop_start: 0, direct: 0, enc: 0, encOk: 0, encFail: 0 };
 let gwLinks = 0;
 let sampled = 0;
 const BCAST = 4294967295;
@@ -94,18 +96,39 @@ client.on("message", (topic, raw) => {
   const tkey = safeKey(topic.split("/").slice(0, 5).join("/"));
   if (topicCounts[tkey] != null || Object.keys(topicCounts).length < 40)
     topicCounts[tkey] = (topicCounts[tkey] || 0) + 1;
-  if (!topic.includes("/json/")) return;   // protobuf/cifrado: solo contar
 
+  if (topic.includes("/json/")) {
+    try {
+      const p = JSON.parse(raw.toString());
+      if (sampled < 3) { sampled++; console.log(`muestra json ${sampled} [${topic}]:`, raw.toString().slice(0, 300)); }
+      processPacket(p);
+    } catch (e) { /* JSON malformado */ }
+  } else if (topic.includes("/e/")) {
+    // paquete CIFRADO: descifrar con la llave del canal
+    fieldCounts.enc++;
+    try {
+      const dec = meshtastic.decodeEnvelope(raw, KEY);
+      if (!dec || !dec.type) { fieldCounts.encFail++; return; }
+      fieldCounts.encOk++;
+      const hopsAway = (dec.hopStart != null && dec.hopLimit != null) ? dec.hopStart - dec.hopLimit : null;
+      processPacket({
+        type: dec.type, from: dec.from, to: dec.to, payload: dec.payload,
+        snr: dec.rxSnr, hop_start: dec.hopStart, hop_limit: dec.hopLimit,
+        hops_away: hopsAway, sender: dec.gatewayId,
+      });
+    } catch (e) { fieldCounts.encFail++; }
+  }
+});
+
+function processPacket(p) {
+  if (p.from == null) return;
   try {
-    const p = JSON.parse(raw.toString());
-    if (sampled < 3) { sampled++; console.log(`muestra ${sampled} [${topic}]:`, raw.toString().slice(0, 350)); }
     const type = safeKey(p.type || "?");
     seenTypes[type] = (seenTypes[type] || 0) + 1;
     if (p.sender != null) fieldCounts.sender++;
     if (p.hops_away != null) fieldCounts.hops_away++;
     if (p.hop_start != null) fieldCounts.hop_start++;
     const pl = p.payload || {};
-    if (p.from == null) return;
 
     // 1) Posición + altitud (position, mapreport, o payload con lat/lon)
     const ll = extractLatLon(pl);
@@ -175,8 +198,8 @@ client.on("message", (topic, raw) => {
         gwLinks++;
       }
     }
-  } catch (e) { /* JSON malformado: ignorar */ }
-});
+  } catch (e) { /* payload raro: ignorar */ }
+}
 
 // flush por lotes cada 5s
 setInterval(async () => {
@@ -185,7 +208,7 @@ setInterval(async () => {
   for (const k of keys) await push(k, batch[k]);
   await push("meta/stats", { types: seenTypes, topics: topicCounts, fields: fieldCounts, gwLinks, t: Date.now() });
   const mix = Object.entries(seenTypes).map(([t, n]) => `${t}:${n}`).join(" ");
-  console.log(`flushed ${keys.length} | gw-links ${gwLinks} | tipos → ${mix || "ninguno"}`);
+  console.log(`flushed ${keys.length} | descifrados ${fieldCounts.encOk}/${fieldCounts.enc} | gw-links ${gwLinks} | tipos → ${mix || "ninguno"}`);
 }, 5000);
 
-console.log("mesh-bridge iniciado (suscrito a msh/CL/#)");
+console.log(`mesh-bridge iniciado (msh/CL/#) · descifrado ${KEY ? "ON (" + (KEY.length * 8) + " bits)" : "OFF"}`);
