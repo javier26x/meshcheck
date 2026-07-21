@@ -213,6 +213,12 @@
           dibujar también el relleno modelado
         </label>
       </div>
+      <div class="row" id="est-row" style="display:none">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+          <input type="checkbox" id="show-est" checked style="accent-color:#b57aff" />
+          ubicar nodos sin GPS por sus vecinos <span id="est-count" class="mono" style="color:#b57aff"></span>
+        </label>
+      </div>
       <p class="note" style="margin-top:10px">
         <b>En vivo</b>: solo enlaces <b>medidos por radio</b> (NeighborInfo o recepción
         directa de un gateway), color = SNR. Lo no medido se estima por distancia
@@ -259,6 +265,7 @@
     <div class="sec legend">
       <h2>Leyenda</h2>
       <div class="li"><span class="sw" style="background:#3ad07a"></span> Nodo vivo (señal dentro del TTL)</div>
+      <div class="li"><span class="sw" style="background:#b57aff;opacity:.5;border:2px dashed #b57aff"></span> Vivo sin GPS (posición estimada)</div>
       <div class="li"><span class="sw" style="background:#7a8391;opacity:.7"></span> Nodo nominal (snapshot, sin señal)</div>
       <div class="li"><span class="sw" style="background:#14171c;border:2px solid var(--router)"></span> Router / elevado (borde amarillo)</div>
       <div class="li"><span class="sw" style="background:var(--accent)"></span> Repetidor hipotético</div>
@@ -326,6 +333,8 @@ let repIdSeq = 1;
 let pointA = null, pointB = null;   // {lat,lon,label}
 let armPoint = null;                // 'A' | 'B' | null (clic en mapa fija el punto)
 let showModelFill = false;          // en vivo: dibujar (o no) el relleno modelado
+let showEstimated = true;           // ubicar nodos sin GPS por sus vecinos
+let lastNodes = {};                 // último set renderizado (para popups)
 const MAX_DRAW_EDGES = 4000;
 
 /* ---- 3. Mapa -------------------------------------------------------------- */
@@ -387,6 +396,7 @@ function activeNodes() {
   const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
   const now = Date.now();
   const out = {};
+  const unlocated = [];
   const nameIdx = new Map();
   const indexName = (nm, id) => { if (nm && nm !== id && !nameIdx.has(nm)) nameIdx.set(nm, id); };
   for (const id in embeddedNodes) {
@@ -408,13 +418,42 @@ function activeNodes() {
     // fusiona SIEMPRE bajo el nº de nodo vivo; hereda del gemelo lo que falte
     const merged = Object.assign({}, twin || {}, compact(n));
     merged.id = id;
-    if (typeof merged.lat !== "number") continue;   // sin posición (propia ni heredada): no dibujable
+    if (typeof merged.lat !== "number") { unlocated.push(merged); continue; } // sin GPS ni gemelo → a estimar
     if (sid && sid !== id) delete out[sid];         // quita el duplicado del directorio
     out[id] = merged;
     liveCount++;
   }
   for (const r of hypRepeaters) out[r.id] = r;
-  return { nodes: out, hasLive: liveCount > 0 };
+  return { nodes: out, unlocated, hasLive: liveCount > 0 };
+}
+
+/* ---- 5b. Ubicación estimada de nodos sin GPS ------------------------------
+ * Un nodo vivo sin posición, pero que ES escuchado por / escucha a nodos SÍ
+ * posicionados, está por fuerza dentro del alcance de radio de ellos: lo
+ * ubicamos en el centroide de esos vecinos (con un pequeño offset determinista
+ * para no encimarlo) y lo marcamos estimated=true. La ADYACENCIA es real
+ * (SNR medido); solo la GEOMETRÍA es aproximada. */
+function hashId(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function estimatePos(id, nodes) {
+  const pts = [];
+  for (const nb of linkNeighbors(liveLinks[id])) {           // nodos que este escucha
+    const p = nodes[nb.id]; if (p && typeof p.lat === "number" && !p.estimated) pts.push(p);
+  }
+  for (const lid in liveLinks) {                              // nodos que lo escuchan a él
+    const ll = liveLinks[lid]; if (!ll) continue;
+    const from = String(ll.from != null ? ll.from : lid);
+    if (from === id) continue;
+    const p = nodes[from]; if (!p || typeof p.lat !== "number" || p.estimated) continue;
+    if (linkNeighbors(ll).some((nb) => nb.id === id)) pts.push(p);
+  }
+  if (!pts.length) return null;
+  let lat = 0, lon = 0; for (const p of pts) { lat += p.lat; lon += p.lon; }
+  lat /= pts.length; lon /= pts.length;
+  const off = pts.length === 1 ? 0.018 : 0.006;              // ~2 km si 1 solo ancla, si no ~0.6 km
+  const ang = (hashId(id) % 360) * Math.PI / 180;
+  lat += off * Math.cos(ang);
+  lon += off * Math.sin(ang) / Math.cos(lat * Math.PI / 180);
+  return { lat, lon, refs: pts.length };
 }
 
 /* ---- 6. Grafo de adyacencia ----------------------------------------------- */
@@ -517,13 +556,18 @@ function neighborsOf(id, nodes) {
 }
 
 function nodePopupHtml(id) {
-  const { nodes } = activeNodes();
+  const nodes = lastNodes;                 // set ya renderizado (incluye estimados)
   const n = nodes[id];
   if (!n) return "";
   const tag = n.placeholder ? " <span style='color:#8b93a1'>(ancla)</span>" : "";
-  const vivo = n.t
+  const vivo = n.estimated
+    ? `<span class="badge" style="background:rgba(181,122,255,.2);color:#b57aff">VIVO · sin GPS</span>`
+    : n.t
     ? `<span class="badge ok">VIVO · ${fmtAge(n.t)}</span>`
     : `<span class="badge" style="background:rgba(122,131,145,.2);color:#7a8391">nominal</span>`;
+  const estNote = n.estimated
+    ? `<div class="nb" style="color:#b57aff">📍 Ubicación ESTIMADA a partir de ${n.estRefs} nodo(s) que lo escuchan — no reportó GPS. La geometría es aproximada; el enlace y su SNR son reales.</div>`
+    : "";
   const extra = [];
   if (n.alt != null) extra.push(`alt ${n.alt} m`);
   if (n.batt != null) extra.push(`bat ${n.batt}%`);
@@ -535,6 +579,7 @@ function nodePopupHtml(id) {
     `<div class="pm">id ${esc(id)} · rol ${esc(String(n.role ?? "?"))}<br>${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}` +
     (extra.length ? `<br>${extra.join(" · ")}` : "") +
     (isRouter(n) ? "<br>router/elevado" : "") + `</div>` +
+    estNote +
     neighborsOf(id, nodes) +
     `<div class="pa">` +
     `<a href="#" class="sa" onclick="setPointFromNode('${esc(id)}','A');return false">Fijar como A</a>` +
@@ -543,8 +588,7 @@ function nodePopupHtml(id) {
 }
 
 window.setPointFromNode = (id, which) => {
-  const { nodes } = activeNodes();
-  const n = nodes[id]; if (!n) return;
+  const n = lastNodes[id]; if (!n) return;
   const pt = { lat: n.lat, lon: n.lon, label: n.name || id };
   if (which === "A") { pointA = pt; document.getElementById("addr-a").value = n.name || id; }
   else { pointB = pt; document.getElementById("addr-b").value = n.name || id; }
@@ -630,7 +674,17 @@ function pinIcon(letter, color) {
 
 function redraw() {
   linkLayer.clearLayers(); nodeLayer.clearLayers(); pathLayer.clearLayers(); pinLayer.clearLayers();
-  const { nodes, hasLive } = activeNodes();
+  const { nodes, unlocated, hasLive } = activeNodes();
+
+  // ubicar por vecinos los nodos vivos sin GPS (marcados como estimados)
+  let estCount = 0;
+  if (showEstimated && useLive) {
+    for (const u of unlocated) {
+      const est = estimatePos(u.id, nodes);
+      if (est) { nodes[u.id] = Object.assign({}, u, { lat: est.lat, lon: est.lon, estimated: true, estRefs: est.refs }); estCount++; }
+    }
+  }
+  lastNodes = nodes;
 
   document.getElementById("btn-live").disabled = !hasLive;
   if (!hasLive && useLive) useLive = false;
@@ -646,8 +700,9 @@ function redraw() {
     if (e.model && drawn >= MAX_DRAW_EDGES) continue;
     const a = nodes[e.a], b = nodes[e.b];
     if (!a || !b) continue;
+    const estGeom = a.estimated || b.estimated;   // enlace real pero con extremo de posición estimada
     L.polyline([[a.lat, a.lon], [b.lat, b.lon]], e.live
-      ? { color: snrColor(e.snr ?? -20), weight: 2.2, opacity: 0.9 }
+      ? { color: snrColor(e.snr ?? -20), weight: 2.2, opacity: estGeom ? 0.6 : 0.9, dashArray: estGeom ? "4,6" : null }
       : { color: "#3a4250", weight: 1, opacity: 0.35, dashArray: "3,5" }
     ).addTo(linkLayer);
     drawn++;
@@ -661,6 +716,14 @@ function redraw() {
     if (typeof n.lat !== "number") continue;
     const alive = !!n.t;
     const router = isRouter(n);
+    if (n.estimated) {
+      // posición estimada: aro violeta punteado, hueco → nunca se confunde con real
+      L.circleMarker([n.lat, n.lon], {
+        radius: 6, color: "#b57aff", weight: 2, dashArray: "2,3",
+        fillColor: "#b57aff", fillOpacity: 0.25,
+      }).addTo(nodeLayer).bindPopup(() => nodePopupHtml(id));
+      continue;
+    }
     let fill = alive ? "#3ad07a" : "#7a8391";
     if (n.role === "repeater") fill = "#ff7a1a";
     const m = L.circleMarker([n.lat, n.lon], {
@@ -732,6 +795,7 @@ function redraw() {
   document.getElementById("s-live").textContent = liveCount;
   document.getElementById("s-src").textContent = hasLive ? "RTDB" : "local";
   document.getElementById("s-src").style.fontSize = "13px";
+  document.getElementById("est-count").textContent = estCount ? `(${estCount} ubicados)` : "";
 
   // status pill
   const st = document.getElementById("status");
@@ -746,6 +810,7 @@ function syncToggle() {
   document.getElementById("btn-live").classList.toggle("active", useLive);
   document.getElementById("btn-model").classList.toggle("active", !useLive);
   document.getElementById("fill-row").style.display = useLive ? "flex" : "none";
+  document.getElementById("est-row").style.display = useLive ? "flex" : "none";
 }
 
 /* ---- 11. Geocodificación (Nominatim / OpenStreetMap) ---------------------- */
@@ -825,6 +890,7 @@ document.getElementById("range").addEventListener("input", (e) => {
 });
 document.getElementById("hoplimit").addEventListener("input", (e) => { hopLimit = +e.target.value || 7; redraw(); });
 document.getElementById("show-fill").addEventListener("change", (e) => { showModelFill = e.target.checked; redraw(); });
+document.getElementById("show-est").addEventListener("change", (e) => { showEstimated = e.target.checked; redraw(); });
 document.getElementById("ttl").addEventListener("change", (e) => { ttlHours = +e.target.value; redraw(); });
 
 document.getElementById("geo-a").addEventListener("click", () => doGeocode("A"));
