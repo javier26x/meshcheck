@@ -1,5 +1,5 @@
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>MeshCheck Live — MeshChile</title>
 
 <!-- Fuentes -->
@@ -7,9 +7,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
-<!-- Leaflet -->
+<!-- Leaflet + MarkerCluster -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <!-- Firebase (compat, sin build) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -17,97 +19,68 @@
 
 <style>
   :root {
-    --bg: #0d0f12;
-    --bg2: #101318;
-    --panel: #14171c;
-    --panel2: #1a1e25;
-    --line: #262b33;
-    --txt: #e6e9ee;
-    --muted: #8b93a1;
-    --accent: #ff7a1a;   /* signal orange */
-    --node: #3fb6c9;     /* cyan */
-    --router: #ffd23f;   /* elevado / router */
-    --a: #5b8cff;        /* endpoint A */
-    --b: #ff5b8c;        /* endpoint B */
-    --ok: #3ad07a;
-    --warn: #ff4d4d;
+    --bg: #0d0f12; --bg2: #101318; --panel: #14171c; --panel2: #1a1e25;
+    --line: #262b33; --txt: #e6e9ee; --muted: #8b93a1;
+    --accent: #ff7a1a; --router: #ffd23f; --a: #5b8cff; --b: #ff5b8c;
+    --ok: #3ad07a; --warn: #ff4d4d; --est: #b57aff;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
-  body {
-    font-family: "DM Sans", system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--txt);
-    overflow: hidden;
-  }
+  body { font-family: "DM Sans", system-ui, sans-serif; background: var(--bg); color: var(--txt); overflow: hidden; }
   code, .mono { font-family: "JetBrains Mono", monospace; }
 
-  #app { display: grid; grid-template-columns: 340px 1fr; height: 100%; }
-  @media (max-width: 860px) {
-    #app { grid-template-columns: 1fr; }
-    #panel { position: absolute; z-index: 1200; width: 88%; max-width: 340px; height: 100%;
-             transform: translateX(-100%); transition: transform .22s ease; }
-    #panel.open { transform: translateX(0); }
-    #panel-toggle { display: flex !important; }
-  }
+  #app { display: grid; grid-template-columns: 350px 1fr; height: 100%; }
 
-  /* Panel */
-  #panel {
-    background: linear-gradient(180deg, var(--panel) 0%, var(--bg2) 100%);
-    border-right: 1px solid var(--line);
-    display: flex; flex-direction: column; overflow-y: auto;
-  }
-  .brand { padding: 16px 16px 12px; border-bottom: 1px solid var(--line); }
+  /* ---------- Panel ---------- */
+  #panel { background: linear-gradient(180deg, var(--panel) 0%, var(--bg2) 100%);
+    border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
   .brand h1 { margin: 0; font-size: 18px; letter-spacing: .5px; display: flex; align-items: center; gap: 8px; }
   .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-  .brand .sub { margin-top: 4px; font-size: 11px; color: var(--muted); letter-spacing: .3px; }
+  .brand .sub { margin-top: 3px; font-size: 11px; color: var(--muted); }
 
-  .status { display: flex; align-items: center; gap: 7px; margin-top: 10px; font-size: 11px; color: var(--muted); }
-  .status .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-  .status.live .pip { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 1.6s infinite; }
-  .status.model .pip { background: var(--accent); }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); flex: none; }
+  .tabs button { flex: 1; background: transparent; border: 0; border-bottom: 2px solid transparent;
+    color: var(--muted); padding: 11px 4px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+  .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .panes { flex: 1; overflow-y: auto; min-height: 0; }
+  .pane { display: none; } .pane.active { display: block; }
 
   .sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
-  .sec h2 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--accent); font-weight: 700; }
+  .sec h2 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--accent); font-weight: 700; display:flex; align-items:center; gap:6px; }
+  .hint { cursor: help; color: var(--muted); border: 1px solid var(--line); border-radius: 50%; width: 14px; height: 14px;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
 
   .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; font-size: 13px; }
   .row label { color: var(--muted); }
-  select, input[type="number"], input[type="text"] {
-    background: var(--panel2); color: var(--txt); border: 1px solid var(--line);
-    border-radius: 6px; padding: 7px 8px; font-family: inherit; font-size: 12px; width: 100%;
-  }
-  input[type="text"]::placeholder { color: #5a6270; }
+  .chk { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--txt); margin: 9px 0; }
+  select, input[type="number"], input[type="text"] { background: var(--panel2); color: var(--txt);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font-family: inherit; font-size: 12px; width: 100%; }
+  input::placeholder { color: #5a6270; }
   input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; }
 
-  .addr-row { display: flex; gap: 6px; margin: 6px 0 10px; }
-  .addr-row .tag {
-    flex: none; width: 26px; display: flex; align-items: center; justify-content: center;
-    border-radius: 6px; font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 12px;
-  }
+  .addr-row { display: flex; gap: 6px; margin: 6px 0; }
+  .addr-row .tag { flex: none; width: 26px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 12px; }
   .addr-row .tag.a { background: rgba(91,140,255,.18); color: var(--a); border: 1px solid var(--a); }
   .addr-row .tag.b { background: rgba(255,91,140,.18); color: var(--b); border: 1px solid var(--b); }
-  .mini {
-    flex: none; width: 34px; background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
-    border-radius: 6px; cursor: pointer; font-size: 13px;
-  }
+  .mini { flex: none; width: 34px; background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
+    border-radius: 6px; cursor: pointer; font-size: 13px; }
   .mini:hover { border-color: var(--accent); color: var(--accent); }
   .mini.armed { background: var(--accent); color: #1a1005; border-color: var(--accent); }
+  .rowbtns { display: flex; gap: 6px; margin: 8px 0 4px; }
+  .rowbtns .btn { flex: 1; padding: 7px; }
 
-  /* Toggle vivo/modelo */
   .toggle { display: flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
-  .toggle button {
-    flex: 1; background: transparent; border: 0; color: var(--muted); padding: 7px 8px;
-    border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: .3px;
-  }
+  .toggle button { flex: 1; background: transparent; border: 0; color: var(--muted); padding: 7px 8px;
+    border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
   .toggle button.active { background: var(--accent); color: #1a1005; }
   .toggle button:disabled { opacity: .35; cursor: not-allowed; }
 
-  .btn {
-    width: 100%; background: var(--panel2); color: var(--txt); border: 1px solid var(--line);
+  .btn { width: 100%; background: var(--panel2); color: var(--txt); border: 1px solid var(--line);
     border-radius: 7px; padding: 9px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
+    display: flex; align-items: center; justify-content: center; gap: 6px; }
   .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn.armed { background: var(--accent); color: #1a1005; border-color: var(--accent); }
   .btn.ghost { background: transparent; }
@@ -117,25 +90,26 @@
   .stat .n { font-size: 20px; font-weight: 700; font-family: "JetBrains Mono", monospace; }
   .stat .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
 
-  .path-out { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7; color: var(--muted); word-break: break-word; }
-  .path-out b { color: var(--txt); }
   .badge { display: inline-block; padding: 1px 6px; border-radius: 5px; font-size: 11px; font-weight: 600; }
   .badge.ok { background: rgba(58,208,122,.15); color: var(--ok); }
   .badge.no { background: rgba(255,77,77,.15); color: var(--warn); }
-  #geo-msg { font-size: 11px; color: var(--muted); min-height: 14px; margin-top: 2px; }
+  #geo-msg { font-size: 11px; color: var(--muted); min-height: 14px; margin-top: 4px; }
 
-  /* Leyenda */
-  .legend .li { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin: 6px 0; }
-  .legend .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-  .legend .ln { width: 18px; height: 0; flex: none; border-top: 3px solid; }
-  .snr-bar { height: 8px; border-radius: 4px; margin: 6px 0 2px;
-    background: linear-gradient(90deg, var(--warn), var(--router), var(--ok)); }
-  .snr-lbl { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+  /* Ruta: tarjetas por salto */
+  .route-sum { font-size: 12px; line-height: 1.6; margin: 8px 0; }
+  .hops { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+  .hop { display: flex; align-items: center; gap: 8px; background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 7px; padding: 7px 9px; font-size: 12px; }
+  .hop .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .hop .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hop .d { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+  .hop.ep { border-style: dashed; }
 
   .note { font-size: 11px; color: var(--muted); line-height: 1.5; }
   .note b { color: var(--accent); }
 
-  /* Mapa */
+  /* ---------- Mapa ---------- */
+  .map-wrap { position: relative; min-width: 0; }
   #map { height: 100%; background: #0a0c0f; }
   .leaflet-container { background: #0a0c0f; font-family: "DM Sans", sans-serif; }
   .leaflet-control-attribution { background: rgba(13,15,18,.75) !important; color: var(--muted) !important; font-size: 10px; }
@@ -149,147 +123,233 @@
   .leaflet-popup-content .nb b { color: var(--accent); }
   .leaflet-popup-content .nb .snr { font-family: "JetBrains Mono", monospace; }
   .leaflet-popup-content .pa { margin-top: 8px; display: flex; gap: 6px; }
-  .leaflet-popup-content .pa a {
-    flex: 1; text-align: center; text-decoration: none; font-size: 11px; font-weight: 600;
-    padding: 4px 6px; border-radius: 5px; border: 1px solid var(--line);
-  }
+  .leaflet-popup-content .pa a { flex: 1; text-align: center; text-decoration: none; font-size: 11px; font-weight: 600;
+    padding: 4px 6px; border-radius: 5px; border: 1px solid var(--line); }
   .leaflet-popup-content .pa a.sa { color: var(--a); border-color: var(--a); }
   .leaflet-popup-content .pa a.sb { color: var(--b); border-color: var(--b); }
 
-  /* Banner */
-  #banner {
-    position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1100;
-    background: rgba(255,122,26,.12); border: 1px solid var(--accent); color: var(--accent);
-    padding: 8px 14px; border-radius: 8px; font-size: 12px; max-width: 80%; text-align: center;
-    backdrop-filter: blur(6px);
-  }
-  #panel-toggle {
-    display: none; position: absolute; top: 12px; left: 12px; z-index: 1300;
-    background: var(--panel); border: 1px solid var(--line); color: var(--txt);
-    width: 40px; height: 40px; border-radius: 8px; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px;
+  /* etiquetas de nombre */
+  .nlabel { background: rgba(13,15,18,.7); border: 0; color: #cfd6e0; font-size: 10px; font-weight: 600;
+    padding: 1px 4px; box-shadow: none; }
+  .nlabel::before { display: none; }
+
+  /* clusters */
+  .cluster { background: transparent; }
+  .cluster .cl { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(20,23,28,.85); border: 2px solid var(--accent); color: var(--txt); font-weight: 700;
+    font-family: "JetBrains Mono", monospace; font-size: 12px; box-shadow: 0 0 10px rgba(255,122,26,.35); }
+  .cluster .cl.haslive { border-color: var(--ok); box-shadow: 0 0 10px rgba(58,208,122,.4); }
+
+  /* pulso de nodo nuevo */
+  .ping { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--ok); animation: ping 1.6s ease-out forwards; }
+  @keyframes ping { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(3.2); opacity: 0; } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ---------- Overlays del mapa ---------- */
+  .map-top { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1000;
+    width: min(440px, 78%); display: flex; flex-direction: column; gap: 8px; }
+  .search { position: relative; }
+  .search input { background: rgba(20,23,28,.92); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,.4);
+    border-color: var(--line); padding: 10px 12px 10px 34px; font-size: 13px; }
+  .search .ic { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
+  .results { position: absolute; top: 44px; left: 0; right: 0; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.5); display: none; max-height: 320px; overflow-y: auto; }
+  .results.open { display: block; }
+  .results .r { padding: 8px 12px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  .results .r:hover, .results .r.sel { background: var(--panel2); }
+  .results .r .d { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .results .r .sn { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 10px; margin-left: auto; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .chip { background: rgba(20,23,28,.9); backdrop-filter: blur(6px); border: 1px solid var(--line); color: var(--muted);
+    border-radius: 20px; padding: 5px 11px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .chip.active { background: var(--accent); color: #1a1005; border-color: var(--accent); }
+
+  .status-ov { position: absolute; top: 12px; right: 12px; z-index: 1000; background: rgba(20,23,28,.9);
+    backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 8px; padding: 7px 11px;
+    font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 7px; max-width: 46vw; }
+  .status-ov .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+  .status-ov.live .pip { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 1.6s infinite; }
+  .status-ov.model .pip { background: var(--accent); }
+
+  .mbtns { position: absolute; top: 58px; right: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 6px; }
+  .mbtn { width: 38px; height: 38px; background: rgba(20,23,28,.9); backdrop-filter: blur(6px); border: 1px solid var(--line);
+    color: var(--txt); border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+  .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .legend-ov { position: absolute; bottom: 16px; left: 12px; z-index: 1000; background: rgba(20,23,28,.92);
+    backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 8px; width: 210px; overflow: hidden; }
+  .legend-ov .lh { padding: 8px 11px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+  .legend-ov .lb { padding: 4px 11px 11px; display: none; }
+  .legend-ov.open .lb { display: block; }
+  .li { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); margin: 5px 0; }
+  .li .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .li .ln { width: 18px; height: 0; flex: none; border-top: 3px solid; }
+  .snr-bar { height: 8px; border-radius: 4px; margin: 7px 0 2px;
+    background: linear-gradient(90deg, rgb(59,110,214), #cfc9bf, rgb(240,158,32)); }
+  .snr-lbl { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+
+  #banner { position: absolute; top: 62px; left: 50%; transform: translateX(-50%); z-index: 1100;
+    background: rgba(255,122,26,.14); border: 1px solid var(--accent); color: var(--accent); padding: 8px 14px;
+    border-radius: 8px; font-size: 12px; max-width: 80%; text-align: center; backdrop-filter: blur(6px); }
+  #panel-toggle { display: none; }
+
+  /* ---------- Móvil: bottom-sheet ---------- */
+  @media (max-width: 820px) {
+    #app { grid-template-columns: 1fr; }
+    #panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1500; height: 66vh; border-right: 0;
+      border-top: 1px solid var(--line); border-radius: 16px 16px 0 0; transform: translateY(calc(100% - 52px));
+      transition: transform .26s ease; box-shadow: 0 -8px 30px rgba(0,0,0,.5); }
+    #panel.open { transform: translateY(0); }
+    .brand { position: relative; cursor: pointer; }
+    .brand::before { content: ""; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+      width: 38px; height: 4px; border-radius: 2px; background: var(--line); }
+    .legend-ov { display: none; }
+    .map-top { width: 90%; }
+    .status-ov { max-width: 60vw; }
   }
 </style>
 
 <div id="app">
   <aside id="panel">
-    <div class="brand">
+    <div class="brand" id="brand">
       <h1><span class="dot"></span> MeshCheck <span style="color:var(--accent)">Live</span></h1>
       <div class="sub">Visor de malla en vivo · MeshChile</div>
-      <div id="status" class="status model"><span class="pip"></span><span id="status-txt">Iniciando…</span></div>
     </div>
 
-    <div class="sec">
-      <h2>Ruta A → B</h2>
-      <div class="addr-row">
-        <span class="tag a">A</span>
-        <input type="text" id="addr-a" placeholder="Dirección o lugar (ej: Plaza Ñuñoa, Santiago)" />
-        <button class="mini" id="geo-a" title="Buscar dirección">🔍</button>
-        <button class="mini" id="pin-a" title="Fijar A con clic en el mapa">📍</button>
-      </div>
-      <div class="addr-row">
-        <span class="tag b">B</span>
-        <input type="text" id="addr-b" placeholder="Dirección o lugar (ej: Cerro Alegre, Valparaíso)" />
-        <button class="mini" id="geo-b" title="Buscar dirección">🔍</button>
-        <button class="mini" id="pin-b" title="Fijar B con clic en el mapa">📍</button>
-      </div>
-      <div id="geo-msg"></div>
-      <div class="row">
-        <label>Hop limit</label>
-        <input type="number" id="hoplimit" value="7" min="1" max="15" style="width:70px" />
-      </div>
-      <div class="path-out" id="path-out" style="margin-top:8px">Fija dirección A y B (busca 🔍 o clic 📍) para trazar la ruta.</div>
+    <div class="tabs">
+      <button data-tab="ruta" class="active">Ruta</button>
+      <button data-tab="capas">Capas</button>
+      <button data-tab="red">Red</button>
     </div>
 
-    <div class="sec">
-      <h2>Modo de enlaces</h2>
-      <div class="toggle" id="mode-toggle">
-        <button data-mode="live" id="btn-live">Malla en vivo</button>
-        <button data-mode="model" id="btn-model" class="active">Modelo</button>
+    <div class="panes">
+      <!-- ===== RUTA ===== -->
+      <div class="pane active" data-pane="ruta">
+        <div class="sec">
+          <h2>Ruta A → B <span class="hint" title="Escribe una dirección y pulsa 🔍, o 📍 y haz clic en el mapa, o 'Fijar como A/B' desde un nodo. Puedes arrastrar los pines.">?</span></h2>
+          <div class="addr-row">
+            <span class="tag a">A</span>
+            <input type="text" id="addr-a" placeholder="Dirección o lugar (ej: Plaza Ñuñoa)" />
+            <button class="mini" id="geo-a" title="Buscar dirección">🔍</button>
+            <button class="mini" id="pin-a" title="Fijar A con clic en el mapa">📍</button>
+          </div>
+          <div class="addr-row">
+            <span class="tag b">B</span>
+            <input type="text" id="addr-b" placeholder="Dirección o lugar (ej: Cerro Alegre)" />
+            <button class="mini" id="geo-b" title="Buscar dirección">🔍</button>
+            <button class="mini" id="pin-b" title="Fijar B con clic en el mapa">📍</button>
+          </div>
+          <div id="geo-msg"></div>
+          <div class="rowbtns">
+            <button class="btn ghost" id="btn-swap" title="Intercambiar A y B">⇅ Intercambiar</button>
+            <button class="btn ghost" id="btn-clear-ab" title="Limpiar ruta">✕ Limpiar</button>
+          </div>
+          <div class="row"><label>Hop limit</label><input type="number" id="hoplimit" value="7" min="1" max="15" style="width:70px" /></div>
+        </div>
+        <div class="sec">
+          <h2>Resultado</h2>
+          <div class="route-sum" id="route-sum">Fija A y B para trazar la ruta.</div>
+          <div class="hops" id="route-hops"></div>
+        </div>
       </div>
-      <div class="row" id="fill-row" style="display:none">
-        <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
-          <input type="checkbox" id="show-fill" style="accent-color:var(--accent)" />
-          dibujar también el relleno modelado
-        </label>
+
+      <!-- ===== CAPAS ===== -->
+      <div class="pane" data-pane="capas">
+        <div class="sec">
+          <h2>Modo de enlaces <span class="hint" title="En vivo: solo enlaces medidos por radio (NeighborInfo/gateway/traceroute), color = SNR. Modelo: todo estimado por distancia.">?</span></h2>
+          <div class="toggle" id="mode-toggle">
+            <button data-mode="live" id="btn-live">Malla en vivo</button>
+            <button data-mode="model" id="btn-model" class="active">Modelo</button>
+          </div>
+          <label class="chk" id="fill-row" style="display:none"><input type="checkbox" id="show-fill" /> dibujar relleno modelado</label>
+          <label class="chk" id="est-row" style="display:none"><input type="checkbox" id="show-est" checked /> ubicar nodos sin GPS por sus vecinos <span id="est-count" class="mono" style="color:var(--est)"></span></label>
+        </div>
+        <div class="sec">
+          <h2>Visualización</h2>
+          <label class="chk"><input type="checkbox" id="show-focus" checked /> resaltar solo el nodo seleccionado <span class="hint" title="Al hacer clic en un nodo, atenúa los enlaces que no le tocan.">?</span></label>
+          <label class="chk"><input type="checkbox" id="show-labels" /> mostrar nombres en el mapa</label>
+        </div>
+        <div class="sec" id="model-controls">
+          <h2>Capa de predicción (modelo)</h2>
+          <div class="row"><label>Alcance por salto</label><span class="mono" id="range-val">15 km</span></div>
+          <input type="range" id="range" min="2" max="60" value="15" step="1" />
+          <button class="btn ghost" id="btn-repeater" style="margin-top:12px">＋ Repetidor hipotético</button>
+          <button class="btn ghost" id="btn-clear-rep" style="margin-top:8px">Limpiar repetidores</button>
+        </div>
+        <div class="sec">
+          <h2>Ajustes</h2>
+          <div class="row"><label>TTL nodos vivos <span class="hint" title="Antigüedad máxima para mostrar un nodo como 'vivo'. El bridge acumula todo; esto solo filtra la vista.">?</span></label>
+            <select id="ttl" style="width:auto">
+              <option value="1">1 h</option><option value="2" selected>2 h</option>
+              <option value="6">6 h</option><option value="24">24 h</option><option value="0">Sin TTL</option>
+            </select>
+          </div>
+        </div>
       </div>
-      <div class="row" id="est-row" style="display:none">
-        <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
-          <input type="checkbox" id="show-est" checked style="accent-color:#b57aff" />
-          ubicar nodos sin GPS por sus vecinos <span id="est-count" class="mono" style="color:#b57aff"></span>
-        </label>
+
+      <!-- ===== RED ===== -->
+      <div class="pane" data-pane="red">
+        <div class="sec">
+          <h2>Estado de la red</h2>
+          <div class="stat-grid">
+            <div class="stat"><div class="n" id="s-nodes">0</div><div class="l">Nodos</div></div>
+            <div class="stat"><div class="n" id="s-links">0</div><div class="l" id="s-links-l">Enlaces</div></div>
+            <div class="stat"><div class="n" id="s-live">0</div><div class="l">Vivos</div></div>
+            <div class="stat"><div class="n" id="s-src">—</div><div class="l">Fuente</div></div>
+          </div>
+        </div>
+        <div class="sec">
+          <h2>Diagnóstico del bridge</h2>
+          <p class="note mono" id="diag" style="margin:0">Esperando datos…</p>
+        </div>
+        <div class="sec">
+          <p class="note" id="foot">Datos vivos vía Firebase RTDB (bridge MQTT MeshChile). Snapshot base: <code id="foot-n">nodes.json</code>. Geocodificación: OpenStreetMap Nominatim.</p>
+        </div>
       </div>
-      <p class="note" style="margin-top:10px">
-        <b>En vivo</b>: solo enlaces <b>medidos por radio</b> (NeighborInfo o recepción
-        directa de un gateway), color = SNR. Lo no medido se estima por distancia
-        únicamente para calcular rutas (relleno, punteado gris si lo activas).
-        <b>Modelo</b>: todo estimado por distancia.
-        Clic en un nodo → qué vecinos ve <b>de verdad</b>.
-      </p>
+    </div>
+  </aside>
+
+  <div class="map-wrap">
+    <div class="map-top">
+      <div class="search">
+        <span class="ic">🔍</span>
+        <input type="text" id="search" placeholder="Buscar nodo por nombre…" autocomplete="off" />
+        <div class="results" id="results"></div>
+      </div>
+      <div class="chips" id="chips">
+        <div class="chip" data-f="live">Solo vivos</div>
+        <div class="chip" data-f="routers">Routers</div>
+        <div class="chip" data-f="measured">Con enlaces medidos</div>
+        <div class="chip" data-f="hideDir">Ocultar directorio</div>
+      </div>
     </div>
 
-    <div class="sec">
-      <h2>Estado de la red</h2>
-      <div class="stat-grid">
-        <div class="stat"><div class="n" id="s-nodes">0</div><div class="l">Nodos</div></div>
-        <div class="stat"><div class="n" id="s-links">0</div><div class="l" id="s-links-l">Enlaces</div></div>
-        <div class="stat"><div class="n" id="s-live">0</div><div class="l">Vivos</div></div>
-        <div class="stat"><div class="n" id="s-src">—</div><div class="l">Fuente</div></div>
-      </div>
+    <div class="status-ov model" id="status"><span class="pip"></span><span id="status-txt">Iniciando…</span></div>
+
+    <div class="mbtns">
+      <button class="mbtn" id="mb-fit" title="Ver toda la red">⤢</button>
+      <button class="mbtn" id="mb-loc" title="Centrar en mi ubicación">◎</button>
+      <button class="mbtn" id="mb-base" title="Cambiar mapa base">🗺️</button>
+      <button class="mbtn" id="mb-share" title="Copiar enlace de esta vista">🔗</button>
+      <button class="mbtn" id="mb-full" title="Pantalla completa">⛶</button>
     </div>
 
-    <div class="sec" id="model-controls">
-      <h2>Capa de predicción (modelo)</h2>
-      <div class="row"><label>Alcance por salto</label><span class="mono" id="range-val">15 km</span></div>
-      <input type="range" id="range" min="2" max="60" value="15" step="1" />
-      <button class="btn ghost" id="btn-repeater" style="margin-top:12px">＋ Repetidor hipotético</button>
-      <button class="btn ghost" id="btn-clear-rep" style="margin-top:8px">Limpiar repetidores</button>
-      <p class="note" style="margin-top:10px">El alcance también define el radio de acceso de A y B al primer/último nodo.</p>
-    </div>
-
-    <div class="sec">
-      <h2>Ajustes</h2>
-      <div class="row">
-        <label>TTL nodos vivos</label>
-        <select id="ttl" style="width:auto">
-          <option value="1">1 h</option>
-          <option value="2" selected>2 h</option>
-          <option value="6">6 h</option>
-          <option value="24">24 h</option>
-          <option value="0">Sin TTL</option>
-        </select>
-      </div>
-      <p class="note">El bridge acumula todo lo que escucha en la RTDB; el TTL solo filtra qué tan viejo se muestra como "vivo".</p>
-    </div>
-
-    <div class="sec legend">
-      <h2>Leyenda</h2>
-      <div class="li"><span class="sw" style="background:#3ad07a"></span> Nodo vivo (señal dentro del TTL)</div>
-      <div class="li"><span class="sw" style="background:#b57aff;opacity:.5;border:2px dashed #b57aff"></span> Vivo sin GPS (posición estimada)</div>
-      <div class="li"><span class="sw" style="background:#7a8391;opacity:.7"></span> Nodo nominal (snapshot, sin señal)</div>
-      <div class="li"><span class="sw" style="background:#14171c;border:2px solid var(--router)"></span> Router / elevado (borde amarillo)</div>
-      <div class="li"><span class="sw" style="background:var(--accent)"></span> Repetidor hipotético</div>
-      <div class="li"><span class="sw" style="background:var(--a)"></span> Punto A</div>
-      <div class="li"><span class="sw" style="background:var(--b)"></span> Punto B</div>
-      <div class="li"><span class="ln" style="border-color:var(--ok)"></span> Enlace real medido (color = SNR)</div>
-      <div class="li"><span class="ln" style="border-color:#3a4250; border-top-style:dashed"></span> Enlace modelado (estimación)</div>
-      <div style="margin-top:10px">
+    <div class="legend-ov open" id="legend">
+      <div class="lh" id="legend-h">Leyenda <span id="legend-cx">▾</span></div>
+      <div class="lb">
+        <div class="li"><span class="sw" style="background:#3ad07a"></span> Vivo (señal dentro del TTL)</div>
+        <div class="li"><span class="sw" style="background:#b57aff;opacity:.5;border:2px dashed #b57aff"></span> Vivo sin GPS (posición estimada)</div>
+        <div class="li"><span class="sw" style="background:#7a8391;opacity:.7"></span> Nominal (directorio, sin señal)</div>
+        <div class="li"><span class="sw" style="background:#14171c;border:2px solid var(--router)"></span> Router / elevado</div>
+        <div class="li"><span class="sw" style="background:var(--accent)"></span> Repetidor hipotético</div>
+        <div class="li"><span class="ln" style="border-color:rgb(240,158,32)"></span> Enlace medido (color = SNR)</div>
+        <div class="li"><span class="ln" style="border-color:#3a4250; border-top-style:dashed"></span> Enlace modelado</div>
         <div class="snr-bar"></div>
         <div class="snr-lbl"><span>SNR bajo</span><span>SNR alto</span></div>
       </div>
     </div>
 
-    <div class="sec">
-      <p class="note" id="foot">
-        Datos vivos vía Firebase RTDB (bridge MQTT MeshChile). Snapshot base:
-        <code id="foot-n">nodes.json</code>. Geocodificación: OpenStreetMap Nominatim.
-      </p>
-      <p class="note mono" id="diag" style="margin-top:8px"></p>
-    </div>
-  </aside>
-
-  <div style="position:relative">
-    <button id="panel-toggle" aria-label="Menú">☰</button>
     <div id="banner" style="display:none"></div>
     <div id="map"></div>
   </div>
@@ -297,13 +357,9 @@
 
 <script>
 /* ============================================================================
- * MeshCheck Live — single-file, sin build.
- *   Nodos = union( snapshot nodes.json , nodos vivos RTDB ) + repetidores.
- *   Enlaces:
- *     - vivo:   NeighborInfo real (SNR) + relleno modelo donde nadie reporta
- *     - modelo: todos los pares dentro del alcance por salto
- *   Ruta: puntos A y B (direccion geocodificada o clic) → nodo de entrada/salida
- *   dentro del radio de acceso → BFS multi-origen con hop limit.
+ * MeshCheck Live — single-file, sin build.  UX: tabs, búsqueda, filtros,
+ * clustering, modo foco, pines arrastrables, estimación de nodos sin GPS,
+ * persistencia (localStorage) y deep-links (URL). Lógica de datos preservada.
  * ========================================================================== */
 
 /* ---- 1. CONFIG FIREBASE --------------------------------------------------- */
@@ -319,56 +375,73 @@ const FIREBASE_CONFIG = {
 const FIREBASE_READY = !FIREBASE_CONFIG.databaseURL.includes("TU-PROYECTO");
 
 /* ---- 2. Estado ------------------------------------------------------------ */
-let liveNodes = {};        // { id: {id,name,lat,lon,t,role} }  desde RTDB
-let liveLinks = {};        // { id: {from,t, nb:{<id>:{snr,t,src}}} } (o legacy neighbors[])
-let liveMeta = null;       // meta/stats del bridge (diagnóstico MQTT)
-let embeddedNodes = {};    // snapshot nodes.json
-let useLive = false;
-let rangeKm = 15;
-let ttlHours = 2;
-let hopLimit = 7;
-let hypRepeaters = [];
-let repeaterArmed = false;
-let repIdSeq = 1;
-let pointA = null, pointB = null;   // {lat,lon,label}
-let armPoint = null;                // 'A' | 'B' | null (clic en mapa fija el punto)
-let showModelFill = false;          // en vivo: dibujar (o no) el relleno modelado
-let showEstimated = true;           // ubicar nodos sin GPS por sus vecinos
-let lastNodes = {};                 // último set renderizado (para popups)
-const MAX_DRAW_EDGES = 4000;
+let liveNodes = {}, liveLinks = {}, liveMeta = null, embeddedNodes = {};
+let useLive = false, rangeKm = 15, ttlHours = 2, hopLimit = 7;
+let hypRepeaters = [], repeaterArmed = false, repIdSeq = 1;
+let pointA = null, pointB = null, armPoint = null;
+let showModelFill = false, showEstimated = true, focusDim = true, showLabels = false;
+let filters = { live: false, routers: false, measured: false, hideDir: false };
+let selectedId = null, openPopupId = null, basemapIdx = 0;
+let lastNodes = {}, markerById = {}, prevLiveIds = new Set();
+let lastUpdate = 0, userLocMarker = null;
+const MAX_DRAW_EDGES = 5000;
+const $ = (id) => document.getElementById(id);
 
-/* ---- 3. Mapa -------------------------------------------------------------- */
-const map = L.map("map", { zoomControl: true, attributionControl: true, preferCanvas: true })
-  .setView([-35.5, -71.5], 5); // Chile
+/* ---- 3. Mapa + capas ------------------------------------------------------ */
+const BASEMAPS = [
+  { name: "Oscuro", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", sub: "abcd", attr: "&copy; OpenStreetMap &copy; CARTO" },
+  { name: "Voyager", url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", sub: "abcd", attr: "&copy; OpenStreetMap &copy; CARTO" },
+  { name: "Satélite", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", sub: "", attr: "&copy; Esri" },
+];
+const map = L.map("map", { zoomControl: true, attributionControl: true, preferCanvas: true }).setView([-35.5, -71.5], 5);
+let baseLayer = null;
+function setBasemap(i) {
+  basemapIdx = ((i % BASEMAPS.length) + BASEMAPS.length) % BASEMAPS.length;
+  const b = BASEMAPS[basemapIdx];
+  if (baseLayer) map.removeLayer(baseLayer);
+  baseLayer = L.tileLayer(b.url, { subdomains: b.sub, maxZoom: 19, attribution: b.attr + " · MeshCheck Live" }).addTo(map);
+  if (baseLayer.bringToBack) baseLayer.bringToBack();
+  $("mb-base").title = "Mapa base: " + b.name;
+}
+setBasemap(0);
 
-L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-  subdomains: "abcd", maxZoom: 19,
-  attribution: '&copy; OpenStreetMap &copy; CARTO · MeshCheck Live',
-}).addTo(map);
-
+const clusterOK = typeof L.markerClusterGroup === "function";
+const nodeLayer = clusterOK
+  ? L.markerClusterGroup({
+      disableClusteringAtZoom: 12, maxClusterRadius: 55, spiderfyOnMaxZoom: true, chunkedLoading: true,
+      iconCreateFunction: (cl) => {
+        const n = cl.getChildCount();
+        const live = cl.getAllChildMarkers().some((m) => m._live);
+        const s = n < 10 ? 34 : n < 50 ? 42 : 50;
+        return L.divIcon({ className: "cluster", iconSize: [s, s],
+          html: `<div class="cl${live ? " haslive" : ""}"><span>${n}</span></div>` });
+      },
+    })
+  : L.layerGroup();
+nodeLayer.addTo(map);
 const linkLayer = L.layerGroup().addTo(map);
-const nodeLayer = L.layerGroup().addTo(map);
 const pathLayer = L.layerGroup().addTo(map);
 const pinLayer  = L.layerGroup().addTo(map);
+const pulseLayer = L.layerGroup().addTo(map);
 
 /* ---- 4. Utilidades -------------------------------------------------------- */
 const R = 6371;
 function haversine(a, b) {
-  const dLat = (b.lat - a.lat) * Math.PI / 180;
-  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const dLat = (b.lat - a.lat) * Math.PI / 180, dLon = (b.lon - a.lon) * Math.PI / 180;
   const la1 = a.lat * Math.PI / 180, la2 = b.lat * Math.PI / 180;
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-// SNR -> color (verde alto → rojo bajo). Rango práctico Meshtastic: -20..+10 dB.
+// SNR -> color colorblind-safe (azul bajo → ámbar alto, sin verde). -20..+10 dB.
 function snrColor(snr) {
   const t = Math.max(0, Math.min(1, (snr + 20) / 30));
-  return `hsl(${t * 130}, 75%, 55%)`;
+  const lo = [59, 110, 214], hi = [240, 158, 32];
+  const c = (i) => Math.round(lo[i] + (hi[i] - lo[i]) * t);
+  return `rgb(${c(0)},${c(1)},${c(2)})`;
 }
 function isRouter(n) {
   if (n.router === true) return true;
   const r = n.role;
-  // enum Meshtastic: 2=ROUTER, 3=ROUTER_CLIENT, 4=REPEATER, 11=ROUTER_LATE
   if (typeof r === "number") return [2, 3, 4, 11].includes(r);
   const s = String(r || "").toLowerCase();
   return s.includes("router") || s.includes("repeat") || s.includes("elev");
@@ -379,47 +452,31 @@ function fmtAge(t) {
   if (m < 1) return "ahora"; if (m < 60) return m + " min"; return Math.round(m / 60) + " h";
 }
 function fmtKm(km) { return km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1) + " km"; }
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-/* ---- 5. Set activo de nodos (union directorio + vivos + repetidores) ------
- * El "snapshot" de meshchile es un DIRECTORIO de estaciones registradas a mano
- * (nombre + ubicación), sin número de nodo Meshtastic. Los vivos del MQTT usan
- * el número de nodo. Se correlacionan por NOMBRE (longName o shortName):
- *  - si un vivo calza por nombre con una estación del directorio, se fusiona
- *    BAJO EL Nº DE NODO VIVO (para que los enlaces —que referencian números de
- *    nodo— lo encuentren), heredando la posición del directorio si el vivo no
- *    reporta GPS. La entrada del directorio se elimina para no duplicar.
- *  - una estación del directorio sin vivo asociado queda "nominal" (plomo). */
+/* ---- 5. Set activo de nodos (union directorio + vivos) --------------------- */
 const normName = (s) => String(s || "").trim().toLowerCase();
 function activeNodes() {
   const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
   const now = Date.now();
-  const out = {};
-  const unlocated = [];
-  const nameIdx = new Map();
+  const out = {}, unlocated = [], nameIdx = new Map();
   const indexName = (nm, id) => { if (nm && nm !== id && !nameIdx.has(nm)) nameIdx.set(nm, id); };
   for (const id in embeddedNodes) {
     out[id] = embeddedNodes[id];
     indexName(normName(embeddedNodes[id].name), id);
-    indexName(normName(embeddedNodes[id].alias), id);   // shortName del directorio
+    indexName(normName(embeddedNodes[id].alias), id);
   }
   let liveCount = 0;
   for (const id in liveNodes) {
     const n = liveNodes[id];
     if (!n || (n.t && now - n.t > ttlMs)) continue;
-    // gemelo en el directorio: por id directo, o por nombre/alias
     let sid = out[id] ? id : null;
-    if (!sid) {
-      const key = nameIdx.get(normName(n.name)) || nameIdx.get(normName(n.alias));
-      if (key) sid = key;
-    }
+    if (!sid) { const k = nameIdx.get(normName(n.name)) || nameIdx.get(normName(n.alias)); if (k) sid = k; }
     const twin = sid ? out[sid] : null;
-    // fusiona SIEMPRE bajo el nº de nodo vivo; hereda del gemelo lo que falte
     const merged = Object.assign({}, twin || {}, compact(n));
     merged.id = id;
-    if (typeof merged.lat !== "number") { unlocated.push(merged); continue; } // sin GPS ni gemelo → a estimar
-    if (sid && sid !== id) delete out[sid];         // quita el duplicado del directorio
+    if (typeof merged.lat !== "number") { unlocated.push(merged); continue; }
+    if (sid && sid !== id) delete out[sid];
     out[id] = merged;
     liveCount++;
   }
@@ -427,19 +484,12 @@ function activeNodes() {
   return { nodes: out, unlocated, hasLive: liveCount > 0 };
 }
 
-/* ---- 5b. Ubicación estimada de nodos sin GPS ------------------------------
- * Un nodo vivo sin posición, pero que ES escuchado por / escucha a nodos SÍ
- * posicionados, está por fuerza dentro del alcance de radio de ellos: lo
- * ubicamos en el centroide de esos vecinos (con un pequeño offset determinista
- * para no encimarlo) y lo marcamos estimated=true. La ADYACENCIA es real
- * (SNR medido); solo la GEOMETRÍA es aproximada. */
+/* ---- 5b. Ubicación estimada de nodos sin GPS ------------------------------ */
 function hashId(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
 function estimatePos(id, nodes) {
   const pts = [];
-  for (const nb of linkNeighbors(liveLinks[id])) {           // nodos que este escucha
-    const p = nodes[nb.id]; if (p && typeof p.lat === "number" && !p.estimated) pts.push(p);
-  }
-  for (const lid in liveLinks) {                              // nodos que lo escuchan a él
+  for (const nb of linkNeighbors(liveLinks[id])) { const p = nodes[nb.id]; if (p && typeof p.lat === "number" && !p.estimated) pts.push(p); }
+  for (const lid in liveLinks) {
     const ll = liveLinks[lid]; if (!ll) continue;
     const from = String(ll.from != null ? ll.from : lid);
     if (from === id) continue;
@@ -449,47 +499,32 @@ function estimatePos(id, nodes) {
   if (!pts.length) return null;
   let lat = 0, lon = 0; for (const p of pts) { lat += p.lat; lon += p.lon; }
   lat /= pts.length; lon /= pts.length;
-  const off = pts.length === 1 ? 0.018 : 0.006;              // ~2 km si 1 solo ancla, si no ~0.6 km
+  const off = pts.length === 1 ? 0.018 : 0.006;
   const ang = (hashId(id) % 360) * Math.PI / 180;
-  lat += off * Math.cos(ang);
-  lon += off * Math.sin(ang) / Math.cos(lat * Math.PI / 180);
+  lat += off * Math.cos(ang); lon += off * Math.sin(ang) / Math.cos(lat * Math.PI / 180);
   return { lat, lon, refs: pts.length };
 }
 
-/* ---- 6. Grafo de adyacencia ----------------------------------------------- */
-// Normaliza los vecinos de un registro de /links, esquema nuevo (nb objeto con
-// snr/t/src por vecino) o legacy (neighbors array). Dedup por id, más fresco gana.
+/* ---- 6. Grafo ------------------------------------------------------------- */
 function linkNeighbors(l) {
   if (!l) return [];
   const byId = new Map();
-  const put = (id, snr, t, src) => {
-    id = String(id);
-    const prev = byId.get(id);
-    if (!prev || (t || 0) >= (prev.t || 0)) byId.set(id, { id, snr, t, src });
-  };
+  const put = (id, snr, t, src) => { id = String(id); const p = byId.get(id); if (!p || (t || 0) >= (p.t || 0)) byId.set(id, { id, snr, t, src }); };
   if (Array.isArray(l.neighbors)) for (const nb of l.neighbors) put(nb.id, nb.snr, l.t, "ni");
   if (l.nb) for (const k in l.nb) { const v = l.nb[k] || {}; put(k, v.snr, v.t || l.t, v.src || "gw"); }
   return [...byId.values()];
 }
-
-// vivo:   enlaces reales (SNR) + modelo entre pares donde NINGUNO reporta vecinos
-// modelo: todos los pares dentro de rangeKm
 const ekey = (x, y) => (x < y ? x + "|" + y : y + "|" + x);
 function buildGraph(nodes) {
-  const adj = new Map();
-  const edges = [];
-  const etype = new Map();   // ekey -> {live:true,snr} | {model:true}
+  const adj = new Map(), edges = [], etype = new Map();
   const add = (x, y) => { if (!adj.has(x)) adj.set(x, new Set()); adj.get(x).add(y); };
-  const ids = Object.keys(nodes);
-  const reporters = new Set();
+  const ids = Object.keys(nodes), reporters = new Set();
   let realCount = 0;
-
   if (useLive) {
     const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
     const now = Date.now();
     for (const lid in liveLinks) {
-      const l = liveLinks[lid];
-      if (!l) continue;
+      const l = liveLinks[lid]; if (!l) continue;
       const from = String(l.from != null ? l.from : lid);
       if (!nodes[from]) continue;
       const nbs = linkNeighbors(l).filter((nb) => !nb.t || now - nb.t <= ttlMs);
@@ -504,36 +539,27 @@ function buildGraph(nodes) {
       }
     }
   }
-
-  // relleno / modelo por distancia
-  for (let i = 0; i < ids.length; i++) {
-    for (let j = i + 1; j < ids.length; j++) {
-      if (useLive && (reporters.has(ids[i]) || reporters.has(ids[j]))) continue;
-      const a = nodes[ids[i]], b = nodes[ids[j]];
-      if (haversine(a, b) <= rangeKm) {
-        add(ids[i], ids[j]); add(ids[j], ids[i]);
-        edges.push({ a: ids[i], b: ids[j], model: true });
-        const k = ekey(ids[i], ids[j]);
-        if (!etype.has(k)) etype.set(k, { model: true });
-      }
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+    if (useLive && (reporters.has(ids[i]) || reporters.has(ids[j]))) continue;
+    if (haversine(nodes[ids[i]], nodes[ids[j]]) <= rangeKm) {
+      add(ids[i], ids[j]); add(ids[j], ids[i]);
+      edges.push({ a: ids[i], b: ids[j], model: true });
+      const k = ekey(ids[i], ids[j]); if (!etype.has(k)) etype.set(k, { model: true });
     }
   }
   return { adj, edges, etype, realCount };
 }
 
-/* ---- 7. Vecinos de un nodo (para el popup) -------------------------------- */
+/* ---- 7. Popup de nodo ----------------------------------------------------- */
 function neighborsOf(id, nodes) {
   const name = (x) => esc((nodes[x] && nodes[x].name) || x);
   const hears = linkNeighbors(liveLinks[id]);
   const heardBy = [];
   for (const lid in liveLinks) {
-    const ll = liveLinks[lid];
-    if (!ll) continue;
+    const ll = liveLinks[lid]; if (!ll) continue;
     const from = String(ll.from != null ? ll.from : lid);
     if (from === id) continue;
-    for (const nb of linkNeighbors(ll)) {
-      if (nb.id === id) heardBy.push({ id: from, snr: nb.snr, t: nb.t, src: nb.src });
-    }
+    for (const nb of linkNeighbors(ll)) if (nb.id === id) heardBy.push({ id: from, snr: nb.snr, t: nb.t, src: nb.src });
   }
   const one = (x) => {
     const bits = [x.snr != null ? x.snr + " dB" : "s/d"];
@@ -541,33 +567,24 @@ function neighborsOf(id, nodes) {
     bits.push(x.src === "ni" ? "NI" : x.src === "tr" ? "TR" : "gw");
     return `${name(x.id)} <span class="snr">(${bits.join(" · ")})</span>`;
   };
-  const fmt = (arr) => arr.sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 10).map(one).join(", ") +
-    (arr.length > 10 ? ` +${arr.length - 10} más` : "");
+  const fmt = (arr) => arr.sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 10).map(one).join(", ") + (arr.length > 10 ? ` +${arr.length - 10} más` : "");
   let html = "";
   if (hears.length)   html += `<div class="nb"><b>📡 Ve (medido) a ${hears.length}:</b> ${fmt(hears)}</div>`;
   if (heardBy.length) html += `<div class="nb"><b>📡 Lo escuchan ${heardBy.length}:</b> ${fmt(heardBy)}</div>`;
-  if (!html) html = `<div class="nb" style="color:var(--muted)">Sin adyacencia <b>medida</b> aún (ni NeighborInfo ni recepción directa de un gateway).</div>`;
-  // vecinos por cercanía = estimación, NO medición — se marca explícito
-  const n0 = nodes[id];
-  let near = 0;
+  if (!html) html = `<div class="nb" style="color:var(--muted)">Sin adyacencia <b>medida</b> aún.</div>`;
+  const n0 = nodes[id]; let near = 0;
   if (n0) for (const k in nodes) { if (k !== id && haversine(n0, nodes[k]) <= rangeKm) near++; }
-  html += `<div class="nb" style="color:var(--muted)"><b style="color:var(--muted)">≈ Por cercanía (modelo ≤ ${rangeKm} km):</b> ${near} nodos — estimado, no medido</div>`;
+  html += `<div class="nb" style="color:var(--muted)"><b style="color:var(--muted)">≈ Por cercanía (≤ ${rangeKm} km):</b> ${near} nodos — estimado</div>`;
   return html;
 }
-
 function nodePopupHtml(id) {
-  const nodes = lastNodes;                 // set ya renderizado (incluye estimados)
-  const n = nodes[id];
+  const nodes = lastNodes, n = nodes[id];
   if (!n) return "";
-  const tag = n.placeholder ? " <span style='color:#8b93a1'>(ancla)</span>" : "";
-  const vivo = n.estimated
-    ? `<span class="badge" style="background:rgba(181,122,255,.2);color:#b57aff">VIVO · sin GPS</span>`
-    : n.t
-    ? `<span class="badge ok">VIVO · ${fmtAge(n.t)}</span>`
+  const tag = n.placeholder ? " <span style='color:#8b93a1'>(directorio)</span>" : "";
+  const vivo = n.estimated ? `<span class="badge" style="background:rgba(181,122,255,.2);color:var(--est)">VIVO · sin GPS</span>`
+    : n.t ? `<span class="badge ok">VIVO · ${fmtAge(n.t)}</span>`
     : `<span class="badge" style="background:rgba(122,131,145,.2);color:#7a8391">nominal</span>`;
-  const estNote = n.estimated
-    ? `<div class="nb" style="color:#b57aff">📍 Ubicación ESTIMADA a partir de ${n.estRefs} nodo(s) que lo escuchan — no reportó GPS. La geometría es aproximada; el enlace y su SNR son reales.</div>`
-    : "";
+  const estNote = n.estimated ? `<div class="nb" style="color:var(--est)">📍 Ubicación ESTIMADA a partir de ${n.estRefs} nodo(s) que lo escuchan — geometría aproximada; enlace y SNR reales.</div>` : "";
   const extra = [];
   if (n.alt != null) extra.push(`alt ${n.alt} m`);
   if (n.batt != null) extra.push(`bat ${n.batt}%`);
@@ -577,40 +594,26 @@ function nodePopupHtml(id) {
   if (n.hw) extra.push(esc(String(n.hw)));
   return `<div class="pt">${esc(n.name || id)}${tag} ${vivo}</div>` +
     `<div class="pm">id ${esc(id)} · rol ${esc(String(n.role ?? "?"))}<br>${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}` +
-    (extra.length ? `<br>${extra.join(" · ")}` : "") +
-    (isRouter(n) ? "<br>router/elevado" : "") + `</div>` +
-    estNote +
-    neighborsOf(id, nodes) +
-    `<div class="pa">` +
-    `<a href="#" class="sa" onclick="setPointFromNode('${esc(id)}','A');return false">Fijar como A</a>` +
-    `<a href="#" class="sb" onclick="setPointFromNode('${esc(id)}','B');return false">Fijar como B</a>` +
-    `</div>`;
+    (extra.length ? `<br>${extra.join(" · ")}` : "") + (isRouter(n) ? "<br>router/elevado" : "") + `</div>` +
+    estNote + neighborsOf(id, nodes) +
+    `<div class="pa"><a href="#" class="sa" onclick="setPointFromNode('${esc(id)}','A');return false">Fijar como A</a>` +
+    `<a href="#" class="sb" onclick="setPointFromNode('${esc(id)}','B');return false">Fijar como B</a></div>`;
 }
-
 window.setPointFromNode = (id, which) => {
   const n = lastNodes[id]; if (!n) return;
   const pt = { lat: n.lat, lon: n.lon, label: n.name || id };
-  if (which === "A") { pointA = pt; document.getElementById("addr-a").value = n.name || id; }
-  else { pointB = pt; document.getElementById("addr-b").value = n.name || id; }
-  map.closePopup();
-  redraw();
+  if (which === "A") { pointA = pt; $("addr-a").value = n.name || id; } else { pointB = pt; $("addr-b").value = n.name || id; }
+  map.closePopup(); saveState(); redraw();
 };
 
-/* ---- 8. Ruta A→B por NIVELES de realidad ----------------------------------
- * En vivo la ruta prefiere la realidad, en este orden:
- *   1) "medida":  solo enlaces medidos por radio (NI/gw/TR)
- *   2) "vivos":   solo nodos vivos (verdes) — enlaces estimados si hace falta
- *   3) "nominal": cualquier nodo del snapshot (última opción, se etiqueta)
- * En modo Modelo se va directo al nivel 3.                                   */
+/* ---- 8. Ruta A→B por niveles ---------------------------------------------- */
 function bfsRoute(nodes, adj, allowNode) {
   const entries = [], exits = new Map();
   for (const id in nodes) {
     const n = nodes[id];
     if (typeof n.lat !== "number" || !allowNode(n)) continue;
-    const dA = haversine(pointA, n);
-    if (dA <= rangeKm) entries.push({ id, d: dA });
-    const dB = haversine(pointB, n);
-    if (dB <= rangeKm) exits.set(id, dB);
+    const dA = haversine(pointA, n); if (dA <= rangeKm) entries.push({ id, d: dA });
+    const dB = haversine(pointB, n); if (dB <= rangeKm) exits.set(id, dB);
   }
   if (!entries.length || !exits.size) return null;
   entries.sort((x, y) => x.d - y.d);
@@ -621,383 +624,454 @@ function bfsRoute(nodes, adj, allowNode) {
     const u = q.shift();
     if (exits.has(u)) { hit = u; break; }
     if (depth.get(u) >= hopLimit) continue;
-    for (const v of (adj.get(u) || [])) {
-      if (!nodes[v] || !allowNode(nodes[v])) continue;
-      if (!prev.has(v)) { prev.set(v, u); depth.set(v, depth.get(u) + 1); q.push(v); }
-    }
+    for (const v of (adj.get(u) || [])) { if (!nodes[v] || !allowNode(nodes[v])) continue; if (!prev.has(v)) { prev.set(v, u); depth.set(v, depth.get(u) + 1); q.push(v); } }
   }
   if (!hit) return null;
-  const path = [];
-  for (let u = hit; u != null; u = prev.get(u)) path.unshift(u);
+  const path = []; for (let u = hit; u != null; u = prev.get(u)) path.unshift(u);
   return { path, entryDist: haversine(pointA, nodes[path[0]]), exitDist: exits.get(hit) };
 }
-
 function computeRoute(nodes, adj, etype) {
   if (!pointA || !pointB) return null;
   const isAlive = (n) => !!n.t || n.role === "repeater";
   let r;
   if (useLive) {
-    // nivel 1: solo aristas medidas
     const adjReal = new Map();
-    for (const [k, t] of etype) {
-      if (!t.live) continue;
-      const [a, b] = k.split("|");
-      if (!adjReal.has(a)) adjReal.set(a, new Set());
-      if (!adjReal.has(b)) adjReal.set(b, new Set());
-      adjReal.get(a).add(b); adjReal.get(b).add(a);
-    }
-    r = bfsRoute(nodes, adjReal, () => true);
-    if (r) return Object.assign(r, { tier: "medida" });
-    // nivel 2: solo nodos vivos (enlaces estimados permitidos)
-    r = bfsRoute(nodes, adj, isAlive);
-    if (r) return Object.assign(r, { tier: "vivos" });
+    for (const [k, t] of etype) { if (!t.live) continue; const [a, b] = k.split("|");
+      if (!adjReal.has(a)) adjReal.set(a, new Set()); if (!adjReal.has(b)) adjReal.set(b, new Set());
+      adjReal.get(a).add(b); adjReal.get(b).add(a); }
+    r = bfsRoute(nodes, adjReal, () => true); if (r) return Object.assign(r, { tier: "medida" });
+    r = bfsRoute(nodes, adj, isAlive); if (r) return Object.assign(r, { tier: "vivos" });
   }
-  // nivel 3: todo el snapshot
-  r = bfsRoute(nodes, adj, () => true);
-  if (r) return Object.assign(r, { tier: "nominal" });
+  r = bfsRoute(nodes, adj, () => true); if (r) return Object.assign(r, { tier: "nominal" });
   const near = (p) => Object.values(nodes).some((n) => typeof n.lat === "number" && haversine(p, n) <= rangeKm);
   if (!near(pointA)) return { fail: "A" };
   if (!near(pointB)) return { fail: "B" };
   return { fail: "path" };
 }
 
-/* ---- 9. Render ------------------------------------------------------------ */
+/* ---- 9. Filtros de visualización ------------------------------------------ */
+function visiblePredicate(measuredIds) {
+  return (n) => {
+    if (filters.live && !(n.t || n.estimated || n.role === "repeater")) return false;
+    if (filters.routers && !isRouter(n)) return false;
+    if (filters.hideDir && n.placeholder && !n.t && !n.estimated) return false;
+    if (filters.measured && !measuredIds.has(n.id)) return false;
+    return true;
+  };
+}
+
+/* ---- 10. Render ----------------------------------------------------------- */
 function pinIcon(letter, color) {
-  return L.divIcon({
-    className: "",
-    html: `<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);` +
-      `background:${color};border:2px solid #0d0f12;box-shadow:0 0 8px ${color};display:flex;align-items:center;justify-content:center">` +
-      `<span style="transform:rotate(45deg);font:700 12px 'JetBrains Mono',monospace;color:#0d0f12">${letter}</span></div>`,
-    iconSize: [26, 26], iconAnchor: [13, 26],
+  return L.divIcon({ className: "",
+    html: `<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2px solid #0d0f12;box-shadow:0 0 8px ${color};display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font:700 12px 'JetBrains Mono',monospace;color:#0d0f12">${letter}</span></div>`,
+    iconSize: [26, 26], iconAnchor: [13, 26] });
+}
+function draggablePin(pt, letter, color, which) {
+  const m = L.marker([pt.lat, pt.lon], { icon: pinIcon(letter, color), draggable: true, zIndexOffset: 1000 });
+  m.on("dragend", (e) => {
+    const ll = e.target.getLatLng();
+    const p = { lat: ll.lat, lon: ll.lng, label: `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}` };
+    if (which === "A") { pointA = p; $("addr-a").value = p.label; } else { pointB = p; $("addr-b").value = p.label; }
+    saveState(); redraw();
   });
+  m.addTo(pinLayer).bindPopup(`<div class="pt">${letter}</div><div class="pm">${esc(pt.label || "")}</div>`);
 }
 
 function redraw() {
   linkLayer.clearLayers(); nodeLayer.clearLayers(); pathLayer.clearLayers(); pinLayer.clearLayers();
+  markerById = {};
   const { nodes, unlocated, hasLive } = activeNodes();
 
-  // ubicar por vecinos los nodos vivos sin GPS (marcados como estimados)
   let estCount = 0;
-  if (showEstimated && useLive) {
-    for (const u of unlocated) {
-      const est = estimatePos(u.id, nodes);
-      if (est) { nodes[u.id] = Object.assign({}, u, { lat: est.lat, lon: est.lon, estimated: true, estRefs: est.refs }); estCount++; }
-    }
+  if (showEstimated && useLive) for (const u of unlocated) {
+    const est = estimatePos(u.id, nodes);
+    if (est) { nodes[u.id] = Object.assign({}, u, { lat: est.lat, lon: est.lon, estimated: true, estRefs: est.refs }); estCount++; }
   }
   lastNodes = nodes;
 
-  document.getElementById("btn-live").disabled = !hasLive;
+  $("btn-live").disabled = !hasLive;
   if (!hasLive && useLive) useLive = false;
   syncToggle();
 
   const { adj, edges, etype, realCount } = buildGraph(nodes);
+  const measuredIds = new Set();
+  for (const e of edges) if (e.live) { measuredIds.add(e.a); measuredIds.add(e.b); }
+  const visible = visiblePredicate(measuredIds);
+  const isVis = (id) => nodes[id] && visible(nodes[id]);
 
-  // enlaces (en vivo el relleno modelado solo se dibuja si el usuario lo pide;
-  // el grafo BFS siempre usa todos). Cap de dibujo para no ahogar el canvas.
+  // enlaces
   let drawn = 0;
   for (const e of edges) {
     if (e.model && useLive && !showModelFill) continue;
     if (e.model && drawn >= MAX_DRAW_EDGES) continue;
     const a = nodes[e.a], b = nodes[e.b];
-    if (!a || !b) continue;
-    const estGeom = a.estimated || b.estimated;   // enlace real pero con extremo de posición estimada
+    if (!a || !b || !isVis(e.a) || !isVis(e.b)) continue;
+    const focus = selectedId && focusDim;
+    const incident = !focus || e.a === selectedId || e.b === selectedId;
+    const estGeom = a.estimated || b.estimated;
+    let opa = e.live ? (estGeom ? 0.6 : 0.9) : 0.32;
+    if (focus && !incident) opa *= 0.14;
     L.polyline([[a.lat, a.lon], [b.lat, b.lon]], e.live
-      ? { color: snrColor(e.snr ?? -20), weight: 2.2, opacity: estGeom ? 0.6 : 0.9, dashArray: estGeom ? "4,6" : null }
-      : { color: "#3a4250", weight: 1, opacity: 0.35, dashArray: "3,5" }
-    ).addTo(linkLayer);
+      ? { color: snrColor(e.snr ?? -20), weight: incident ? 2.4 : 1.6, opacity: opa, dashArray: estGeom ? "4,6" : null }
+      : { color: "#3a4250", weight: 1, opacity: opa, dashArray: "3,5" }).addTo(linkLayer);
     drawn++;
   }
 
-  // nodos: VERDE = vivo (reportó dentro del TTL) · PLOMO = nominal (solo
-  // snapshot, sin señal reciente) · borde AMARILLO = router/elevado ·
-  // NARANJO = repetidor hipotético
+  // nodos
+  const markers = [];
+  const liveIdsNow = new Set();
   for (const id in nodes) {
     const n = nodes[id];
-    if (typeof n.lat !== "number") continue;
-    const alive = !!n.t;
-    const router = isRouter(n);
+    if (typeof n.lat !== "number" || !visible(n)) continue;
+    if (n.t && !n.estimated) liveIdsNow.add(id);
+    const sel = id === selectedId;
+    let m;
     if (n.estimated) {
-      // posición estimada: aro violeta punteado, hueco → nunca se confunde con real
-      L.circleMarker([n.lat, n.lon], {
-        radius: 6, color: "#b57aff", weight: 2, dashArray: "2,3",
-        fillColor: "#b57aff", fillOpacity: 0.25,
-      }).addTo(nodeLayer).bindPopup(() => nodePopupHtml(id));
-      continue;
-    }
-    let fill = alive ? "#3ad07a" : "#7a8391";
-    if (n.role === "repeater") fill = "#ff7a1a";
-    const m = L.circleMarker([n.lat, n.lon], {
-      radius: router ? 7 : 5,
-      color: router ? "#ffd23f" : "#0d0f12",
-      weight: router ? 2 : 1,
-      fillColor: fill,
-      fillOpacity: alive ? 0.95 : 0.55,
-    }).addTo(nodeLayer);
-    m.bindPopup(() => nodePopupHtml(id));
-  }
-
-  // pines A/B
-  if (pointA) L.marker([pointA.lat, pointA.lon], { icon: pinIcon("A", "#5b8cff") })
-    .addTo(pinLayer).bindPopup(`<div class="pt">A</div><div class="pm">${esc(pointA.label || "")}</div>`);
-  if (pointB) L.marker([pointB.lat, pointB.lon], { icon: pinIcon("B", "#ff5b8c") })
-    .addTo(pinLayer).bindPopup(`<div class="pt">B</div><div class="pm">${esc(pointB.label || "")}</div>`);
-
-  // ruta
-  let pathTxt = "Fija dirección A y B (busca 🔍 o clic 📍) para trazar la ruta.";
-  const route = computeRoute(nodes, adj, etype);
-  if (route) {
-    if (route.fail === "A" || route.fail === "B") {
-      pathTxt = `<span class="badge no">sin acceso</span> Ningún nodo a menos de ${rangeKm} km del punto ` +
-        `${route.fail}. Sube el alcance por salto o agrega un repetidor hipotético.`;
-    } else if (route.fail === "path") {
-      pathTxt = `<span class="badge no">sin ruta</span> No hay camino ≤ ${hopLimit} saltos entre los nodos ` +
-        `cercanos a A y B (${useLive ? "malla viva + relleno" : rangeKm + " km/salto"}).`;
+      m = L.circleMarker([n.lat, n.lon], { radius: sel ? 8 : 6, color: "#b57aff", weight: 2, dashArray: "2,3", fillColor: "#b57aff", fillOpacity: 0.25 });
     } else {
-      const { path, entryDist, exitDist } = route;
-      // dibujo: A --acceso-- nodo1 → ... → nodoN --salida-- B
-      // cada salto se dibuja según su tipo: sólido = enlace real medido,
-      // punteado = estimado por modelo de distancia
-      L.polyline([[pointA.lat, pointA.lon], [nodes[path[0]].lat, nodes[path[0]].lon]],
-        { color: "#5b8cff", weight: 2, dashArray: "5,6", opacity: 0.9 }).addTo(pathLayer);
-      let realHops = 0;
-      for (let i = 0; i < path.length - 1; i++) {
-        const t = etype.get(ekey(path[i], path[i + 1])) || {};
-        if (t.live) realHops++;
-        L.polyline([[nodes[path[i]].lat, nodes[path[i]].lon], [nodes[path[i + 1]].lat, nodes[path[i + 1]].lon]],
-          { color: "#ff7a1a", weight: 3.5, opacity: 0.95, dashArray: t.live ? null : "7,8" }).addTo(pathLayer);
-      }
-      path.forEach((id) => L.circleMarker([nodes[id].lat, nodes[id].lon],
-        { radius: 6, color: nodes[id].t ? "#3ad07a" : "#7a8391", weight: 2.5, fillOpacity: 0 }).addTo(pathLayer));
-      L.polyline([[nodes[path[path.length - 1]].lat, nodes[path[path.length - 1]].lon], [pointB.lat, pointB.lon]],
-        { color: "#ff5b8c", weight: 2, dashArray: "5,6", opacity: 0.9 }).addTo(pathLayer);
-      const hops = path.length - 1;
-      const dot = (id) => `<span style="color:${nodes[id].t ? "#3ad07a" : "#7a8391"}">●</span>`;
-      const names = path.map((id) => `${dot(id)}<b>${esc(nodes[id].name || id)}</b>`).join(" → ");
-      const tierBadge =
-        route.tier === "medida" ? `<span class="badge ok">ruta 100% medida</span>` :
-        route.tier === "vivos" ? `<span class="badge" style="background:rgba(58,208,122,.15);color:#3ad07a">solo nodos vivos · enlaces estimados</span>` :
-        `<span class="badge" style="background:rgba(122,131,145,.2);color:#8b93a1">incluye nodos nominales (sin señal)</span>`;
-      const mix = hops === 0 ? "" :
-        useLive ? ` · <span class="mono">${realHops} medido${realHops === 1 ? "" : "s"} / ${hops - realHops} estimado${hops - realHops === 1 ? "" : "s"}</span>` :
-        ` · <span class="mono">todos estimados (modelo)</span>`;
-      pathTxt = `A → ${names} → B<br>` +
-        `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ${tierBadge}${mix}<br>` +
-        `acceso ${fmtKm(entryDist)} · salida ${fmtKm(exitDist)}`;
+      const alive = !!n.t, router = isRouter(n);
+      let fill = alive ? "#3ad07a" : "#7a8391";
+      if (n.role === "repeater") fill = "#ff7a1a";
+      m = L.circleMarker([n.lat, n.lon], {
+        radius: (router ? 7 : 5) + (sel ? 3 : 0),
+        color: sel ? "#fff" : (router ? "#ffd23f" : "#0d0f12"),
+        weight: sel ? 3 : (router ? 2 : 1), fillColor: fill, fillOpacity: alive ? 0.95 : 0.55 });
     }
+    m._nodeId = id; m._live = !!n.t && !n.estimated;
+    m.bindPopup(() => nodePopupHtml(id));
+    m.on("click", () => { selectedId = id; redraw(); });
+    if (showLabels && (n.name || n.alias)) m.bindTooltip(esc(String(n.alias || n.name)), { permanent: true, direction: "right", className: "nlabel", offset: [6, 0] });
+    markers.push(m); markerById[id] = m;
   }
-  document.getElementById("path-out").innerHTML = pathTxt;
+  if (nodeLayer.addLayers) nodeLayer.addLayers(markers); else markers.forEach((m) => m.addTo(nodeLayer));
+
+  // pulso para nodos vivos nuevos
+  if (useLive && prevLiveIds.size) for (const id of liveIdsNow) if (!prevLiveIds.has(id) && nodes[id]) {
+    L.marker([nodes[id].lat, nodes[id].lon], { icon: L.divIcon({ className: "", html: '<div class="ping"></div>', iconSize: [14, 14] }), interactive: false }).addTo(pulseLayer);
+  }
+  prevLiveIds = liveIdsNow;
+  setTimeout(() => pulseLayer.clearLayers(), 1800);
+
+  // pines A/B (arrastrables)
+  if (pointA) draggablePin(pointA, "A", "#5b8cff", "A");
+  if (pointB) draggablePin(pointB, "B", "#ff5b8c", "B");
+
+  renderRoute(nodes, adj, etype);
 
   // stats
   const liveCount = Object.values(nodes).filter((n) => n.t).length;
-  document.getElementById("s-nodes").textContent = Object.keys(nodes).length;
-  document.getElementById("s-links").textContent = useLive ? realCount : edges.length;
-  document.getElementById("s-links-l").textContent = useLive ? "Enlaces reales" : "Enlaces (modelo)";
-  document.getElementById("s-live").textContent = liveCount;
-  document.getElementById("s-src").textContent = hasLive ? "RTDB" : "local";
-  document.getElementById("s-src").style.fontSize = "13px";
-  document.getElementById("est-count").textContent = estCount ? `(${estCount} ubicados)` : "";
+  const visCount = Object.values(nodes).filter((n) => typeof n.lat === "number" && visible(n)).length;
+  $("s-nodes").textContent = visCount;
+  $("s-links").textContent = useLive ? realCount : edges.length;
+  $("s-links-l").textContent = useLive ? "Enlaces reales" : "Enlaces (modelo)";
+  $("s-live").textContent = liveCount;
+  $("s-src").textContent = hasLive ? "RTDB" : "local"; $("s-src").style.fontSize = "13px";
+  $("est-count").textContent = estCount ? `(${estCount} ubicados)` : "";
+  updateStatus(hasLive);
 
-  // status pill
-  const st = document.getElementById("status");
-  const stt = document.getElementById("status-txt");
-  if (hasLive && useLive) { st.className = "status live"; stt.textContent = "Malla en vivo · vecinos reales + relleno"; }
-  else if (hasLive) { st.className = "status model"; stt.textContent = "Datos vivos · vista modelo"; }
-  else { st.className = "status model"; stt.textContent = FIREBASE_READY ? "Sin datos vivos · modelo" : "Firebase no configurado · modelo"; }
+  // reabrir popup si estaba abierto
+  if (openPopupId && markerById[openPopupId] && !map._popup) {
+    try { markerById[openPopupId].openPopup(); } catch (e) {}
+  }
 }
 
-/* ---- 10. Toggle vivo/modelo ----------------------------------------------- */
+function renderRoute(nodes, adj, etype) {
+  const sum = $("route-sum"), hopsEl = $("route-hops");
+  hopsEl.innerHTML = "";
+  const route = computeRoute(nodes, adj, etype);
+  if (!route) { sum.innerHTML = "Fija A y B para trazar la ruta."; return; }
+  if (route.fail === "A" || route.fail === "B") {
+    sum.innerHTML = `<span class="badge no">sin acceso</span> Ningún nodo a ≤ ${rangeKm} km del punto ${route.fail}. Sube el alcance o agrega un repetidor.`; return;
+  }
+  if (route.fail === "path") {
+    sum.innerHTML = `<span class="badge no">sin ruta</span> No hay camino ≤ ${hopLimit} saltos entre los nodos cercanos a A y B.`; return;
+  }
+  const { path, entryDist, exitDist } = route;
+  L.polyline([[pointA.lat, pointA.lon], [nodes[path[0]].lat, nodes[path[0]].lon]], { color: "#5b8cff", weight: 2, dashArray: "5,6", opacity: 0.9 }).addTo(pathLayer);
+  let realHops = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    const t = etype.get(ekey(path[i], path[i + 1])) || {};
+    if (t.live) realHops++;
+    L.polyline([[nodes[path[i]].lat, nodes[path[i]].lon], [nodes[path[i + 1]].lat, nodes[path[i + 1]].lon]], { color: "#ff7a1a", weight: 3.5, opacity: 0.95, dashArray: t.live ? null : "7,8" }).addTo(pathLayer);
+  }
+  path.forEach((id) => L.circleMarker([nodes[id].lat, nodes[id].lon], { radius: 6, color: nodes[id].t ? "#3ad07a" : "#7a8391", weight: 2.5, fillOpacity: 0 }).addTo(pathLayer));
+  L.polyline([[nodes[path[path.length - 1]].lat, nodes[path[path.length - 1]].lon], [pointB.lat, pointB.lon]], { color: "#ff5b8c", weight: 2, dashArray: "5,6", opacity: 0.9 }).addTo(pathLayer);
+
+  const hops = path.length - 1;
+  const tierBadge = route.tier === "medida" ? `<span class="badge ok">ruta 100% medida</span>`
+    : route.tier === "vivos" ? `<span class="badge" style="background:rgba(58,208,122,.15);color:#3ad07a">solo nodos vivos</span>`
+    : `<span class="badge" style="background:rgba(122,131,145,.2);color:#8b93a1">incluye nominales</span>`;
+  const mix = hops === 0 ? "" : useLive ? ` · ${realHops} medido${realHops === 1 ? "" : "s"} / ${hops - realHops} estimado${hops - realHops === 1 ? "" : "s"}` : " · modelo";
+  sum.innerHTML = `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ${tierBadge}<br><span class="mono" style="color:var(--muted)">acceso ${fmtKm(entryDist)} · salida ${fmtKm(exitDist)}${mix}</span>`;
+
+  // tarjetas por salto
+  hopsEl.insertAdjacentHTML("beforeend", `<div class="hop ep"><span class="dot" style="background:#5b8cff"></span><span class="nm">A · ${esc(pointA.label || "")}</span><span class="d">${fmtKm(entryDist)}</span></div>`);
+  let cum = entryDist;
+  for (let i = 0; i < path.length; i++) {
+    const id = path[i], n = nodes[id];
+    let dtxt = "";
+    if (i > 0) { const seg = haversine(nodes[path[i - 1]], n); cum += seg; const t = etype.get(ekey(path[i - 1], id)) || {}; dtxt = `${fmtKm(seg)} ${t.live ? "medido" : "≈"}`; }
+    const col = n.estimated ? "#b57aff" : n.t ? "#3ad07a" : "#7a8391";
+    hopsEl.insertAdjacentHTML("beforeend", `<div class="hop"><span class="dot" style="background:${col}"></span><span class="nm">${esc(n.name || id)}</span><span class="d">${dtxt}</span></div>`);
+  }
+  hopsEl.insertAdjacentHTML("beforeend", `<div class="hop ep"><span class="dot" style="background:#ff5b8c"></span><span class="nm">B · ${esc(pointB.label || "")}</span><span class="d">${fmtKm(exitDist)}</span></div>`);
+}
+
+/* ---- 11. Estado / status -------------------------------------------------- */
 function syncToggle() {
-  document.getElementById("btn-live").classList.toggle("active", useLive);
-  document.getElementById("btn-model").classList.toggle("active", !useLive);
-  document.getElementById("fill-row").style.display = useLive ? "flex" : "none";
-  document.getElementById("est-row").style.display = useLive ? "flex" : "none";
+  $("btn-live").classList.toggle("active", useLive);
+  $("btn-model").classList.toggle("active", !useLive);
+  $("fill-row").style.display = useLive ? "flex" : "none";
+  $("est-row").style.display = useLive ? "flex" : "none";
+}
+function updateStatus(hasLive) {
+  const st = $("status"), stt = $("status-txt");
+  const upd = lastUpdate ? ` · act. ${fmtAge(lastUpdate)}` : "";
+  if (hasLive && useLive) { st.className = "status-ov live"; stt.textContent = "En vivo" + upd; }
+  else if (hasLive) { st.className = "status-ov model"; stt.textContent = "Datos vivos · modelo" + upd; }
+  else { st.className = "status-ov model"; stt.textContent = FIREBASE_READY ? "Sin datos vivos · modelo" : "Firebase no configurado"; }
+}
+setInterval(() => updateStatus(Object.keys(liveNodes).length > 0), 5000);
+
+/* ---- 12. Búsqueda de nodos ------------------------------------------------ */
+let searchSel = -1;
+function runSearch(q) {
+  const box = $("results");
+  q = q.trim().toLowerCase();
+  if (!q) { box.classList.remove("open"); box.innerHTML = ""; return; }
+  const matches = [];
+  for (const id in lastNodes) {
+    const n = lastNodes[id];
+    if (typeof n.lat !== "number") continue;
+    const nm = String(n.name || id), al = String(n.alias || "");
+    if (nm.toLowerCase().includes(q) || al.toLowerCase().includes(q) || id.includes(q)) matches.push(n);
+    if (matches.length >= 12) break;
+  }
+  searchSel = -1;
+  box.innerHTML = matches.map((n, i) => {
+    const col = n.estimated ? "#b57aff" : n.t ? "#3ad07a" : "#7a8391";
+    return `<div class="r" data-id="${esc(n.id)}" data-i="${i}"><span class="d" style="background:${col}"></span>${esc(n.name || n.id)}<span class="sn">${esc(String(n.alias || ""))}</span></div>`;
+  }).join("") || `<div class="r" style="color:var(--muted)">sin resultados</div>`;
+  box.classList.add("open");
+}
+function focusNode(id) {
+  const n = lastNodes[id]; if (!n) return;
+  selectedId = id;
+  $("results").classList.remove("open"); $("search").value = n.name || id;
+  const go = () => { const m = markerById[id]; if (m) m.openPopup(); };
+  map.setView([n.lat, n.lon], Math.max(map.getZoom(), 14));
+  redraw();
+  if (clusterOK && nodeLayer.zoomToShowLayer && markerById[id]) { try { nodeLayer.zoomToShowLayer(markerById[id], go); return; } catch (e) {} }
+  setTimeout(go, 250);
 }
 
-/* ---- 11. Geocodificación (Nominatim / OpenStreetMap) ---------------------- */
+/* ---- 13. Geocodificación -------------------------------------------------- */
 async function geocode(q) {
-  const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cl&q=" +
-    encodeURIComponent(q);
+  const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cl&q=" + encodeURIComponent(q);
   const r = await fetch(url, { headers: { "Accept-Language": "es" } });
   if (!r.ok) throw new Error("HTTP " + r.status);
   const j = await r.json();
-  if (!j.length) return null;
-  return { lat: +j[0].lat, lon: +j[0].lon, label: j[0].display_name };
+  return j.length ? { lat: +j[0].lat, lon: +j[0].lon, label: j[0].display_name } : null;
 }
-function geoMsg(txt) { document.getElementById("geo-msg").textContent = txt || ""; }
-
+function geoMsg(t) { $("geo-msg").textContent = t || ""; }
 async function doGeocode(which) {
-  const input = document.getElementById(which === "A" ? "addr-a" : "addr-b");
-  const q = input.value.trim();
+  const input = $(which === "A" ? "addr-a" : "addr-b"), q = input.value.trim();
   if (!q) { geoMsg("Escribe una dirección o lugar."); return; }
-  geoMsg(`Buscando ${which}: "${q}"…`);
+  geoMsg(`Buscando ${which}…`);
   try {
     const pt = await geocode(q);
-    if (!pt) { geoMsg(`No se encontró "${q}" en Chile. Prueba agregando comuna/ciudad.`); return; }
+    if (!pt) { geoMsg(`No se encontró "${q}" en Chile.`); return; }
     if (which === "A") pointA = pt; else pointB = pt;
-    geoMsg("");
-    fitPoints();
-    redraw();
-  } catch (e) { geoMsg("Error geocodificando: " + e.message); }
+    geoMsg(""); fitPoints(); saveState(); redraw();
+  } catch (e) { geoMsg("Error: " + e.message); }
 }
 function fitPoints() {
   const pts = [pointA, pointB].filter(Boolean).map((p) => [p.lat, p.lon]);
-  if (pts.length === 2) map.fitBounds(pts, { padding: [60, 60] });
+  if (pts.length === 2) map.fitBounds(pts, { padding: [70, 70] });
   else if (pts.length === 1) map.setView(pts[0], Math.max(map.getZoom(), 11));
 }
 
-/* ---- 11b. Diagnóstico del bridge (meta/stats) ------------------------------ */
+/* ---- 14. Diagnóstico ------------------------------------------------------ */
 function updateDiag() {
-  const el = document.getElementById("diag");
-  if (!liveMeta) { el.textContent = ""; return; }
-  const types = Object.entries(liveMeta.types || {})
-    .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
-  const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
-  const f = liveMeta.fields || {};
+  const el = $("diag");
+  if (!liveMeta) { el.textContent = "Esperando datos del bridge…"; return; }
+  const types = Object.entries(liveMeta.types || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
+  const age = liveMeta.t ? fmtAge(liveMeta.t) : "?", f = liveMeta.fields || {};
   let tmix = "";
   if (liveMeta.topics) {
     const agg = { json: 0, e: 0, map: 0, otro: 0 };
-    for (const k in liveMeta.topics) {
-      const segs = k.split(/[|/]/);   // el bridge guarda topics con "|" (RTDB prohíbe "/")
-      if (segs.includes("json")) agg.json += liveMeta.topics[k];
-      else if (segs.includes("e")) agg.e += liveMeta.topics[k];
-      else if (segs.includes("map")) agg.map += liveMeta.topics[k];
-      else agg.otro += liveMeta.topics[k];
-    }
-    tmix = ` · topics[json:${agg.json} cifrado:${agg.e} map:${agg.map} otro:${agg.otro}]`;
+    for (const k in liveMeta.topics) { const s = k.split(/[|/]/);
+      if (s.includes("json")) agg.json += liveMeta.topics[k]; else if (s.includes("e")) agg.e += liveMeta.topics[k];
+      else if (s.includes("map")) agg.map += liveMeta.topics[k]; else agg.otro += liveMeta.topics[k]; }
+    tmix = ` · topics[json:${agg.json} cifrado:${agg.e} map:${agg.map}]`;
   }
   const enc = f.enc ? ` · descifrados:${f.encOk || 0}/${f.enc}` : "";
-  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links: ${liveMeta.gwLinks || 0}${enc}` +
+  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links:${liveMeta.gwLinks || 0}${enc}` +
     (f.sender != null ? ` · sobres[sender:${f.sender} hops_away:${f.hops_away} directos:${f.direct}]` : "") + tmix;
 }
+function banner(msg) { const b = $("banner"); if (!msg) { b.style.display = "none"; return; } b.textContent = msg; b.style.display = "block"; }
 
-/* ---- 12. Banner ------------------------------------------------------------ */
-function banner(msg) {
-  const b = document.getElementById("banner");
-  if (!msg) { b.style.display = "none"; return; }
-  b.textContent = msg; b.style.display = "block";
+/* ---- 15. Persistencia + deep-links ---------------------------------------- */
+const LS = "meshcheck.state";
+function saveState() {
+  try {
+    const c = map.getCenter();
+    localStorage.setItem(LS, JSON.stringify({
+      useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels,
+      filters, basemapIdx, view: { c: [c.lat, c.lng], z: map.getZoom() },
+      a: pointA, b: pointB,
+    }));
+  } catch (e) {}
+}
+function loadState() {
+  let s; try { s = JSON.parse(localStorage.getItem(LS)); } catch (e) {}
+  if (!s) return null;
+  if (typeof s.useLive === "boolean") useLive = s.useLive;
+  if (s.rangeKm) rangeKm = s.rangeKm;
+  if (s.ttlHours != null) ttlHours = s.ttlHours;
+  if (s.hopLimit) hopLimit = s.hopLimit;
+  showModelFill = !!s.showModelFill; showEstimated = s.showEstimated !== false;
+  focusDim = s.focusDim !== false; showLabels = !!s.showLabels;
+  if (s.filters) filters = Object.assign(filters, s.filters);
+  if (s.basemapIdx) setBasemap(s.basemapIdx);
+  if (s.a) pointA = s.a; if (s.b) pointB = s.b;
+  return s;
+}
+function applyDeepLinks() {
+  const p = new URLSearchParams(location.search);
+  const parseLL = (v) => { const m = String(v || "").split(","); const la = +m[0], lo = +m[1]; return isFinite(la) && isFinite(lo) ? { lat: la, lon: lo, label: `${la.toFixed(4)}, ${lo.toFixed(4)}` } : null; };
+  if (p.get("a")) pointA = parseLL(p.get("a")) || pointA;
+  if (p.get("b")) pointB = parseLL(p.get("b")) || pointB;
+  if (p.get("a") || p.get("b")) { if (pointA) $("addr-a").value = pointA.label; if (pointB) $("addr-b").value = pointB.label; fitPoints(); }
+  const node = p.get("node");
+  if (node) setTimeout(() => focusNode(node), 800);
+}
+function syncControls() {
+  $("range").value = rangeKm; $("range-val").textContent = rangeKm + " km";
+  $("ttl").value = String(ttlHours); $("hoplimit").value = hopLimit;
+  $("show-fill").checked = showModelFill; $("show-est").checked = showEstimated;
+  $("show-focus").checked = focusDim; $("show-labels").checked = showLabels;
+  if (pointA) $("addr-a").value = pointA.label || ""; if (pointB) $("addr-b").value = pointB.label || "";
+  document.querySelectorAll("#chips .chip").forEach((c) => c.classList.toggle("active", filters[c.dataset.f]));
+  syncToggle();
+}
+function shareUrl() {
+  const c = map.getCenter(), p = new URLSearchParams();
+  p.set("c", `${c.lat.toFixed(5)},${c.lng.toFixed(5)}`); p.set("z", map.getZoom());
+  if (pointA) p.set("a", `${pointA.lat.toFixed(5)},${pointA.lon.toFixed(5)}`);
+  if (pointB) p.set("b", `${pointB.lat.toFixed(5)},${pointB.lon.toFixed(5)}`);
+  if (selectedId) p.set("node", selectedId);
+  return location.origin + location.pathname + "?" + p.toString();
 }
 
-/* ---- 13. Wire UI ----------------------------------------------------------- */
-document.getElementById("mode-toggle").addEventListener("click", (e) => {
-  const btn = e.target.closest("button"); if (!btn || btn.disabled) return;
-  useLive = btn.dataset.mode === "live";
-  syncToggle(); redraw();
+/* ---- 16. Wire UI ---------------------------------------------------------- */
+// tabs
+document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs button").forEach((x) => x.classList.toggle("active", x === b));
+  document.querySelectorAll(".pane").forEach((p) => p.classList.toggle("active", p.dataset.pane === b.dataset.tab));
+}));
+// modo, controles
+$("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b || b.disabled) return; useLive = b.dataset.mode === "live"; saveState(); syncToggle(); redraw(); });
+$("range").addEventListener("input", (e) => { rangeKm = +e.target.value; $("range-val").textContent = rangeKm + " km"; redraw(); });
+$("range").addEventListener("change", saveState);
+$("hoplimit").addEventListener("input", (e) => { hopLimit = +e.target.value || 7; saveState(); redraw(); });
+$("ttl").addEventListener("change", (e) => { ttlHours = +e.target.value; saveState(); redraw(); });
+$("show-fill").addEventListener("change", (e) => { showModelFill = e.target.checked; saveState(); redraw(); });
+$("show-est").addEventListener("change", (e) => { showEstimated = e.target.checked; saveState(); redraw(); });
+$("show-focus").addEventListener("change", (e) => { focusDim = e.target.checked; saveState(); redraw(); });
+$("show-labels").addEventListener("change", (e) => { showLabels = e.target.checked; saveState(); redraw(); });
+// ruta
+$("geo-a").addEventListener("click", () => doGeocode("A"));
+$("geo-b").addEventListener("click", () => doGeocode("B"));
+$("addr-a").addEventListener("keydown", (e) => { if (e.key === "Enter") doGeocode("A"); });
+$("addr-b").addEventListener("keydown", (e) => { if (e.key === "Enter") doGeocode("B"); });
+$("btn-swap").addEventListener("click", () => { const t = pointA; pointA = pointB; pointB = t;
+  const va = $("addr-a").value; $("addr-a").value = $("addr-b").value; $("addr-b").value = va; saveState(); redraw(); });
+$("btn-clear-ab").addEventListener("click", () => { pointA = pointB = null; $("addr-a").value = ""; $("addr-b").value = ""; geoMsg(""); saveState(); redraw(); });
+// pines armar
+function syncPinButtons() { $("pin-a").classList.toggle("armed", armPoint === "A"); $("pin-b").classList.toggle("armed", armPoint === "B"); banner(armPoint ? `Haz clic en el mapa para fijar ${armPoint}` : ""); }
+$("pin-a").addEventListener("click", () => { armPoint = armPoint === "A" ? null : "A"; repeaterArmed = false; syncPinButtons(); });
+$("pin-b").addEventListener("click", () => { armPoint = armPoint === "B" ? null : "B"; repeaterArmed = false; syncPinButtons(); });
+// repetidor
+$("btn-repeater").addEventListener("click", (e) => { repeaterArmed = !repeaterArmed; armPoint = null; syncPinButtons(); e.target.classList.toggle("armed", repeaterArmed); e.target.textContent = repeaterArmed ? "Haz clic en el mapa…" : "＋ Repetidor hipotético"; });
+$("btn-clear-rep").addEventListener("click", () => { hypRepeaters = []; redraw(); });
+// filtros (chips)
+document.querySelectorAll("#chips .chip").forEach((c) => c.addEventListener("click", () => { filters[c.dataset.f] = !filters[c.dataset.f]; c.classList.toggle("active", filters[c.dataset.f]); saveState(); redraw(); }));
+// búsqueda
+$("search").addEventListener("input", (e) => runSearch(e.target.value));
+$("search").addEventListener("keydown", (e) => {
+  const items = [...$("results").querySelectorAll(".r[data-id]")];
+  if (e.key === "ArrowDown") { searchSel = Math.min(searchSel + 1, items.length - 1); }
+  else if (e.key === "ArrowUp") { searchSel = Math.max(searchSel - 1, 0); }
+  else if (e.key === "Enter") { const it = items[searchSel] || items[0]; if (it) focusNode(it.dataset.id); return; }
+  else return;
+  items.forEach((it, i) => it.classList.toggle("sel", i === searchSel));
+  e.preventDefault();
 });
-document.getElementById("range").addEventListener("input", (e) => {
-  rangeKm = +e.target.value;
-  document.getElementById("range-val").textContent = rangeKm + " km";
-  redraw();
-});
-document.getElementById("hoplimit").addEventListener("input", (e) => { hopLimit = +e.target.value || 7; redraw(); });
-document.getElementById("show-fill").addEventListener("change", (e) => { showModelFill = e.target.checked; redraw(); });
-document.getElementById("show-est").addEventListener("change", (e) => { showEstimated = e.target.checked; redraw(); });
-document.getElementById("ttl").addEventListener("change", (e) => { ttlHours = +e.target.value; redraw(); });
-
-document.getElementById("geo-a").addEventListener("click", () => doGeocode("A"));
-document.getElementById("geo-b").addEventListener("click", () => doGeocode("B"));
-document.getElementById("addr-a").addEventListener("keydown", (e) => { if (e.key === "Enter") doGeocode("A"); });
-document.getElementById("addr-b").addEventListener("keydown", (e) => { if (e.key === "Enter") doGeocode("B"); });
-
-function syncPinButtons() {
-  document.getElementById("pin-a").classList.toggle("armed", armPoint === "A");
-  document.getElementById("pin-b").classList.toggle("armed", armPoint === "B");
-  banner(armPoint ? `Haz clic en el mapa para fijar el punto ${armPoint}` : "");
-}
-document.getElementById("pin-a").addEventListener("click", () => { armPoint = armPoint === "A" ? null : "A"; repeaterArmed = false; syncPinButtons(); });
-document.getElementById("pin-b").addEventListener("click", () => { armPoint = armPoint === "B" ? null : "B"; repeaterArmed = false; syncPinButtons(); });
-
-document.getElementById("btn-repeater").addEventListener("click", (e) => {
-  repeaterArmed = !repeaterArmed; armPoint = null; syncPinButtons();
-  e.target.classList.toggle("armed", repeaterArmed);
-  e.target.textContent = repeaterArmed ? "Haz clic en el mapa…" : "＋ Repetidor hipotético";
-});
-document.getElementById("btn-clear-rep").addEventListener("click", () => { hypRepeaters = []; redraw(); });
-
+$("results").addEventListener("click", (e) => { const r = e.target.closest(".r[data-id]"); if (r) focusNode(r.dataset.id); });
+document.addEventListener("click", (e) => { if (!e.target.closest(".search")) $("results").classList.remove("open"); });
+// botones de mapa
+$("mb-fit").addEventListener("click", () => { const pts = Object.values(lastNodes).filter((n) => typeof n.lat === "number").map((n) => [n.lat, n.lon]); if (pts.length) map.fitBounds(pts, { padding: [50, 50] }); });
+$("mb-loc").addEventListener("click", () => map.locate({ setView: true, maxZoom: 13 }));
+map.on("locationfound", (e) => { if (userLocMarker) map.removeLayer(userLocMarker); userLocMarker = L.circleMarker(e.latlng, { radius: 7, color: "#fff", weight: 2, fillColor: "#5b8cff", fillOpacity: .9 }).addTo(map).bindPopup("Tú estás aquí"); });
+map.on("locationerror", () => banner("No se pudo obtener tu ubicación."));
+$("mb-base").addEventListener("click", () => { setBasemap(basemapIdx + 1); saveState(); });
+$("mb-share").addEventListener("click", async () => { const u = shareUrl(); try { await navigator.clipboard.writeText(u); banner("Enlace copiado al portapapeles"); setTimeout(() => banner(""), 1800); } catch (e) { prompt("Copia el enlace:", u); } });
+$("mb-full").addEventListener("click", () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); });
+// leyenda colapsable
+$("legend-h").addEventListener("click", () => { $("legend").classList.toggle("open"); $("legend-cx").textContent = $("legend").classList.contains("open") ? "▾" : "▸"; });
+// móvil: brand como handle del bottom-sheet
+$("brand").addEventListener("click", () => { if (window.matchMedia("(max-width:820px)").matches) $("panel").classList.toggle("open"); });
+// mapa: clic
 map.on("click", (e) => {
-  if (repeaterArmed) {
-    const id = "rep-" + (repIdSeq++);
-    hypRepeaters.push({ id, name: "Repetidor " + (hypRepeaters.length + 1), lat: e.latlng.lat, lon: e.latlng.lng, role: "repeater" });
-    repeaterArmed = false;
-    const btn = document.getElementById("btn-repeater");
-    btn.classList.remove("armed"); btn.textContent = "＋ Repetidor hipotético";
-    redraw();
-    return;
-  }
-  if (armPoint) {
-    const pt = { lat: e.latlng.lat, lon: e.latlng.lng, label: `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}` };
-    const input = document.getElementById(armPoint === "A" ? "addr-a" : "addr-b");
-    input.value = pt.label;
-    if (armPoint === "A") pointA = pt; else pointB = pt;
-    armPoint = null; syncPinButtons();
-    redraw();
-  }
+  if (repeaterArmed) { const id = "rep-" + (repIdSeq++); hypRepeaters.push({ id, name: "Repetidor " + (hypRepeaters.length + 1), lat: e.latlng.lat, lon: e.latlng.lng, role: "repeater" }); repeaterArmed = false; $("btn-repeater").classList.remove("armed"); $("btn-repeater").textContent = "＋ Repetidor hipotético"; redraw(); return; }
+  if (armPoint) { const pt = { lat: e.latlng.lat, lon: e.latlng.lng, label: `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}` }; $(armPoint === "A" ? "addr-a" : "addr-b").value = pt.label; if (armPoint === "A") pointA = pt; else pointB = pt; armPoint = null; syncPinButtons(); saveState(); redraw(); return; }
+  if (selectedId) { selectedId = null; redraw(); }
 });
-document.getElementById("panel-toggle").addEventListener("click", () =>
-  document.getElementById("panel").classList.toggle("open"));
+map.on("popupopen", (e) => { openPopupId = e.popup._source && e.popup._source._nodeId || null; });
+map.on("popupclose", () => { openPopupId = null; });
+map.on("moveend", saveState);
 
-/* ---- 14. Carga inicial: nodes.json + Firebase ------------------------------ */
+/* ---- 17. Carga inicial ---------------------------------------------------- */
 async function loadEmbedded() {
   try {
     const r = await fetch("nodes.json", { cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
-    const j = await r.json();
-    const raw = j.nodes || j;
+    const j = await r.json(), raw = j.nodes || j;
     for (const id in raw) {
       const n = raw[id];
-      if (typeof (+n.lat) !== "number" || isNaN(+n.lat)) continue;
-      embeddedNodes[String(id)] = {
-        id: String(id), name: n.name || String(id), alias: n.alias,
-        lat: +n.lat, lon: +n.lon, role: n.role, placeholder: n.placeholder !== false,
-      };
+      if (isNaN(+n.lat)) continue;
+      embeddedNodes[String(id)] = { id: String(id), name: n.name || String(id), alias: n.alias, lat: +n.lat, lon: +n.lon, role: n.role, placeholder: n.placeholder !== false };
     }
-    document.getElementById("foot-n").textContent =
-      `${Object.keys(embeddedNodes).length} nodos snapshot` + (j.generated && j.generated !== "seed" ? ` · ${j.generated.slice(0, 10)}` : " · placeholder");
-  } catch (err) {
-    console.warn("nodes.json no disponible:", err.message);
-    document.getElementById("foot-n").textContent = "nodes.json no encontrado";
-  }
+    $("foot-n").textContent = `${Object.keys(embeddedNodes).length} nodos snapshot` + (j.generated && j.generated !== "seed" ? ` · ${j.generated.slice(0, 10)}` : "");
+  } catch (err) { $("foot-n").textContent = "nodes.json no encontrado"; }
 }
 const compact = (o) => { const r = {}; for (const k in o) if (o[k] !== undefined) r[k] = o[k]; return r; };
 function normalizeLive(val) {
-  // conserva TAMBIÉN los nodos sin posición: su actividad (t) puede "encender"
-  // al gemelo del snapshot vía calce por nombre (ver activeNodes)
   const out = {};
-  for (const id in val) {
-    const n = val[id];
-    if (!n) continue;
-    out[String(id)] = compact({
-      id: String(id), name: n.name || String(id), alias: n.sn,
-      lat: typeof n.lat === "number" ? n.lat : undefined,
-      lon: typeof n.lon === "number" ? n.lon : undefined,
-      t: n.t, role: n.role, alt: n.alt, hw: n.hw,
-      batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil,
-    });
-  }
+  for (const id in val) { const n = val[id]; if (!n) continue;
+    out[String(id)] = compact({ id: String(id), name: n.name || String(id), alias: n.sn,
+      lat: typeof n.lat === "number" ? n.lat : undefined, lon: typeof n.lon === "number" ? n.lon : undefined,
+      t: n.t, role: n.role, alt: n.alt, hw: n.hw, batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil }); }
   return out;
 }
 function initFirebase() {
-  if (!FIREBASE_READY) {
-    banner("Firebase no configurado — modelo con snapshot local.");
-    return;
-  }
+  if (!FIREBASE_READY) { banner("Firebase no configurado — modelo con snapshot local."); return; }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
     const db = firebase.database();
-    db.ref("nodes").on("value", (s) => {
-      liveNodes = normalizeLive(s.val() || {});
-      if (Object.keys(liveNodes).length && !useLive) useLive = true;
-      redraw();
-    });
-    db.ref("links").on("value", (s) => { liveLinks = s.val() || {}; redraw(); });
+    db.ref("nodes").on("value", (s) => { liveNodes = normalizeLive(s.val() || {}); lastUpdate = Date.now(); if (Object.keys(liveNodes).length && !useLive && !localStorage.getItem(LS)) useLive = true; redraw(); });
+    db.ref("links").on("value", (s) => { liveLinks = s.val() || {}; lastUpdate = Date.now(); redraw(); });
     db.ref("meta/stats").on("value", (s) => { liveMeta = s.val(); updateDiag(); });
-  } catch (err) {
-    console.error("Firebase init falló:", err);
-    banner("No se pudo conectar a Firebase — modo modelo.");
-  }
+  } catch (err) { banner("No se pudo conectar a Firebase — modo modelo."); }
 }
 
 (async function main() {
+  const saved = loadState();
+  if (saved && saved.view) map.setView(saved.view.c, saved.view.z);
+  syncControls();
   await loadEmbedded();
+  applyDeepLinks();
   redraw();
   initFirebase();
 })();
