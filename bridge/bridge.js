@@ -1,14 +1,22 @@
 /* ============================================================================
- * mesh-bridge — cosecha position/neighborinfo del MQTT de MeshChile y lo empuja
+ * mesh-bridge — cosecha posiciones/adyacencia del MQTT de MeshChile y lo empuja
  * a Firebase RTDB por REST (PATCH). Componente persistente (VPS + PM2).
  *
  * Requiere Node 18+ (usa fetch nativo). Variables de entorno:
  *   RTDB_URL   https://TU-PROYECTO-default-rtdb.firebaseio.com
  *   FB_SECRET  Firebase database secret (auth admin, salta las reglas)
  *
- * Ver MESHCHECK_LIVE.md (PASO 0/1). Si msh/CL/2/json/# viene vacío pero el
- * catch-all msh/CL/# trae tráfico, los gateways publican cifrado: hay que
- * descifrar con la llave del canal antes de parsear (tarea condicional).
+ * Fuentes de posición capturadas del topic JSON (msh/CL/2/json/#):
+ *   - position            (paquete de posición estándar)
+ *   - mapreport           (Map Report: posición + nombre + rol, si el gateway lo emite)
+ *   - cualquier payload con latitude_i/lat_i/latitude (tolerante a variantes)
+ *   - nodeinfo            (enriquece nombre + rol)
+ *   - neighborinfo        (adyacencia real medida con SNR)  → /links
+ *
+ * OJO: no se puede "forzar" la ubicación de un nodo; solo se registra lo que el
+ * nodo transmite. Los móviles con position-sharing apagado no aparecen.
+ * Si msh/CL/2/json/# viene vacío pero msh/CL/# trae tráfico, los gateways
+ * publican cifrado (ver MESHCHECK_LIVE.md PASO 0).
  * ========================================================================== */
 const mqtt = require("mqtt");
 
@@ -27,7 +35,7 @@ const push = async (path, data) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    if (!r.ok) console.error("push", path, r.status);
+    if (!r.ok) console.error("push", path, r.status, await r.text().catch(() => ""));
   } catch (e) { console.error("push fail", e.message); }
 };
 
@@ -47,40 +55,67 @@ client.on("reconnect", () => console.log("reconnecting…"));
 client.on("error", (e) => console.error("mqtt err", e.message));
 
 let buf = {};
+const seenTypes = {};          // diagnóstico: qué tipos de mensaje llegan
+
+// merge sobre el nodo en el buffer (position/mapreport/nodeinfo se enriquecen)
+function upsertNode(from, fields) {
+  const key = `nodes/${from}`;
+  buf[key] = Object.assign({ id: from }, buf[key] || {}, fields, { t: Date.now() });
+}
+
+// tolerante a variantes: latitude_i/lat_i (*1e7) o latitude (float)
+function extractLatLon(p) {
+  if (!p) return null;
+  const latI = p.latitude_i ?? p.lat_i;
+  const lonI = p.longitude_i ?? p.long_i;
+  if (typeof latI === "number" && typeof lonI === "number" && latI !== 0)
+    return { lat: latI / 1e7, lon: lonI / 1e7 };
+  if (typeof p.latitude === "number" && typeof p.longitude === "number" && p.latitude !== 0)
+    return { lat: p.latitude, lon: p.longitude };
+  return null;
+}
+
+function nameOf(p) {
+  const pl = p.payload || {};
+  return pl.longname || pl.long_name || pl.name || pl.shortname || pl.short_name || null;
+}
+
 client.on("message", (_topic, raw) => {
   try {
     const p = JSON.parse(raw.toString());
+    const type = p.type || "?";
+    seenTypes[type] = (seenTypes[type] || 0) + 1;
+    const pl = p.payload || {};
+    if (p.from == null) return;
 
-    // Posición → /nodes/<from>
-    if (p.type === "position" && p.payload && p.payload.latitude_i) {
-      buf[`nodes/${p.from}`] = {
-        id: p.from,
-        name: p.payload.name || nodeName(p) || String(p.from),
-        lat: p.payload.latitude_i / 1e7,
-        lon: p.payload.longitude_i / 1e7,
-        t: Date.now(),
-      };
+    // 1) Posición (position, mapreport, o cualquier payload con lat/lon)
+    const ll = extractLatLon(pl);
+    if (ll && (type === "position" || type === "mapreport" || pl.latitude_i || pl.lat_i)) {
+      const fields = { lat: ll.lat, lon: ll.lon };
+      const nm = nameOf(p); if (nm) fields.name = nm;
+      if (pl.role !== undefined) fields.role = pl.role;   // rol si viene (mapreport/nodeinfo)
+      if (!fields.name) fields.name = String(p.from);
+      upsertNode(p.from, fields);
     }
 
-    // NeighborInfo → /links/<from>  (adyacencia real medida con SNR)
-    if (p.type === "neighborinfo" && p.payload && p.payload.neighbors) {
+    // 2) nodeinfo → enriquece nombre + rol (sin posición; el frontend ignora sin lat)
+    if (type === "nodeinfo") {
+      const fields = {};
+      const nm = nameOf(p); if (nm) fields.name = nm;
+      if (pl.role !== undefined) fields.role = pl.role;
+      if (Object.keys(fields).length) upsertNode(p.from, fields);
+    }
+
+    // 3) NeighborInfo → /links (adyacencia real medida con SNR)
+    if (type === "neighborinfo" && Array.isArray(pl.neighbors)) {
       buf[`links/${p.from}`] = {
         from: p.from,
-        neighbors: p.payload.neighbors.map((n) => ({ id: n.node_id, snr: n.snr })),
+        neighbors: pl.neighbors.map((n) => ({ id: n.node_id ?? n.nodeId ?? n.id, snr: n.snr })),
         t: Date.now(),
       };
-    }
-
-    // nodeinfo → completa el nombre del nodo (opcional, útil para etiquetas)
-    if (p.type === "nodeinfo" && p.payload && (p.payload.longname || p.payload.shortname)) {
-      buf[`nodes/${p.from}/name`] = p.payload.longname || p.payload.shortname;
     }
   } catch (e) { /* no-JSON o cifrado: ignorar (ver PASO 0) */ }
 });
-
-function nodeName(p) {
-  return (p.sender && String(p.sender)) || null;
-}
 
 // flush por lotes cada 5s para no martillar RTDB
 setInterval(async () => {
@@ -88,7 +123,8 @@ setInterval(async () => {
   if (!keys.length) return;
   const batch = buf; buf = {};
   for (const k of keys) await push(k, batch[k]);
-  console.log(`flushed ${keys.length}`);
+  const mix = Object.entries(seenTypes).map(([t, n]) => `${t}:${n}`).join(" ");
+  console.log(`flushed ${keys.length} | tipos vistos → ${mix || "ninguno"}`);
 }, 5000);
 
 console.log("mesh-bridge iniciado");

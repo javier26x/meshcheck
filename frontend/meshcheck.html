@@ -306,8 +306,12 @@ function snrColor(snr) {
   return `hsl(${hue}, 75%, 55%)`;
 }
 function isRouter(n) {
-  const r = (n.role || "").toLowerCase();
-  return r.includes("router") || r.includes("repeat") || r.includes("elev") || n.router === true;
+  if (n.router === true) return true;
+  const r = n.role;
+  // enum Meshtastic: 2=ROUTER, 3=ROUTER_CLIENT, 4=REPEATER, 11=ROUTER_LATE
+  if (typeof r === "number") return [2, 3, 4, 11].includes(r);
+  const s = String(r || "").toLowerCase();
+  return s.includes("router") || s.includes("repeat") || s.includes("elev");
 }
 function fmtAge(t) {
   if (!t) return "";
