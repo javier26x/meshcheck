@@ -315,21 +315,24 @@ function fmtAge(t) {
   if (m < 1) return "ahora"; if (m < 60) return m + " min"; return Math.round(m / 60) + " h";
 }
 
-/* ---- 5. Set activo de nodos (con TTL + repetidores) ----------------------- */
+/* ---- 5. Set activo de nodos (MERGE snapshot + vivo, con TTL + repetidores) -
+ * Union: siempre se muestra el snapshot embebido (nodes.json) y encima se
+ * superponen los nodos vivos de la RTDB (ganan sobre el mismo id). Así la malla
+ * viva enriquece el mapa en vez de reemplazarlo por 1 solo punto.            */
 function activeNodes() {
   const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
   const now = Date.now();
-  const live = {};
+  const out = {};
+  // base: snapshot embebido (siempre visible)
+  for (const id in embeddedNodes) out[id] = embeddedNodes[id];
+  // overlay: nodos vivos frescos (ganan sobre el snapshot con el mismo id)
+  let liveCount = 0;
   for (const id in liveNodes) {
     const n = liveNodes[id];
-    if (n && typeof n.lat === "number" && (!n.t || now - n.t <= ttlMs)) live[id] = n;
+    if (n && typeof n.lat === "number" && (!n.t || now - n.t <= ttlMs)) { out[id] = n; liveCount++; }
   }
-  const hasLive = Object.keys(live).length > 0;
-  const base = hasLive ? live : embeddedNodes;
-  const out = {};
-  for (const id in base) out[id] = base[id];
   for (const r of hypRepeaters) out[r.id] = r;
-  return { nodes: out, hasLive };
+  return { nodes: out, hasLive: liveCount > 0 };
 }
 
 /* ---- 6. Grafo de adyacencia ---------------------------------------------- */
