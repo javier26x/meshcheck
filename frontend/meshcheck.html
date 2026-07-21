@@ -251,11 +251,16 @@
  * SDK setup and configuration). Mientras diga "TU-PROYECTO" el visor arranca en
  * modo Modelo usando nodes.json.                                             */
 const FIREBASE_CONFIG = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU-PROYECTO.firebaseapp.com",
-  databaseURL: "https://TU-PROYECTO-default-rtdb.firebaseio.com",
-  projectId: "TU-PROYECTO",
-  appId: "TU_APP_ID",
+  apiKey: "AIzaSyDJVJ-RH0zr1Bs135_c5SqRG87u26QjP9M",
+  authDomain: "meshcheckci.firebaseapp.com",
+  // OJO: crea la Realtime Database en la consola y copia su URL exacta aqui.
+  // US (default): https://meshcheckci-default-rtdb.firebaseio.com
+  // Otras regiones: https://meshcheckci-default-rtdb.<region>.firebasedatabase.app
+  databaseURL: "https://meshcheckci-default-rtdb.firebaseio.com",
+  projectId: "meshcheckci",
+  storageBucket: "meshcheckci.firebasestorage.app",
+  messagingSenderId: "330602515151",
+  appId: "1:330602515151:web:1750b526e6915bb01b85ba",
 };
 const FIREBASE_READY = !FIREBASE_CONFIG.databaseURL.includes("TU-PROYECTO");
 
