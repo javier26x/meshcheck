@@ -371,20 +371,36 @@ function fmtKm(km) { return km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-/* ---- 5. Set activo de nodos (union snapshot + vivos + repetidores) -------- */
+/* ---- 5. Set activo de nodos (union snapshot + vivos + repetidores) --------
+ * El snapshot de Firestore usa auto-IDs de documento, no el numero de nodo
+ * Meshtastic; los vivos del MQTT usan el numero decimal. Para no duplicar el
+ * mismo nodo fisico, ademas del calce por id se dedup-lica por NOMBRE:
+ * si un vivo tiene el mismo nombre que uno del snapshot, el vivo lo reemplaza
+ * (heredando rol del snapshot si el vivo no trae). */
+const normName = (s) => String(s || "").trim().toLowerCase();
 function activeNodes() {
   const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
   const now = Date.now();
   const out = {};
-  for (const id in embeddedNodes) out[id] = embeddedNodes[id];
+  const nameIdx = new Map();
+  for (const id in embeddedNodes) {
+    out[id] = embeddedNodes[id];
+    const nm = normName(embeddedNodes[id].name);
+    if (nm && nm !== id) nameIdx.set(nm, id);
+  }
   let liveCount = 0;
   for (const id in liveNodes) {
     const n = liveNodes[id];
-    if (n && typeof n.lat === "number" && (!n.t || now - n.t <= ttlMs)) {
-      // el vivo gana sobre el snapshot con el mismo id, conservando rol/nombre previos
-      out[id] = Object.assign({}, out[id] || {}, n);
-      liveCount++;
+    if (!n || typeof n.lat !== "number" || (n.t && now - n.t > ttlMs)) continue;
+    let base = out[id];
+    const nm = normName(n.name);
+    if (!base && nm && nameIdx.has(nm)) {
+      const sid = nameIdx.get(nm);
+      base = out[sid];
+      delete out[sid];        // el vivo reemplaza a su gemelo del snapshot
     }
+    out[id] = Object.assign({}, base || {}, n);
+    liveCount++;
   }
   for (const r of hypRepeaters) out[r.id] = r;
   return { nodes: out, hasLive: liveCount > 0 };
@@ -710,7 +726,9 @@ function updateDiag() {
   const types = Object.entries(liveMeta.types || {})
     .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
   const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
-  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · enlaces vía gateway: ${liveMeta.gwLinks || 0}`;
+  const f = liveMeta.fields || {};
+  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links: ${liveMeta.gwLinks || 0}` +
+    (f.sender != null ? ` · sobres[sender:${f.sender} hops_away:${f.hops_away} directos:${f.direct}]` : "");
 }
 
 /* ---- 12. Banner ------------------------------------------------------------ */

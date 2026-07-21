@@ -60,6 +60,10 @@ client.on("error", (e) => console.error("mqtt err", e.message));
 let buf = {};
 const seenTypes = {};   // diagnóstico: tipos de mensaje vistos desde el arranque
 let gwLinks = 0;        // enlaces derivados de recepción directa de gateways
+// contadores de campos del sobre MQTT, para diagnosticar por qué (no) se
+// derivan enlaces gw: sin hops_away/hop_start no hay certeza de recepción directa
+const fieldCounts = { sender: 0, hops_away: 0, hop_start: 0, direct: 0 };
+let sampled = 0;        // loguea los primeros mensajes crudos (ver campos reales)
 
 function upsertNode(from, fields) {
   const key = `nodes/${from}`;
@@ -89,8 +93,12 @@ function nameOf(p) {
 client.on("message", (_topic, raw) => {
   try {
     const p = JSON.parse(raw.toString());
+    if (sampled < 3) { sampled++; console.log(`muestra ${sampled}:`, raw.toString().slice(0, 350)); }
     const type = p.type || "?";
     seenTypes[type] = (seenTypes[type] || 0) + 1;
+    if (p.sender != null) fieldCounts.sender++;
+    if (p.hops_away != null) fieldCounts.hops_away++;
+    if (p.hop_start != null) fieldCounts.hop_start++;
     const pl = p.payload || {};
     if (p.from == null) return;
 
@@ -129,6 +137,7 @@ client.on("message", (_topic, raw) => {
     const direct =
       p.hops_away === 0 ||
       (p.hops_away == null && p.hop_start != null && p.hop_limit != null && p.hop_start === p.hop_limit);
+    if (direct) fieldCounts.direct++;
     if (direct && typeof p.sender === "string" && p.sender.startsWith("!")) {
       const gw = parseInt(p.sender.slice(1), 16);
       if (Number.isFinite(gw) && gw !== p.from) {
@@ -146,7 +155,7 @@ setInterval(async () => {
   const batch = buf; buf = {};
   for (const k of keys) await push(k, batch[k]);
   // diagnóstico siempre (aunque no haya batch), visible desde el frontend
-  await push("meta/stats", { types: seenTypes, gwLinks, t: Date.now() });
+  await push("meta/stats", { types: seenTypes, gwLinks, fields: fieldCounts, t: Date.now() });
   const mix = Object.entries(seenTypes).map(([t, n]) => `${t}:${n}`).join(" ");
   console.log(`flushed ${keys.length} | gw-links ${gwLinks} | tipos → ${mix || "ninguno"}`);
 }, 5000);

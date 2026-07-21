@@ -45,11 +45,12 @@ const COLLECTION_GUESSES = [
 
 const args = process.argv.slice(2);
 let OUT = resolve(ROOT, "frontend/nodes.json");
-let forcedUrl = null, fromRtdb = null, htmlFile = null;
+let forcedUrl = null, fromRtdb = null, htmlFile = null, sampleMode = false;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--out") OUT = resolve(process.cwd(), args[++i]);
   else if (args[i] === "--from-rtdb") fromRtdb = args[++i];
   else if (args[i] === "--html") htmlFile = args[++i];
+  else if (args[i] === "--sample") sampleMode = true;
   else if (args[i].startsWith("http")) forcedUrl = args[i];
 }
 
@@ -360,6 +361,24 @@ async function main() {
   if (fb.projectId) {
     console.log(`\nConfig Firebase del sitio: projectId=${fb.projectId} · apiKey ${fb.apiKey ? "encontrada" : "NO encontrada"}` +
       (fbCols.length ? ` · colecciones vistas: ${fbCols.join(", ")}` : ""));
+    if (sampleMode) {
+      // imprime docs CRUDOS para descubrir el campo con el id real del nodo
+      for (const col of [...new Set([...fbCols, ...COLLECTION_GUESSES])]) {
+        const url = `${FIRESTORE_BASE}/v1/projects/${fb.projectId}/databases/(default)/documents/${col}?pageSize=3` +
+          (fb.apiKey ? `&key=${fb.apiKey}` : "");
+        const r = await getText(url).catch(() => null);
+        const data = r && r.ok ? tryParse(r.text) : null;
+        if (!data || !Array.isArray(data.documents) || !data.documents.length) continue;
+        console.log(`\n=== MUESTRA CRUDA de "${col}" (pega esto a Claude) ===`);
+        for (const d of data.documents) {
+          console.log(`doc ${d.name.split("/").pop()}:`);
+          console.log(JSON.stringify(fsFlat(d.fields || {}), null, 1).slice(0, 1200));
+        }
+        return;
+      }
+      console.error("✗ --sample: ninguna colección legible");
+      process.exit(1);
+    }
     console.log("Probando Firestore:");
     const hit = await tryFirestore(fb, fbCols);
     if (hit) return save(hit.nodes, hit.url);
