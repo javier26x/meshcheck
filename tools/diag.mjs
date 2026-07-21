@@ -45,6 +45,18 @@ if (!stats) {
   if (!types.neighborinfo) console.log("  (neighborinfo: 0 — esperable, va apagado por default en la malla)");
   const f = stats.fields || {};
   console.log(`sobres: sender:${f.sender ?? "?"}  hops_away:${f.hops_away ?? "?"}  hop_start:${f.hop_start ?? "?"}  directos:${f.direct ?? "?"}  → gw-links acumulados: ${stats.gwLinks ?? "?"}`);
+  if (stats.topics) {
+    console.log("topics MQTT (top 8):");
+    Object.entries(stats.topics).sort((a, b) => b[1] - a[1]).slice(0, 8)
+      .forEach(([k, v]) => console.log(`   ${k}: ${v}`));
+    const sum = (pred) => Object.entries(stats.topics)
+      .filter(([k]) => pred(k.split("/"))).reduce((s, [, v]) => s + v, 0);
+    const js = sum((s) => s.includes("json")), enc = sum((s) => s.includes("e"));
+    if (js === 0 && enc > 0)
+      problems.push("TODO el tráfico va CIFRADO (…/e/…), no hay topic JSON → aplica el PASO 0 del brief (descifrar con la llave del canal).");
+    else if (enc > js * 3)
+      console.log(`  (ojo: tráfico cifrado ${enc} ≫ json ${js} — varios gateways no publican JSON; se pierde parte de la malla)`);
+  }
   if (f.sender > 0 && !f.hops_away && !f.hop_start) {
     problems.push("Los sobres MQTT NO traen hops_away ni hop_start → no se puede certificar recepción " +
       "directa y no se derivan enlaces gw. Pega a Claude las líneas 'muestra N:' de `pm2 logs mesh-bridge`.");

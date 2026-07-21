@@ -258,8 +258,10 @@
 
     <div class="sec legend">
       <h2>Leyenda</h2>
-      <div class="li"><span class="sw" style="background:var(--node)"></span> Nodo cliente</div>
-      <div class="li"><span class="sw" style="background:var(--router)"></span> Router / elevado</div>
+      <div class="li"><span class="sw" style="background:#3ad07a"></span> Nodo vivo (señal dentro del TTL)</div>
+      <div class="li"><span class="sw" style="background:#7a8391;opacity:.7"></span> Nodo nominal (snapshot, sin señal)</div>
+      <div class="li"><span class="sw" style="background:#14171c;border:2px solid var(--router)"></span> Router / elevado (borde amarillo)</div>
+      <div class="li"><span class="sw" style="background:var(--accent)"></span> Repetidor hipotético</div>
       <div class="li"><span class="sw" style="background:var(--a)"></span> Punto A</div>
       <div class="li"><span class="sw" style="background:var(--b)"></span> Punto B</div>
       <div class="li"><span class="ln" style="border-color:var(--ok)"></span> Enlace real medido (color = SNR)</div>
@@ -391,16 +393,22 @@ function activeNodes() {
   let liveCount = 0;
   for (const id in liveNodes) {
     const n = liveNodes[id];
-    if (!n || typeof n.lat !== "number" || (n.t && now - n.t > ttlMs)) continue;
+    if (!n || (n.t && now - n.t > ttlMs)) continue;
+    const hasPos = typeof n.lat === "number";
     let base = out[id];
+    let sid = null;
     const nm = normName(n.name);
-    if (!base && nm && nameIdx.has(nm)) {
-      const sid = nameIdx.get(nm);
-      base = out[sid];
-      delete out[sid];        // el vivo reemplaza a su gemelo del snapshot
+    if (!base && nm && nameIdx.has(nm)) { sid = nameIdx.get(nm); base = out[sid]; }
+    if (hasPos) {
+      if (sid) delete out[sid];              // el vivo reemplaza a su gemelo del snapshot
+      out[id] = Object.assign({}, base || {}, n);
+      liveCount++;
+    } else if (base) {
+      // vivo sin posición propia: "enciende" al gemelo (conserva coords snapshot)
+      Object.assign(base, compact({ t: n.t, role: n.role, hw: n.hw, batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil }));
+      liveCount++;
     }
-    out[id] = Object.assign({}, base || {}, n);
-    liveCount++;
+    // vivo sin posición y sin gemelo: no hay dónde dibujarlo (queda invisible)
   }
   for (const r of hypRepeaters) out[r.id] = r;
   return { nodes: out, hasLive: liveCount > 0 };
@@ -488,7 +496,7 @@ function neighborsOf(id, nodes) {
   const one = (x) => {
     const bits = [x.snr != null ? x.snr + " dB" : "s/d"];
     if (x.t) bits.push(fmtAge(x.t));
-    bits.push(x.src === "ni" ? "NI" : "gw");
+    bits.push(x.src === "ni" ? "NI" : x.src === "tr" ? "TR" : "gw");
     return `${name(x.id)} <span class="snr">(${bits.join(" · ")})</span>`;
   };
   const fmt = (arr) => arr.sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 10).map(one).join(", ") +
@@ -509,10 +517,20 @@ function nodePopupHtml(id) {
   const { nodes } = activeNodes();
   const n = nodes[id];
   if (!n) return "";
-  const age = n.t ? ` · ${fmtAge(n.t)}` : "";
   const tag = n.placeholder ? " <span style='color:#8b93a1'>(ancla)</span>" : "";
-  return `<div class="pt">${esc(n.name || id)}${tag}</div>` +
-    `<div class="pm">id ${esc(id)}${age}<br>${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}` +
+  const vivo = n.t
+    ? `<span class="badge ok">VIVO · ${fmtAge(n.t)}</span>`
+    : `<span class="badge" style="background:rgba(122,131,145,.2);color:#7a8391">nominal</span>`;
+  const extra = [];
+  if (n.alt != null) extra.push(`alt ${n.alt} m`);
+  if (n.batt != null) extra.push(`bat ${n.batt}%`);
+  if (n.volt != null) extra.push(`${n.volt} V`);
+  if (n.temp != null) extra.push(`${n.temp}°C`);
+  if (n.chUtil != null) extra.push(`canal ${n.chUtil}%`);
+  if (n.hw) extra.push(esc(String(n.hw)));
+  return `<div class="pt">${esc(n.name || id)}${tag} ${vivo}</div>` +
+    `<div class="pm">id ${esc(id)} · rol ${esc(String(n.role ?? "?"))}<br>${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}` +
+    (extra.length ? `<br>${extra.join(" · ")}` : "") +
     (isRouter(n) ? "<br>router/elevado" : "") + `</div>` +
     neighborsOf(id, nodes) +
     `<div class="pa">` +
@@ -604,15 +622,22 @@ function redraw() {
     drawn++;
   }
 
-  // nodos
+  // nodos: VERDE = vivo (reportó dentro del TTL) · PLOMO = nominal (solo
+  // snapshot, sin señal reciente) · borde AMARILLO = router/elevado ·
+  // NARANJO = repetidor hipotético
   for (const id in nodes) {
     const n = nodes[id];
-    let color = isRouter(n) ? "#ffd23f" : "#3fb6c9";
-    let radius = isRouter(n) ? 7 : 5;
-    if (n.role === "repeater") { color = "#ff7a1a"; radius = 7; }
+    if (typeof n.lat !== "number") continue;
+    const alive = !!n.t;
+    const router = isRouter(n);
+    let fill = alive ? "#3ad07a" : "#7a8391";
+    if (n.role === "repeater") fill = "#ff7a1a";
     const m = L.circleMarker([n.lat, n.lon], {
-      radius, color: "#0d0f12", weight: 1,
-      fillColor: color, fillOpacity: n.placeholder ? 0.55 : 0.95,
+      radius: router ? 7 : 5,
+      color: router ? "#ffd23f" : "#0d0f12",
+      weight: router ? 2 : 1,
+      fillColor: fill,
+      fillOpacity: alive ? 0.95 : 0.55,
     }).addTo(nodeLayer);
     m.bindPopup(() => nodePopupHtml(id));
   }
@@ -727,8 +752,20 @@ function updateDiag() {
     .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
   const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
   const f = liveMeta.fields || {};
+  let tmix = "";
+  if (liveMeta.topics) {
+    const agg = { json: 0, e: 0, map: 0, otro: 0 };
+    for (const k in liveMeta.topics) {
+      const segs = k.split("/");
+      if (segs.includes("json")) agg.json += liveMeta.topics[k];
+      else if (segs.includes("e")) agg.e += liveMeta.topics[k];
+      else if (segs.includes("map")) agg.map += liveMeta.topics[k];
+      else agg.otro += liveMeta.topics[k];
+    }
+    tmix = ` · topics[json:${agg.json} cifrado:${agg.e} map:${agg.map} otro:${agg.otro}]`;
+  }
   el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links: ${liveMeta.gwLinks || 0}` +
-    (f.sender != null ? ` · sobres[sender:${f.sender} hops_away:${f.hops_away} directos:${f.direct}]` : "");
+    (f.sender != null ? ` · sobres[sender:${f.sender} hops_away:${f.hops_away} directos:${f.direct}]` : "") + tmix;
 }
 
 /* ---- 12. Banner ------------------------------------------------------------ */
@@ -817,12 +854,21 @@ async function loadEmbedded() {
     document.getElementById("foot-n").textContent = "nodes.json no encontrado";
   }
 }
+const compact = (o) => { const r = {}; for (const k in o) if (o[k] !== undefined) r[k] = o[k]; return r; };
 function normalizeLive(val) {
+  // conserva TAMBIÉN los nodos sin posición: su actividad (t) puede "encender"
+  // al gemelo del snapshot vía calce por nombre (ver activeNodes)
   const out = {};
   for (const id in val) {
     const n = val[id];
-    if (!n || typeof n.lat !== "number") continue;
-    out[String(id)] = { id: String(id), name: n.name || String(id), lat: n.lat, lon: n.lon, t: n.t, role: n.role };
+    if (!n) continue;
+    out[String(id)] = compact({
+      id: String(id), name: n.name || String(id),
+      lat: typeof n.lat === "number" ? n.lat : undefined,
+      lon: typeof n.lon === "number" ? n.lon : undefined,
+      t: n.t, role: n.role, alt: n.alt, hw: n.hw,
+      batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil,
+    });
   }
   return out;
 }
