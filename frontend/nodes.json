@@ -1,0 +1,26 @@
+{
+  "_note": "PLACEHOLDER. No son nodos reales de la malla: son anclas geograficas (capitales regionales / ciudades con actividad MeshChile) para que el modo Modelo renderice mientras no haya datos vivos. Reemplaza este archivo corriendo: node tools/fetch_nodes.mjs",
+  "generated": "seed",
+  "source": "anclas geograficas de Chile (placeholder)",
+  "count": 18,
+  "nodes": {
+    "anchor-arica":        { "id": "anchor-arica",        "name": "Arica",            "lat": -18.4783, "lon": -70.3126, "placeholder": true },
+    "anchor-iquique":      { "id": "anchor-iquique",      "name": "Iquique",          "lat": -20.2141, "lon": -70.1524, "placeholder": true },
+    "anchor-antofagasta":  { "id": "anchor-antofagasta",  "name": "Antofagasta",      "lat": -23.6509, "lon": -70.3975, "placeholder": true },
+    "anchor-calama":       { "id": "anchor-calama",       "name": "Calama",           "lat": -22.4544, "lon": -68.9294, "placeholder": true },
+    "anchor-copiapo":      { "id": "anchor-copiapo",      "name": "Copiapo",          "lat": -27.3668, "lon": -70.3323, "placeholder": true },
+    "anchor-laserena":     { "id": "anchor-laserena",     "name": "La Serena",        "lat": -29.9027, "lon": -71.2519, "placeholder": true },
+    "anchor-valparaiso":   { "id": "anchor-valparaiso",   "name": "Valparaiso",       "lat": -33.0472, "lon": -71.6127, "placeholder": true },
+    "anchor-vina":         { "id": "anchor-vina",         "name": "Vina del Mar",     "lat": -33.0245, "lon": -71.5518, "placeholder": true },
+    "anchor-santiago":     { "id": "anchor-santiago",     "name": "Santiago",         "lat": -33.4489, "lon": -70.6693, "placeholder": true },
+    "anchor-rancagua":     { "id": "anchor-rancagua",     "name": "Rancagua",         "lat": -34.1708, "lon": -70.7444, "placeholder": true },
+    "anchor-talca":        { "id": "anchor-talca",        "name": "Talca",            "lat": -35.4264, "lon": -71.6554, "placeholder": true },
+    "anchor-chillan":      { "id": "anchor-chillan",      "name": "Chillan",          "lat": -36.6066, "lon": -72.1034, "placeholder": true },
+    "anchor-concepcion":   { "id": "anchor-concepcion",   "name": "Concepcion",       "lat": -36.8201, "lon": -73.0444, "placeholder": true },
+    "anchor-temuco":       { "id": "anchor-temuco",       "name": "Temuco",           "lat": -38.7359, "lon": -72.5904, "placeholder": true },
+    "anchor-valdivia":     { "id": "anchor-valdivia",     "name": "Valdivia",         "lat": -39.8142, "lon": -73.2459, "placeholder": true },
+    "anchor-puertomontt":  { "id": "anchor-puertomontt",  "name": "Puerto Montt",     "lat": -41.4718, "lon": -72.9411, "placeholder": true },
+    "anchor-coyhaique":    { "id": "anchor-coyhaique",    "name": "Coyhaique",        "lat": -45.5712, "lon": -72.0685, "placeholder": true },
+    "anchor-puntaarenas":  { "id": "anchor-puntaarenas",  "name": "Punta Arenas",     "lat": -53.1638, "lon": -70.9171, "placeholder": true }
+  }
+}

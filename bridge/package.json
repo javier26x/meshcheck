@@ -1,0 +1,13 @@
+{
+  "name": "mesh-bridge",
+  "version": "1.0.0",
+  "description": "Bridge MQTT MeshChile -> Firebase RTDB para MeshCheck Live",
+  "main": "bridge.js",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node bridge.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.10.1"
+  }
+}

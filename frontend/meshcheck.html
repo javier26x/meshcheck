@@ -1,0 +1,608 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>MeshCheck Live — MeshChile</title>
+
+<!-- Fuentes -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Firebase (compat, sin build) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+  :root {
+    --bg: #0d0f12;
+    --bg2: #101318;
+    --panel: #14171c;
+    --panel2: #1a1e25;
+    --line: #262b33;
+    --txt: #e6e9ee;
+    --muted: #8b93a1;
+    --accent: #ff7a1a;   /* signal orange */
+    --node: #3fb6c9;     /* cyan */
+    --router: #ffd23f;   /* elevado / router */
+    --a: #5b8cff;        /* endpoint A */
+    --b: #ff5b8c;        /* endpoint B */
+    --ok: #3ad07a;
+    --warn: #ff4d4d;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "DM Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--txt);
+    overflow: hidden;
+  }
+  code, .mono { font-family: "JetBrains Mono", monospace; }
+
+  #app { display: grid; grid-template-columns: 340px 1fr; height: 100%; }
+  @media (max-width: 860px) {
+    #app { grid-template-columns: 1fr; }
+    #panel { position: absolute; z-index: 1200; width: 88%; max-width: 340px; height: 100%;
+             transform: translateX(-100%); transition: transform .22s ease; }
+    #panel.open { transform: translateX(0); }
+    #panel-toggle { display: flex !important; }
+  }
+
+  /* Panel */
+  #panel {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg2) 100%);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .brand { padding: 16px 16px 12px; border-bottom: 1px solid var(--line); }
+  .brand h1 { margin: 0; font-size: 18px; letter-spacing: .5px; display: flex; align-items: center; gap: 8px; }
+  .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .brand .sub { margin-top: 4px; font-size: 11px; color: var(--muted); letter-spacing: .3px; }
+
+  .status { display: flex; align-items: center; gap: 7px; margin-top: 10px; font-size: 11px; color: var(--muted); }
+  .status .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .status.live .pip { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 1.6s infinite; }
+  .status.model .pip { background: var(--accent); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  .sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .sec h2 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--accent); font-weight: 700; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; font-size: 13px; }
+  .row label { color: var(--muted); }
+  select, input[type="number"] {
+    background: var(--panel2); color: var(--txt); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 12px; width: 100%;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+  /* Toggle vivo/modelo */
+  .toggle { display: flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+  .toggle button {
+    flex: 1; background: transparent; border: 0; color: var(--muted); padding: 7px 8px;
+    border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: .3px;
+  }
+  .toggle button.active { background: var(--accent); color: #1a1005; }
+  .toggle button:disabled { opacity: .35; cursor: not-allowed; }
+
+  .btn {
+    width: 100%; background: var(--panel2); color: var(--txt); border: 1px solid var(--line);
+    border-radius: 7px; padding: 9px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.armed { background: var(--accent); color: #1a1005; border-color: var(--accent); }
+  .btn.ghost { background: transparent; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .stat .n { font-size: 20px; font-weight: 700; font-family: "JetBrains Mono", monospace; }
+  .stat .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+
+  .path-out { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7; color: var(--muted); }
+  .path-out b { color: var(--txt); }
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 5px; font-size: 11px; font-weight: 600; }
+  .badge.ok { background: rgba(58,208,122,.15); color: var(--ok); }
+  .badge.no { background: rgba(255,77,77,.15); color: var(--warn); }
+
+  /* Leyenda */
+  .legend .li { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin: 6px 0; }
+  .legend .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .snr-bar { height: 8px; border-radius: 4px; margin: 6px 0 2px;
+    background: linear-gradient(90deg, var(--warn), var(--router), var(--ok)); }
+  .snr-lbl { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+
+  .note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .note b { color: var(--accent); }
+
+  /* Mapa */
+  #map { height: 100%; background: #0a0c0f; }
+  .leaflet-container { background: #0a0c0f; font-family: "DM Sans", sans-serif; }
+  .leaflet-control-attribution { background: rgba(13,15,18,.75) !important; color: var(--muted) !important; font-size: 10px; }
+  .leaflet-control-attribution a { color: var(--muted) !important; }
+  .leaflet-bar a { background: var(--panel) !important; color: var(--txt) !important; border-color: var(--line) !important; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--panel); color: var(--txt); border: 1px solid var(--line); }
+  .leaflet-popup-content { margin: 10px 12px; font-size: 12px; }
+  .leaflet-popup-content .pt { font-weight: 700; margin-bottom: 3px; }
+  .leaflet-popup-content .pm { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+
+  /* Banner */
+  #banner {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1100;
+    background: rgba(255,122,26,.12); border: 1px solid var(--accent); color: var(--accent);
+    padding: 8px 14px; border-radius: 8px; font-size: 12px; max-width: 80%; text-align: center;
+    backdrop-filter: blur(6px);
+  }
+  #panel-toggle {
+    display: none; position: absolute; top: 12px; left: 12px; z-index: 1300;
+    background: var(--panel); border: 1px solid var(--line); color: var(--txt);
+    width: 40px; height: 40px; border-radius: 8px; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px;
+  }
+</style>
+
+<div id="app">
+  <aside id="panel">
+    <div class="brand">
+      <h1><span class="dot"></span> MeshCheck <span style="color:var(--accent)">Live</span></h1>
+      <div class="sub">Visor de malla en vivo · MeshChile</div>
+      <div id="status" class="status model"><span class="pip"></span><span id="status-txt">Iniciando…</span></div>
+    </div>
+
+    <div class="sec">
+      <h2>Modo de enlaces</h2>
+      <div class="toggle" id="mode-toggle">
+        <button data-mode="live" id="btn-live">Malla en vivo</button>
+        <button data-mode="model" id="btn-model" class="active">Modelo</button>
+      </div>
+      <p class="note" style="margin-top:10px" id="mode-note">
+        <b>En vivo</b>: adyacencia real observada (NeighborInfo) coloreada por SNR.
+        <b>Modelo</b>: enlaces estimados por distancia para cubrir huecos.
+      </p>
+    </div>
+
+    <div class="sec">
+      <h2>Estado de la red</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="n" id="s-nodes">0</div><div class="l">Nodos</div></div>
+        <div class="stat"><div class="n" id="s-links">0</div><div class="l">Enlaces</div></div>
+        <div class="stat"><div class="n" id="s-live">0</div><div class="l">Vivos</div></div>
+        <div class="stat"><div class="n" id="s-src">—</div><div class="l">Fuente</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Análisis de alcance (BFS)</h2>
+      <div class="row"><label>Origen A</label></div>
+      <select id="sel-a"></select>
+      <div class="row" style="margin-top:10px"><label>Destino B</label></div>
+      <select id="sel-b"></select>
+      <div class="row" style="margin-top:12px">
+        <label>Hop limit</label>
+        <input type="number" id="hoplimit" value="7" min="1" max="15" style="width:70px" />
+      </div>
+      <div class="path-out" id="path-out" style="margin-top:10px">Selecciona A y B.</div>
+    </div>
+
+    <div class="sec" id="model-controls">
+      <h2>Capa de predicción (modelo)</h2>
+      <div class="row"><label>Alcance por salto</label><span class="mono" id="range-val">15 km</span></div>
+      <input type="range" id="range" min="2" max="60" value="15" step="1" />
+      <button class="btn ghost" id="btn-repeater" style="margin-top:12px">＋ Repetidor hipotético</button>
+      <button class="btn ghost" id="btn-clear-rep" style="margin-top:8px">Limpiar repetidores</button>
+      <p class="note" style="margin-top:10px">Con el repetidor armado, haz clic en el mapa para colocarlo y recalcular la ruta.</p>
+    </div>
+
+    <div class="sec">
+      <h2>Ajustes</h2>
+      <div class="row">
+        <label>TTL nodos vivos</label>
+        <select id="ttl" style="width:auto">
+          <option value="1">1 h</option>
+          <option value="2" selected>2 h</option>
+          <option value="6">6 h</option>
+          <option value="24">24 h</option>
+          <option value="0">Sin TTL</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sec legend">
+      <h2>Leyenda</h2>
+      <div class="li"><span class="sw" style="background:var(--node)"></span> Nodo cliente</div>
+      <div class="li"><span class="sw" style="background:var(--router)"></span> Router / elevado</div>
+      <div class="li"><span class="sw" style="background:var(--a)"></span> Origen A</div>
+      <div class="li"><span class="sw" style="background:var(--b)"></span> Destino B</div>
+      <div style="margin-top:10px">
+        <div class="snr-bar"></div>
+        <div class="snr-lbl"><span>SNR bajo</span><span>SNR alto</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="note" id="foot">
+        Datos vivos vía Firebase RTDB (bridge MQTT MeshChile). Fallback a nodos embebidos
+        (<code id="foot-n">nodos.json</code>) en modo predicción.
+      </p>
+    </div>
+  </aside>
+
+  <div style="position:relative">
+    <button id="panel-toggle" aria-label="Menú">☰</button>
+    <div id="banner" style="display:none"></div>
+    <div id="map"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * MeshCheck Live — single-file, sin build.
+ *   Fuentes de nodos, en orden de prioridad:
+ *     1) Firebase RTDB /nodes + /links  (vivo, del bridge MQTT de MeshChile)
+ *     2) nodes.json embebido            (fallback / modo predicción)
+ *   Ver MESHCHECK_LIVE.md y tools/fetch_nodes.mjs.
+ * ========================================================================== */
+
+/* ---- 1. CONFIG FIREBASE ---------------------------------------------------
+ * Reemplaza con la config de tu proyecto (Firebase Console → Project settings →
+ * SDK setup and configuration). Mientras diga "TU-PROYECTO" el visor arranca en
+ * modo Modelo usando nodes.json.                                             */
+const FIREBASE_CONFIG = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU-PROYECTO.firebaseapp.com",
+  databaseURL: "https://TU-PROYECTO-default-rtdb.firebaseio.com",
+  projectId: "TU-PROYECTO",
+  appId: "TU_APP_ID",
+};
+const FIREBASE_READY = !FIREBASE_CONFIG.databaseURL.includes("TU-PROYECTO");
+
+/* ---- 2. Estado ------------------------------------------------------------ */
+let liveNodes = {};       // { id: {id,name,lat,lon,t,role} }  desde RTDB
+let liveLinks = {};       // { id: {from,neighbors:[{id,snr}],t} }
+let embeddedNodes = {};   // desde nodes.json
+let useLive = false;      // toggle
+let rangeKm = 15;
+let ttlHours = 2;
+let hopLimit = 7;
+let hypRepeaters = [];     // [{id,name,lat,lon,role:'repeater'}]
+let repeaterArmed = false;
+let repIdSeq = 1;
+let endA = null, endB = null;
+
+/* ---- 3. Mapa -------------------------------------------------------------- */
+const map = L.map("map", { zoomControl: true, attributionControl: true, preferCanvas: true })
+  .setView([-35.5, -71.5], 5); // Chile
+
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  subdomains: "abcd", maxZoom: 19,
+  attribution: '&copy; OpenStreetMap &copy; CARTO · MeshCheck Live',
+}).addTo(map);
+
+const linkLayer = L.layerGroup().addTo(map);
+const nodeLayer = L.layerGroup().addTo(map);
+const pathLayer = L.layerGroup().addTo(map);
+
+/* ---- 4. Utilidades -------------------------------------------------------- */
+const R = 6371;
+function haversine(a, b) {
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const la1 = a.lat * Math.PI / 180, la2 = b.lat * Math.PI / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+// SNR -> color (verde alto → rojo bajo). Rango práctico Meshtastic: -20..+10 dB.
+function snrColor(snr) {
+  const t = Math.max(0, Math.min(1, (snr + 20) / 30));
+  const hue = 0 + t * 130; // 0=rojo, 130=verde
+  return `hsl(${hue}, 75%, 55%)`;
+}
+function isRouter(n) {
+  const r = (n.role || "").toLowerCase();
+  return r.includes("router") || r.includes("repeat") || r.includes("elev") || n.router === true;
+}
+function fmtAge(t) {
+  if (!t) return "";
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return "ahora"; if (m < 60) return m + " min"; return Math.round(m / 60) + " h";
+}
+
+/* ---- 5. Set activo de nodos (con TTL + repetidores) ----------------------- */
+function activeNodes() {
+  const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
+  const now = Date.now();
+  const live = {};
+  for (const id in liveNodes) {
+    const n = liveNodes[id];
+    if (n && typeof n.lat === "number" && (!n.t || now - n.t <= ttlMs)) live[id] = n;
+  }
+  const hasLive = Object.keys(live).length > 0;
+  const base = hasLive ? live : embeddedNodes;
+  const out = {};
+  for (const id in base) out[id] = base[id];
+  for (const r of hypRepeaters) out[r.id] = r;
+  return { nodes: out, hasLive };
+}
+
+/* ---- 6. Grafo de adyacencia ---------------------------------------------- */
+// Devuelve { adj: Map<id,Set<id>>, edges: [{a,b,snr?}] }
+function buildGraph(nodes, live) {
+  const adj = new Map();
+  const edges = [];
+  const add = (x, y) => { if (!adj.has(x)) adj.set(x, new Set()); adj.get(x).add(y); };
+  const ids = Object.keys(nodes);
+
+  if (live && !useLiveDisabled()) {
+    // Adyacencia real: NeighborInfo (tratada como no dirigida para alcance)
+    const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
+    const now = Date.now();
+    for (const lid in liveLinks) {
+      const l = liveLinks[lid];
+      if (!l || (l.t && now - l.t > ttlMs)) continue;
+      const from = String(l.from);
+      if (!nodes[from]) continue;
+      for (const nb of (l.neighbors || [])) {
+        const to = String(nb.id);
+        if (!nodes[to]) continue;
+        add(from, to); add(to, from);
+        edges.push({ a: from, b: to, snr: nb.snr });
+      }
+    }
+    // sumar repetidores hipotéticos por distancia sobre la malla viva
+    for (const r of hypRepeaters) linkByRange(r, nodes, ids, adj, edges, add);
+  } else {
+    // Modelo por distancia
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const a = nodes[ids[i]], b = nodes[ids[j]];
+        if (haversine(a, b) <= rangeKm) { add(ids[i], ids[j]); add(ids[j], ids[i]); edges.push({ a: ids[i], b: ids[j] }); }
+      }
+    }
+  }
+  return { adj, edges };
+}
+function linkByRange(r, nodes, ids, adj, edges, add) {
+  for (const id of ids) {
+    if (id === r.id) continue;
+    if (haversine(r, nodes[id]) <= rangeKm) { add(r.id, id); add(id, r.id); edges.push({ a: r.id, b: id }); }
+  }
+}
+function useLiveDisabled() {
+  // "vivo" solo tiene sentido si hay nodos vivos
+  return !useLive;
+}
+
+/* ---- 7. BFS ruta A→B ------------------------------------------------------ */
+function bfs(adj, a, b, limit) {
+  if (a == null || b == null || !adj.has(a)) return null;
+  const q = [[a]]; const seen = new Set([a]);
+  while (q.length) {
+    const path = q.shift();
+    const last = path[path.length - 1];
+    if (last === b) return path;
+    if (path.length > limit) continue; // path.length-1 saltos
+    for (const nx of (adj.get(last) || [])) {
+      if (!seen.has(nx)) { seen.add(nx); q.push([...path, nx]); }
+    }
+  }
+  return null;
+}
+
+/* ---- 8. Render ------------------------------------------------------------ */
+function redraw() {
+  linkLayer.clearLayers(); nodeLayer.clearLayers(); pathLayer.clearLayers();
+  const { nodes, hasLive } = activeNodes();
+  const live = hasLive;
+
+  // toggle habilitación
+  document.getElementById("btn-live").disabled = !live;
+  if (!live && useLive) useLive = false;
+  syncToggle();
+
+  const { adj, edges } = buildGraph(nodes, live);
+
+  // enlaces
+  for (const e of edges) {
+    const a = nodes[e.a], b = nodes[e.b];
+    if (!a || !b) continue;
+    const liveEdge = live && !useLiveDisabled() && e.snr !== undefined;
+    L.polyline([[a.lat, a.lon], [b.lat, b.lon]], {
+      color: liveEdge ? snrColor(e.snr) : "#3a4250",
+      weight: liveEdge ? 2 : 1,
+      opacity: liveEdge ? 0.85 : 0.4,
+      dashArray: liveEdge ? null : "3,5",
+    }).addTo(linkLayer);
+  }
+
+  // nodos
+  for (const id in nodes) {
+    const n = nodes[id];
+    let color = isRouter(n) ? "#ffd23f" : "#3fb6c9"; // router amarillo / cliente cyan
+    let radius = isRouter(n) ? 7 : 5;
+    let ring = null;
+    if (id === endA) { ring = "#5b8cff"; }
+    else if (id === endB) { ring = "#ff5b8c"; }
+    if (n.role === "repeater") { color = "#ff7a1a"; radius = 7; }
+
+    const m = L.circleMarker([n.lat, n.lon], {
+      radius, color: ring || "#0d0f12", weight: ring ? 3 : 1,
+      fillColor: color, fillOpacity: n.placeholder ? 0.55 : 0.95,
+    }).addTo(nodeLayer);
+
+    const age = n.t ? ` · ${fmtAge(n.t)}` : "";
+    const tag = n.placeholder ? " <span style='color:#8b93a1'>(ancla)</span>" : "";
+    m.bindPopup(
+      `<div class="pt">${(n.name || id)}${tag}</div>` +
+      `<div class="pm">id ${id}${age}<br>${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}` +
+      (isRouter(n) ? "<br>router/elevado" : "") + `</div>`
+    );
+    m.on("click", () => onNodeClick(id));
+  }
+
+  // ruta BFS
+  let pathTxt = "Selecciona A y B.";
+  if (endA && endB && nodes[endA] && nodes[endB]) {
+    const path = bfs(adj, endA, endB, hopLimit);
+    if (path) {
+      const pts = path.map(id => [nodes[id].lat, nodes[id].lon]);
+      L.polyline(pts, { color: "#ff7a1a", weight: 3.5, opacity: 0.95 }).addTo(pathLayer);
+      path.forEach(id => L.circleMarker([nodes[id].lat, nodes[id].lon],
+        { radius: 6, color: "#ff7a1a", weight: 2, fillOpacity: 0 }).addTo(pathLayer));
+      const hops = path.length - 1;
+      pathTxt = `<b>${nodes[endA].name || endA}</b> → <b>${nodes[endB].name || endB}</b><br>` +
+        `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ` +
+        `${hops <= hopLimit ? "" : '<span class="badge no">supera hop limit</span>'}`;
+    } else {
+      pathTxt = `<b>${nodes[endA].name || endA}</b> → <b>${nodes[endB].name || endB}</b><br>` +
+        `<span class="badge no">sin ruta</span> dentro de ${hopLimit} saltos ` +
+        `(${useLive ? "malla viva" : rangeKm + " km/salto"})`;
+    }
+  }
+  document.getElementById("path-out").innerHTML = pathTxt;
+
+  // stats
+  const liveCount = Object.values(nodes).filter(n => n.t).length;
+  document.getElementById("s-nodes").textContent = Object.keys(nodes).length;
+  document.getElementById("s-links").textContent = edges.length;
+  document.getElementById("s-live").textContent = liveCount;
+  document.getElementById("s-src").textContent = live ? "RTDB" : "local";
+  document.getElementById("s-src").style.fontSize = "13px";
+
+  // status pill
+  const st = document.getElementById("status");
+  const stt = document.getElementById("status-txt");
+  if (live && useLive) { st.className = "status live"; stt.textContent = "Malla en vivo · adyacencia real"; }
+  else if (live) { st.className = "status model"; stt.textContent = "Datos vivos · vista modelo"; }
+  else { st.className = "status model"; stt.textContent = FIREBASE_READY ? "Sin datos vivos · modelo" : "Firebase no configurado · modelo"; }
+}
+
+/* ---- 9. Selección de endpoints ------------------------------------------- */
+function onNodeClick(id) {
+  if (!endA || (endA && endB)) { endA = id; endB = null; }
+  else if (id !== endA) { endB = id; }
+  syncSelects(); redraw();
+}
+function populateSelects() {
+  const { nodes } = activeNodes();
+  const ids = Object.keys(nodes).sort((x, y) =>
+    (nodes[x].name || x).localeCompare(nodes[y].name || y));
+  for (const sel of [document.getElementById("sel-a"), document.getElementById("sel-b")]) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">—</option>' +
+      ids.map(id => `<option value="${id}">${nodes[id].name || id}</option>`).join("");
+    if (ids.includes(cur)) sel.value = cur;
+  }
+}
+function syncSelects() {
+  document.getElementById("sel-a").value = endA || "";
+  document.getElementById("sel-b").value = endB || "";
+}
+
+/* ---- 10. Toggle vivo/modelo ---------------------------------------------- */
+function syncToggle() {
+  document.getElementById("btn-live").classList.toggle("active", useLive);
+  document.getElementById("btn-model").classList.toggle("active", !useLive);
+  document.getElementById("model-controls").style.opacity = useLive ? ".45" : "1";
+}
+
+/* ---- 11. Banner ----------------------------------------------------------- */
+function banner(msg) {
+  const b = document.getElementById("banner");
+  if (!msg) { b.style.display = "none"; return; }
+  b.textContent = msg; b.style.display = "block";
+}
+
+/* ---- 12. Wire UI ---------------------------------------------------------- */
+document.getElementById("mode-toggle").addEventListener("click", (e) => {
+  const btn = e.target.closest("button"); if (!btn || btn.disabled) return;
+  useLive = btn.dataset.mode === "live";
+  syncToggle(); redraw();
+});
+document.getElementById("range").addEventListener("input", (e) => {
+  rangeKm = +e.target.value; document.getElementById("range-val").textContent = rangeKm + " km";
+  redraw();
+});
+document.getElementById("hoplimit").addEventListener("input", (e) => { hopLimit = +e.target.value || 7; redraw(); });
+document.getElementById("ttl").addEventListener("change", (e) => { ttlHours = +e.target.value; redraw(); populateSelects(); });
+document.getElementById("sel-a").addEventListener("change", (e) => { endA = e.target.value || null; redraw(); });
+document.getElementById("sel-b").addEventListener("change", (e) => { endB = e.target.value || null; redraw(); });
+document.getElementById("btn-repeater").addEventListener("click", (e) => {
+  repeaterArmed = !repeaterArmed;
+  e.target.classList.toggle("armed", repeaterArmed);
+  e.target.textContent = repeaterArmed ? "Haz clic en el mapa…" : "＋ Repetidor hipotético";
+});
+document.getElementById("btn-clear-rep").addEventListener("click", () => {
+  hypRepeaters = []; redraw(); populateSelects();
+});
+map.on("click", (e) => {
+  if (!repeaterArmed) return;
+  const id = "rep-" + (repIdSeq++);
+  hypRepeaters.push({ id, name: "Repetidor " + (hypRepeaters.length + 1), lat: e.latlng.lat, lon: e.latlng.lng, role: "repeater" });
+  repeaterArmed = false;
+  document.getElementById("btn-repeater").classList.remove("armed");
+  document.getElementById("btn-repeater").textContent = "＋ Repetidor hipotético";
+  redraw(); populateSelects();
+});
+document.getElementById("panel-toggle").addEventListener("click", () =>
+  document.getElementById("panel").classList.toggle("open"));
+
+/* ---- 13. Carga inicial: nodes.json + Firebase ---------------------------- */
+async function loadEmbedded() {
+  try {
+    const r = await fetch("nodes.json", { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    const raw = j.nodes || j;
+    for (const id in raw) {
+      const n = raw[id];
+      embeddedNodes[String(id)] = {
+        id: String(id), name: n.name || String(id),
+        lat: +n.lat, lon: +n.lon, role: n.role, placeholder: n.placeholder !== false,
+      };
+    }
+    document.getElementById("foot-n").textContent =
+      `${Object.keys(embeddedNodes).length} nodos embebidos` + (j.generated ? ` · ${j.generated}` : "");
+  } catch (err) {
+    console.warn("nodes.json no disponible:", err.message);
+    document.getElementById("foot-n").textContent = "nodes.json no encontrado";
+  }
+}
+function initFirebase() {
+  if (!FIREBASE_READY) {
+    banner("Firebase no configurado — mostrando modelo con nodos embebidos. Edita FIREBASE_CONFIG.");
+    return;
+  }
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.database();
+    db.ref("nodes").on("value", (s) => {
+      liveNodes = normalizeLive(s.val() || {});
+      if (Object.keys(liveNodes).length && !useLive) useLive = true; // salta a vivo al llegar datos
+      redraw(); populateSelects();
+    });
+    db.ref("links").on("value", (s) => { liveLinks = s.val() || {}; redraw(); });
+  } catch (err) {
+    console.error("Firebase init falló:", err);
+    banner("No se pudo conectar a Firebase — modo modelo.");
+  }
+}
+function normalizeLive(val) {
+  const out = {};
+  for (const id in val) {
+    const n = val[id];
+    if (!n || typeof n.lat !== "number") continue;
+    out[String(id)] = { id: String(id), name: n.name || String(id), lat: n.lat, lon: n.lon, t: n.t, role: n.role };
+  }
+  return out;
+}
+
+(async function main() {
+  await loadEmbedded();
+  redraw();
+  populateSelects();
+  initFirebase();
+})();
+</script>

@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "nodes": { ".read": true, ".write": false },
+    "links": { ".read": true, ".write": false }
+  }
+}
