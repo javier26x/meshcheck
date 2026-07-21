@@ -100,7 +100,10 @@ pm2 save
 pm2 logs mesh-bridge --lines 30          # verifica "MQTT ok" y "flushed N"
 ```
 
-El bridge escribe `/nodes/<id>` (posición) y `/links/<id>` (NeighborInfo con SNR).
+El bridge escribe `/nodes/<id>` (posición), `/links/<id>` (adyacencia real con
+SNR: NeighborInfo del nodo **y** recepciones directas de cada gateway MQTT,
+`hops_away=0`) y `/meta/stats` (diagnóstico de tipos de mensaje, visible en el
+pie del panel del visor).
 
 ### 4. Frontend
 

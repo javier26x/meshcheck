@@ -268,6 +268,7 @@
         Datos vivos vía Firebase RTDB (bridge MQTT MeshChile). Snapshot base:
         <code id="foot-n">nodes.json</code>. Geocodificación: OpenStreetMap Nominatim.
       </p>
+      <p class="note mono" id="diag" style="margin-top:8px"></p>
     </div>
   </aside>
 
@@ -303,7 +304,8 @@ const FIREBASE_READY = !FIREBASE_CONFIG.databaseURL.includes("TU-PROYECTO");
 
 /* ---- 2. Estado ------------------------------------------------------------ */
 let liveNodes = {};        // { id: {id,name,lat,lon,t,role} }  desde RTDB
-let liveLinks = {};        // { id: {from,neighbors:[{id,snr}],t} }
+let liveLinks = {};        // { id: {from,t, nb:{<id>:{snr,t,src}}} } (o legacy neighbors[])
+let liveMeta = null;       // meta/stats del bridge (diagnóstico MQTT)
 let embeddedNodes = {};    // snapshot nodes.json
 let useLive = false;
 let rangeKm = 15;
@@ -381,6 +383,21 @@ function activeNodes() {
 }
 
 /* ---- 6. Grafo de adyacencia ----------------------------------------------- */
+// Normaliza los vecinos de un registro de /links, esquema nuevo (nb objeto con
+// snr/t/src por vecino) o legacy (neighbors array). Dedup por id, más fresco gana.
+function linkNeighbors(l) {
+  if (!l) return [];
+  const byId = new Map();
+  const put = (id, snr, t, src) => {
+    id = String(id);
+    const prev = byId.get(id);
+    if (!prev || (t || 0) >= (prev.t || 0)) byId.set(id, { id, snr, t, src });
+  };
+  if (Array.isArray(l.neighbors)) for (const nb of l.neighbors) put(nb.id, nb.snr, l.t, "ni");
+  if (l.nb) for (const k in l.nb) { const v = l.nb[k] || {}; put(k, v.snr, v.t || l.t, v.src || "gw"); }
+  return [...byId.values()];
+}
+
 // vivo:   enlaces reales (SNR) + modelo entre pares donde NINGUNO reporta vecinos
 // modelo: todos los pares dentro de rangeKm
 function buildGraph(nodes) {
@@ -396,15 +413,16 @@ function buildGraph(nodes) {
     const now = Date.now();
     for (const lid in liveLinks) {
       const l = liveLinks[lid];
-      if (!l || (l.t && now - l.t > ttlMs)) continue;
-      const from = String(l.from);
+      if (!l) continue;
+      const from = String(l.from != null ? l.from : lid);
       if (!nodes[from]) continue;
+      const nbs = linkNeighbors(l).filter((nb) => !nb.t || now - nb.t <= ttlMs);
+      if (!nbs.length) continue;
       reporters.add(from);
-      for (const nb of (l.neighbors || [])) {
-        const to = String(nb.id);
-        if (!nodes[to]) continue;
-        add(from, to); add(to, from);
-        edges.push({ a: from, b: to, snr: nb.snr, live: true });
+      for (const nb of nbs) {
+        if (!nodes[nb.id]) continue;
+        add(from, nb.id); add(nb.id, from);
+        edges.push({ a: from, b: nb.id, snr: nb.snr, live: true });
         realCount++;
       }
     }
@@ -427,26 +445,29 @@ function buildGraph(nodes) {
 /* ---- 7. Vecinos de un nodo (para el popup) -------------------------------- */
 function neighborsOf(id, nodes) {
   const name = (x) => esc((nodes[x] && nodes[x].name) || x);
-  const hears = [];
-  const l = liveLinks[id];
-  if (l && Array.isArray(l.neighbors)) {
-    for (const nb of l.neighbors) hears.push({ id: String(nb.id), snr: nb.snr });
-  }
+  const hears = linkNeighbors(liveLinks[id]);
   const heardBy = [];
   for (const lid in liveLinks) {
     const ll = liveLinks[lid];
-    if (!ll || String(ll.from) === id) continue;
-    for (const nb of (ll.neighbors || [])) {
-      if (String(nb.id) === id) heardBy.push({ id: String(ll.from), snr: nb.snr });
+    if (!ll) continue;
+    const from = String(ll.from != null ? ll.from : lid);
+    if (from === id) continue;
+    for (const nb of linkNeighbors(ll)) {
+      if (nb.id === id) heardBy.push({ id: from, snr: nb.snr, t: nb.t, src: nb.src });
     }
   }
-  const fmt = (arr) => arr.slice(0, 10).map((x) =>
-    `${name(x.id)} <span class="snr">(${x.snr != null ? x.snr + " dB" : "s/d"})</span>`).join(", ") +
+  const one = (x) => {
+    const bits = [x.snr != null ? x.snr + " dB" : "s/d"];
+    if (x.t) bits.push(fmtAge(x.t));
+    if (x.src === "gw") bits.push("vía gw");
+    return `${name(x.id)} <span class="snr">(${bits.join(" · ")})</span>`;
+  };
+  const fmt = (arr) => arr.sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 10).map(one).join(", ") +
     (arr.length > 10 ? ` +${arr.length - 10} más` : "");
   let html = "";
   if (hears.length)   html += `<div class="nb"><b>Ve a ${hears.length}:</b> ${fmt(hears)}</div>`;
   if (heardBy.length) html += `<div class="nb"><b>Lo escuchan ${heardBy.length}:</b> ${fmt(heardBy)}</div>`;
-  if (!html) html = `<div class="nb" style="color:var(--muted)">Sin NeighborInfo reportado (módulo apagado o nodo silencioso).</div>`;
+  if (!html) html = `<div class="nb" style="color:var(--muted)">Sin adyacencia observada aún (ni NeighborInfo ni recepción directa de un gateway).</div>`;
   return html;
 }
 
@@ -651,6 +672,16 @@ function fitPoints() {
   else if (pts.length === 1) map.setView(pts[0], Math.max(map.getZoom(), 11));
 }
 
+/* ---- 11b. Diagnóstico del bridge (meta/stats) ------------------------------ */
+function updateDiag() {
+  const el = document.getElementById("diag");
+  if (!liveMeta) { el.textContent = ""; return; }
+  const types = Object.entries(liveMeta.types || {})
+    .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
+  const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
+  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · enlaces vía gateway: ${liveMeta.gwLinks || 0}`;
+}
+
 /* ---- 12. Banner ------------------------------------------------------------ */
 function banner(msg) {
   const b = document.getElementById("banner");
@@ -759,6 +790,7 @@ function initFirebase() {
       redraw();
     });
     db.ref("links").on("value", (s) => { liveLinks = s.val() || {}; redraw(); });
+    db.ref("meta/stats").on("value", (s) => { liveMeta = s.val(); updateDiag(); });
   } catch (err) {
     console.error("Firebase init falló:", err);
     banner("No se pudo conectar a Firebase — modo modelo.");

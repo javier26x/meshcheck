@@ -1,6 +1,7 @@
 {
   "rules": {
     "nodes": { ".read": true, ".write": false },
-    "links": { ".read": true, ".write": false }
+    "links": { ".read": true, ".write": false },
+    "meta":  { ".read": true, ".write": false }
   }
 }
