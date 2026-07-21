@@ -549,22 +549,24 @@ window.setPointFromNode = (id, which) => {
   redraw();
 };
 
-/* ---- 8. Ruta A→B: acceso + BFS multi-origen ------------------------------- */
-function computeRoute(nodes, adj) {
-  if (!pointA || !pointB) return null;
-  const ids = Object.keys(nodes);
-  const entries = [];            // nodos alcanzables desde A (radio = rangeKm)
-  const exits = new Map();       // idem desde B
-  for (const id of ids) {
-    const dA = haversine(pointA, nodes[id]);
+/* ---- 8. Ruta A→B por NIVELES de realidad ----------------------------------
+ * En vivo la ruta prefiere la realidad, en este orden:
+ *   1) "medida":  solo enlaces medidos por radio (NI/gw/TR)
+ *   2) "vivos":   solo nodos vivos (verdes) — enlaces estimados si hace falta
+ *   3) "nominal": cualquier nodo del snapshot (última opción, se etiqueta)
+ * En modo Modelo se va directo al nivel 3.                                   */
+function bfsRoute(nodes, adj, allowNode) {
+  const entries = [], exits = new Map();
+  for (const id in nodes) {
+    const n = nodes[id];
+    if (typeof n.lat !== "number" || !allowNode(n)) continue;
+    const dA = haversine(pointA, n);
     if (dA <= rangeKm) entries.push({ id, d: dA });
-    const dB = haversine(pointB, nodes[id]);
+    const dB = haversine(pointB, n);
     if (dB <= rangeKm) exits.set(id, dB);
   }
-  if (!entries.length) return { fail: "A" };
-  if (!exits.size) return { fail: "B" };
+  if (!entries.length || !exits.size) return null;
   entries.sort((x, y) => x.d - y.d);
-
   const prev = new Map(), depth = new Map(), q = [];
   for (const e of entries) { prev.set(e.id, null); depth.set(e.id, 0); q.push(e.id); }
   let hit = null;
@@ -573,17 +575,43 @@ function computeRoute(nodes, adj) {
     if (exits.has(u)) { hit = u; break; }
     if (depth.get(u) >= hopLimit) continue;
     for (const v of (adj.get(u) || [])) {
+      if (!nodes[v] || !allowNode(nodes[v])) continue;
       if (!prev.has(v)) { prev.set(v, u); depth.set(v, depth.get(u) + 1); q.push(v); }
     }
   }
-  if (!hit) return { fail: "path" };
+  if (!hit) return null;
   const path = [];
   for (let u = hit; u != null; u = prev.get(u)) path.unshift(u);
-  return {
-    path,
-    entryDist: haversine(pointA, nodes[path[0]]),
-    exitDist: exits.get(hit),
-  };
+  return { path, entryDist: haversine(pointA, nodes[path[0]]), exitDist: exits.get(hit) };
+}
+
+function computeRoute(nodes, adj, etype) {
+  if (!pointA || !pointB) return null;
+  const isAlive = (n) => !!n.t || n.role === "repeater";
+  let r;
+  if (useLive) {
+    // nivel 1: solo aristas medidas
+    const adjReal = new Map();
+    for (const [k, t] of etype) {
+      if (!t.live) continue;
+      const [a, b] = k.split("|");
+      if (!adjReal.has(a)) adjReal.set(a, new Set());
+      if (!adjReal.has(b)) adjReal.set(b, new Set());
+      adjReal.get(a).add(b); adjReal.get(b).add(a);
+    }
+    r = bfsRoute(nodes, adjReal, () => true);
+    if (r) return Object.assign(r, { tier: "medida" });
+    // nivel 2: solo nodos vivos (enlaces estimados permitidos)
+    r = bfsRoute(nodes, adj, isAlive);
+    if (r) return Object.assign(r, { tier: "vivos" });
+  }
+  // nivel 3: todo el snapshot
+  r = bfsRoute(nodes, adj, () => true);
+  if (r) return Object.assign(r, { tier: "nominal" });
+  const near = (p) => Object.values(nodes).some((n) => typeof n.lat === "number" && haversine(p, n) <= rangeKm);
+  if (!near(pointA)) return { fail: "A" };
+  if (!near(pointB)) return { fail: "B" };
+  return { fail: "path" };
 }
 
 /* ---- 9. Render ------------------------------------------------------------ */
@@ -650,7 +678,7 @@ function redraw() {
 
   // ruta
   let pathTxt = "Fija dirección A y B (busca 🔍 o clic 📍) para trazar la ruta.";
-  const route = computeRoute(nodes, adj);
+  const route = computeRoute(nodes, adj, etype);
   if (route) {
     if (route.fail === "A" || route.fail === "B") {
       pathTxt = `<span class="badge no">sin acceso</span> Ningún nodo a menos de ${rangeKm} km del punto ` +
@@ -673,16 +701,21 @@ function redraw() {
           { color: "#ff7a1a", weight: 3.5, opacity: 0.95, dashArray: t.live ? null : "7,8" }).addTo(pathLayer);
       }
       path.forEach((id) => L.circleMarker([nodes[id].lat, nodes[id].lon],
-        { radius: 6, color: "#ff7a1a", weight: 2, fillOpacity: 0 }).addTo(pathLayer));
+        { radius: 6, color: nodes[id].t ? "#3ad07a" : "#7a8391", weight: 2.5, fillOpacity: 0 }).addTo(pathLayer));
       L.polyline([[nodes[path[path.length - 1]].lat, nodes[path[path.length - 1]].lon], [pointB.lat, pointB.lon]],
         { color: "#ff5b8c", weight: 2, dashArray: "5,6", opacity: 0.9 }).addTo(pathLayer);
       const hops = path.length - 1;
-      const names = path.map((id) => `<b>${esc(nodes[id].name || id)}</b>`).join(" → ");
+      const dot = (id) => `<span style="color:${nodes[id].t ? "#3ad07a" : "#7a8391"}">●</span>`;
+      const names = path.map((id) => `${dot(id)}<b>${esc(nodes[id].name || id)}</b>`).join(" → ");
+      const tierBadge =
+        route.tier === "medida" ? `<span class="badge ok">ruta 100% medida</span>` :
+        route.tier === "vivos" ? `<span class="badge" style="background:rgba(58,208,122,.15);color:#3ad07a">solo nodos vivos · enlaces estimados</span>` :
+        `<span class="badge" style="background:rgba(122,131,145,.2);color:#8b93a1">incluye nodos nominales (sin señal)</span>`;
       const mix = hops === 0 ? "" :
         useLive ? ` · <span class="mono">${realHops} medido${realHops === 1 ? "" : "s"} / ${hops - realHops} estimado${hops - realHops === 1 ? "" : "s"}</span>` :
         ` · <span class="mono">todos estimados (modelo)</span>`;
       pathTxt = `A → ${names} → B<br>` +
-        `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"} en malla</span>${mix}<br>` +
+        `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ${tierBadge}${mix}<br>` +
         `acceso ${fmtKm(entryDist)} · salida ${fmtKm(exitDist)}`;
     }
   }
