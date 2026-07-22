@@ -606,47 +606,62 @@ window.setPointFromNode = (id, which) => {
   map.closePopup(); saveState(); redraw();
 };
 
-/* ---- 8. Ruta A→B por niveles ---------------------------------------------- */
-function bfsRoute(nodes, adj, allowNode) {
+/* ---- 8. Ruta A→B: camino más corto PONDERADO ------------------------------
+ * Dijkstra sobre (nodo, profundidad). El coste hace que saltar por un nodo
+ * MEDIDO/VIVO sea barato y por uno NOMINAL (gris, del directorio) sea caro, así
+ * la ruta prefiere la malla real y solo usa nominales para tapar huecos —en vez
+ * del antiguo "todo o nada" que caía a puros nominales. Respeta el hop limit.
+ *   coste de salto a v = 1 (base) + 2 si el enlace es modelado + 8 si v es nominal
+ * En modo Modelo no hay enlaces medidos: se comporta como distancia pura.      */
+const isNominalNode = (n) => !n.t && !n.estimated && n.role !== "repeater";
+function computeRoute(nodes, adj, etype) {
+  if (!pointA || !pointB) return null;
   const entries = [], exits = new Map();
   for (const id in nodes) {
-    const n = nodes[id];
-    if (typeof n.lat !== "number" || !allowNode(n)) continue;
+    const n = nodes[id]; if (typeof n.lat !== "number") continue;
     const dA = haversine(pointA, n); if (dA <= rangeKm) entries.push({ id, d: dA });
     const dB = haversine(pointB, n); if (dB <= rangeKm) exits.set(id, dB);
   }
-  if (!entries.length || !exits.size) return null;
-  entries.sort((x, y) => x.d - y.d);
-  const prev = new Map(), depth = new Map(), q = [];
-  for (const e of entries) { prev.set(e.id, null); depth.set(e.id, 0); q.push(e.id); }
-  let hit = null;
-  while (q.length) {
-    const u = q.shift();
-    if (exits.has(u)) { hit = u; break; }
-    if (depth.get(u) >= hopLimit) continue;
-    for (const v of (adj.get(u) || [])) { if (!nodes[v] || !allowNode(nodes[v])) continue; if (!prev.has(v)) { prev.set(v, u); depth.set(v, depth.get(u) + 1); q.push(v); } }
+  if (!entries.length) return { fail: "A" };
+  if (!exits.size) return { fail: "B" };
+
+  // min-heap por coste
+  const heap = [];
+  const hpush = (c, id, d) => { heap.push({ c, id, d }); let i = heap.length - 1;
+    while (i > 0) { const p = (i - 1) >> 1; if (heap[p].c <= heap[i].c) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+  const hpop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0;
+    for (;;) { let l = 2 * i + 1, r = 2 * i + 2, s = i; if (l < heap.length && heap[l].c < heap[s].c) s = l; if (r < heap.length && heap[r].c < heap[s].c) s = r; if (s === i) break; [heap[s], heap[i]] = [heap[i], heap[s]]; i = s; } } return top; };
+
+  const dist = new Map(), prev = new Map(), key = (id, d) => id + "#" + d;
+  for (const e of entries) {
+    const c = (isNominalNode(nodes[e.id]) ? 8 : 0) + e.d * 0.05;   // prefiere entrar por un vivo cercano
+    const k = key(e.id, 0);
+    if (!(dist.get(k) <= c)) { dist.set(k, c); prev.set(k, null); hpush(c, e.id, 0); }
   }
-  if (!hit) return null;
-  const path = []; for (let u = hit; u != null; u = prev.get(u)) path.unshift(u);
-  return { path, entryDist: haversine(pointA, nodes[path[0]]), exitDist: exits.get(hit) };
-}
-function computeRoute(nodes, adj, etype) {
-  if (!pointA || !pointB) return null;
-  const isAlive = (n) => !!n.t || n.role === "repeater";
-  let r;
-  if (useLive) {
-    const adjReal = new Map();
-    for (const [k, t] of etype) { if (!t.live) continue; const [a, b] = k.split("|");
-      if (!adjReal.has(a)) adjReal.set(a, new Set()); if (!adjReal.has(b)) adjReal.set(b, new Set());
-      adjReal.get(a).add(b); adjReal.get(b).add(a); }
-    r = bfsRoute(nodes, adjReal, () => true); if (r) return Object.assign(r, { tier: "medida" });
-    r = bfsRoute(nodes, adj, isAlive); if (r) return Object.assign(r, { tier: "vivos" });
+  let hitK = null;
+  while (heap.length) {
+    const { c, id, d } = hpop();
+    const k = key(id, d);
+    if (c > (dist.get(k) ?? Infinity)) continue;
+    if (exits.has(id)) { hitK = k; break; }        // primer exit que sale del heap = mínimo coste
+    if (d >= hopLimit) continue;
+    for (const v of (adj.get(id) || [])) {
+      if (!nodes[v]) continue;
+      const t = etype.get(ekey(id, v)) || {};
+      const ec = 1 + (t.live ? 0 : 2) + (isNominalNode(nodes[v]) ? 8 : 0);
+      const nd = d + 1, nc = c + ec, nk = key(v, nd);
+      if (!(dist.get(nk) <= nc)) { dist.set(nk, nc); prev.set(nk, k); hpush(nc, v, nd); }
+    }
   }
-  r = bfsRoute(nodes, adj, () => true); if (r) return Object.assign(r, { tier: "nominal" });
-  const near = (p) => Object.values(nodes).some((n) => typeof n.lat === "number" && haversine(p, n) <= rangeKm);
-  if (!near(pointA)) return { fail: "A" };
-  if (!near(pointB)) return { fail: "B" };
-  return { fail: "path" };
+  if (hitK == null) return { fail: "path" };
+  const path = [];
+  for (let cur = hitK; cur != null; cur = prev.get(cur)) path.unshift(cur.slice(0, cur.lastIndexOf("#")));
+  let realHops = 0, nominal = 0;
+  for (let i = 0; i < path.length - 1; i++) if ((etype.get(ekey(path[i], path[i + 1])) || {}).live) realHops++;
+  for (const id of path) if (isNominalNode(nodes[id])) nominal++;
+  const hops = path.length - 1;
+  const tier = (nominal === 0 && realHops === hops && hops > 0) ? "medida" : nominal === 0 ? "vivos" : "hibrida";
+  return { path, entryDist: haversine(pointA, nodes[path[0]]), exitDist: exits.get(path[path.length - 1]), tier, realHops, nominal };
 }
 
 /* ---- 9. Filtros de visualización ------------------------------------------ */
@@ -800,7 +815,7 @@ function renderRoute(nodes, adj, etype) {
   const hops = path.length - 1;
   const tierBadge = route.tier === "medida" ? `<span class="badge ok">ruta 100% medida</span>`
     : route.tier === "vivos" ? `<span class="badge" style="background:rgba(58,208,122,.15);color:#3ad07a">solo nodos vivos</span>`
-    : `<span class="badge" style="background:rgba(122,131,145,.2);color:#8b93a1">incluye nominales</span>`;
+    : `<span class="badge" style="background:rgba(122,131,145,.2);color:#8b93a1">usa ${route.nominal} nominal${route.nominal === 1 ? "" : "es"}</span>`;
   const mix = hops === 0 ? "" : useLive ? ` · ${realHops} medido${realHops === 1 ? "" : "s"} / ${hops - realHops} estimado${hops - realHops === 1 ? "" : "s"}` : " · modelo";
   sum.innerHTML = `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ${tierBadge}<br><span class="mono" style="color:var(--muted)">acceso ${fmtKm(entryDist)} · salida ${fmtKm(exitDist)}${mix}</span>`;
 
