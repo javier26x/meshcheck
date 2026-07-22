@@ -394,7 +394,7 @@ let showModelFill = false, showEstimated = true, focusDim = true, showLabels = f
 let filters = { live: false, routers: false, measured: false, hideDir: false };
 let selectedId = null, openPopupId = null, basemapIdx = 0;
 let lastNodes = {}, markerById = {}, prevLiveIds = new Set();
-let lastUpdate = 0, userLocMarker = null;
+let lastUpdate = 0, userLocMarker = null, redrawing = false;
 const MAX_DRAW_EDGES = 5000;
 const $ = (id) => document.getElementById(id);
 
@@ -746,6 +746,7 @@ function draggablePin(pt, letter, color, which) {
 }
 
 function redraw() {
+  redrawing = true;   // evita que el clearLayers cierre el popup abierto (ver popupclose)
   linkLayer.clearLayers(); nodeLayer.clearLayers(); pathLayer.clearLayers(); pinLayer.clearLayers();
   markerById = {};
   const { nodes, unlocated, hasLive } = activeNodes();
@@ -815,8 +816,8 @@ function redraw() {
         weight: sel ? 3 : (router ? 2 : 1), fillColor: fill, fillOpacity: alive ? 0.95 : 0.55 });
     }
     m._nodeId = id; m._live = !!n.t && !n.estimated;
-    m.bindPopup(() => nodePopupHtml(id));
-    m.on("click", () => { selectedId = id; redraw(); });
+    m.bindPopup(() => nodePopupHtml(id), { autoPan: true, maxHeight: 380 });
+    m.on("click", () => { selectedId = id; openPopupId = id; redraw(); });
     if (showLabels && (n.name || n.alias)) m.bindTooltip(esc(String(n.alias || n.name)), { permanent: true, direction: "right", className: "nlabel", offset: [6, 0] });
     markers.push(m); markerById[id] = m;
   }
@@ -846,10 +847,11 @@ function redraw() {
   $("est-count").textContent = estCount ? `(${estCount} ubicados)` : "";
   updateStatus(hasLive);
 
-  // reabrir popup si estaba abierto
-  if (openPopupId && markerById[openPopupId] && !map._popup) {
+  // reabrir el popup del nodo que estaba abierto (o el recién clickeado)
+  if (openPopupId && markerById[openPopupId]) {
     try { markerById[openPopupId].openPopup(); } catch (e) {}
   }
+  redrawing = false;
 }
 
 function renderRoute(nodes, adj, etype) {
@@ -1109,8 +1111,8 @@ map.on("click", (e) => {
   if (armPoint) { const pt = { lat: e.latlng.lat, lon: e.latlng.lng, label: `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}` }; $(armPoint === "A" ? "addr-a" : "addr-b").value = pt.label; if (armPoint === "A") pointA = pt; else pointB = pt; armPoint = null; syncPinButtons(); saveState(); redraw(); return; }
   if (selectedId) { selectedId = null; redraw(); }
 });
-map.on("popupopen", (e) => { openPopupId = e.popup._source && e.popup._source._nodeId || null; });
-map.on("popupclose", () => { openPopupId = null; });
+map.on("popupopen", (e) => { const s = e.popup._source; if (s && s._nodeId) openPopupId = s._nodeId; });
+map.on("popupclose", () => { if (!redrawing) openPopupId = null; });   // no borrar durante el redraw
 map.on("moveend", saveState);
 
 /* ---- 17. Carga inicial ---------------------------------------------------- */
