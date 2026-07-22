@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Sintaxis del frontend (JS embebido)
+        run: |
+          node -e '
+            const fs=require("fs");
+            const h=fs.readFileSync("frontend/meshcheck.html","utf8");
+            const re=/<script>([\s\S]*?)<\/script>/g; let m,last=null;
+            while((m=re.exec(h))) last=m[1];
+            require("node:vm").compileFunction(last);
+            console.log("frontend JS OK");
+          '
+      - name: Sintaxis del bridge y extractor
+        run: |
+          node --check bridge/bridge.js
+          node --check bridge/meshtastic.js
+          node --check tools/fetch_nodes.mjs
+          node --check tools/diag.mjs
+      - name: Tests
+        run: npm test

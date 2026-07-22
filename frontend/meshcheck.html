@@ -1027,7 +1027,12 @@ function updateDiag() {
     tmix = ` · topics[json:${agg.json} cifrado:${agg.e} map:${agg.map}]`;
   }
   const enc = f.enc ? ` · descifrados:${f.encOk || 0}/${f.enc}` : "";
-  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links:${liveMeta.gwLinks || 0}${enc}` +
+  let chan = "";
+  if (liveMeta.chan) {
+    const rows = Object.entries(liveMeta.chan).sort((a, b) => b[1].n - a[1].n).map(([c, v]) => `${c}:${v.ok}/${v.n}`);
+    if (rows.length) chan = ` · canales[${rows.join(" ")}]`;
+  }
+  el.textContent = `bridge (${age}) → ${types || "sin tráfico"} · gw-links:${liveMeta.gwLinks || 0}${enc}${chan}` +
     (f.sender != null ? ` · sobres[sender:${f.sender} hops_away:${f.hops_away} directos:${f.direct}]` : "") + tmix;
 }
 function banner(msg) { const b = $("banner"); if (!msg) { b.style.display = "none"; return; } b.textContent = msg; b.style.display = "block"; }

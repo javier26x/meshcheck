@@ -1,0 +1,39 @@
+name: Refrescar snapshot de nodos
+
+# Re-extrae el directorio de meshchile.cl (Firestore) y actualiza frontend/nodes.json.
+# Corre diario y se puede lanzar a mano. El deploy a Firebase es opcional: requiere
+# el secret FIREBASE_TOKEN (firebase login:ci). Sin él, solo commitea el snapshot.
+on:
+  schedule:
+    - cron: "17 9 * * *"   # 09:17 UTC diario
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Extraer nodos desde el mapa de MeshChile
+        run: node tools/fetch_nodes.mjs
+      - name: Commit si cambió
+        run: |
+          if git diff --quiet -- frontend/nodes.json; then
+            echo "sin cambios en nodes.json"
+            exit 0
+          fi
+          git config user.name "meshcheck-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add frontend/nodes.json
+          git commit -m "chore: refrescar snapshot de nodos MeshChile (auto)"
+          git push
+      - name: Deploy a Firebase Hosting (opcional, requiere FIREBASE_TOKEN)
+        if: ${{ env.FIREBASE_TOKEN != '' }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: npx --yes firebase-tools deploy --only hosting --project meshcheckci --token "$FIREBASE_TOKEN"

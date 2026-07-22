@@ -471,4 +471,10 @@ function save(nodes, source) {
   console.log("  Redespliega el frontend:  firebase deploy --only hosting --project meshcheckci");
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+// Ejecuta solo si se invoca directo (no al importarlo para tests)
+import { pathToFileURL } from "node:url";
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((e) => { console.error(e); process.exit(1); });
+}
+
+export { normNode, finish, scanNodeId, fsVal, fsFlat, extractNodes, coord, pick };

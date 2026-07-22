@@ -1,0 +1,12 @@
+{
+  "name": "meshcheck",
+  "version": "1.0.0",
+  "description": "Visor de la malla MeshChile en vivo (frontend + bridge + extractor)",
+  "type": "commonjs",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "extract": "node tools/fetch_nodes.mjs",
+    "diag": "node tools/diag.mjs"
+  }
+}

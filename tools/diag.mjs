@@ -46,6 +46,12 @@ if (!stats) {
   const f = stats.fields || {};
   console.log(`sobres: sender:${f.sender ?? "?"}  hops_away:${f.hops_away ?? "?"}  hop_start:${f.hop_start ?? "?"}  directos:${f.direct ?? "?"}  → gw-links acumulados: ${stats.gwLinks ?? "?"}`);
   console.log(`descifrado: ${f.encOk ?? 0}/${f.enc ?? 0} paquetes cifrados decodificados (fallos: ${f.encFail ?? 0})`);
+  if (stats.chan) {
+    const rows = Object.entries(stats.chan).sort((a, b) => b[1].n - a[1].n).map(([c, v]) => `${c}: ${v.ok}/${v.n}`);
+    if (rows.length) console.log("  por canal → " + rows.join("   "));
+    const dead = Object.entries(stats.chan).filter(([, v]) => v.n >= 3 && v.ok === 0).map(([c]) => c);
+    if (dead.length) problems.push(`Canal(es) sin descifrar (llave distinta): ${dead.join(", ")} — normal si son canales privados (ej. RQR). El nacional es LongFast.`);
+  }
   if (f.enc > 0) {
     if ((f.encOk ?? 0) === 0)
       problems.push("Llegan paquetes cifrados pero NINGUNO se descifra → la llave del canal NO es la default. " +
