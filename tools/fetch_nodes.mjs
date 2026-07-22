@@ -196,7 +196,21 @@ async function fetchFirestoreCollection(cfg, col) {
     pageToken = data.nextPageToken;
   }
   if (!out.length) { console.log("[vacía]"); return null; }
-  const nodes = out.map(normNode).filter(Boolean);
+  // normaliza + adjunta metadatos del directorio (para la ficha del nodo)
+  const nodes = [];
+  for (const o of out) {
+    const nn = normNode(o); if (!nn) continue;
+    const meta = {};
+    const put = (dst, keys) => { for (const k of keys) { const v = o[k]; if (v != null && v !== "") { meta[dst] = v; break; } } };
+    put("user", ["userName", "user", "owner"]);
+    put("freq", ["frequency", "freq"]);
+    put("power", ["power"]);
+    put("antenna", ["antenna", "antena"]);
+    put("locType", ["locationType"]);
+    put("desc", ["description", "descripcion", "notes"]);
+    if (Object.keys(meta).length) nn.meta = meta;
+    nodes.push(nn);
+  }
   // inventario de campos (para diagnosticar de dónde sale/no sale el nº de nodo)
   const keys = [...new Set(out.flatMap((o) => Object.keys(o)))];
   console.log(`\n    campos vistos: ${keys.join(", ")}`);

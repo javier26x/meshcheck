@@ -116,17 +116,22 @@
   .leaflet-control-attribution a { color: var(--muted) !important; }
   .leaflet-bar a { background: var(--panel) !important; color: var(--txt) !important; border-color: var(--line) !important; }
   .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--panel); color: var(--txt); border: 1px solid var(--line); }
-  .leaflet-popup-content { margin: 10px 12px; font-size: 12px; max-width: 240px; }
-  .leaflet-popup-content .pt { font-weight: 700; margin-bottom: 3px; }
-  .leaflet-popup-content .pm { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
-  .leaflet-popup-content .nb { margin-top: 7px; font-size: 11px; }
+  .leaflet-popup-content { margin: 10px 12px; font-size: 12px; width: 264px !important; max-height: 62vh; overflow-y: auto; }
+  .leaflet-popup-content .pt { font-weight: 700; margin-bottom: 3px; font-size: 13px; }
+  .leaflet-popup-content .nb { margin-top: 6px; font-size: 11px; }
   .leaflet-popup-content .nb b { color: var(--accent); }
-  .leaflet-popup-content .nb .snr { font-family: "JetBrains Mono", monospace; }
-  .leaflet-popup-content .pa { margin-top: 8px; display: flex; gap: 6px; }
-  .leaflet-popup-content .pa a { flex: 1; text-align: center; text-decoration: none; font-size: 11px; font-weight: 600;
-    padding: 4px 6px; border-radius: 5px; border: 1px solid var(--line); }
-  .leaflet-popup-content .pa a.sa { color: var(--a); border-color: var(--a); }
-  .leaflet-popup-content .pa a.sb { color: var(--b); border-color: var(--b); }
+  .pop-sec { margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line); }
+  .pop-sec .h { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+  .pop-kv { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin: 2px 0; }
+  .pop-kv .k { color: var(--muted); } .pop-kv .v { font-family: "JetBrains Mono", monospace; text-align: right; word-break: break-all; }
+  .batt { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 2px 0 4px; }
+  .batt > i { display: block; height: 100%; }
+  .pop-act { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .pop-act a { flex: 1 1 40%; text-align: center; text-decoration: none; font-size: 11px; font-weight: 600;
+    padding: 5px 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--txt); cursor: pointer; }
+  .pop-act a:hover { border-color: var(--accent); color: var(--accent); }
+  .pop-act a.sa { color: var(--a); border-color: var(--a); }
+  .pop-act a.sb { color: var(--b); border-color: var(--b); }
   /* tooltip de enlace */
   .leaflet-tooltip.linktip { background: var(--panel); border: 1px solid var(--line); color: var(--txt);
     font-size: 11px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.5); padding: 5px 8px; }
@@ -556,54 +561,92 @@ function buildGraph(nodes) {
   return { adj, edges, etype, realCount };
 }
 
-/* ---- 7. Popup de nodo ----------------------------------------------------- */
-function neighborsOf(id, nodes) {
-  const name = (x) => esc((nodes[x] && nodes[x].name) || x);
-  const hears = linkNeighbors(liveLinks[id]);
-  const heardBy = [];
-  for (const lid in liveLinks) {
-    const ll = liveLinks[lid]; if (!ll) continue;
-    const from = String(ll.from != null ? ll.from : lid);
-    if (from === id) continue;
-    for (const nb of linkNeighbors(ll)) if (nb.id === id) heardBy.push({ id: from, snr: nb.snr, t: nb.t, src: nb.src });
-  }
-  const one = (x) => {
-    const bits = [x.snr != null ? x.snr + " dB" : "s/d"];
-    if (x.t) bits.push(fmtAge(x.t));
-    bits.push(x.src === "ni" ? "NI" : x.src === "tr" ? "TR" : "gw");
-    return `${name(x.id)} <span class="snr">(${bits.join(" · ")})</span>`;
-  };
-  const fmt = (arr) => arr.sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 10).map(one).join(", ") + (arr.length > 10 ? ` +${arr.length - 10} más` : "");
-  let html = "";
-  if (hears.length)   html += `<div class="nb"><b>📡 Ve (medido) a ${hears.length}:</b> ${fmt(hears)}</div>`;
-  if (heardBy.length) html += `<div class="nb"><b>📡 Lo escuchan ${heardBy.length}:</b> ${fmt(heardBy)}</div>`;
-  if (!html) html = `<div class="nb" style="color:var(--muted)">Sin adyacencia <b>medida</b> aún.</div>`;
-  const n0 = nodes[id]; let near = 0;
-  if (n0) for (const k in nodes) { if (k !== id && haversine(n0, nodes[k]) <= rangeKm) near++; }
-  html += `<div class="nb" style="color:var(--muted)"><b style="color:var(--muted)">≈ Por cercanía (≤ ${rangeKm} km):</b> ${near} nodos — estimado</div>`;
-  return html;
+/* ---- 7. Popup de nodo (ficha completa) ------------------------------------ */
+const ROLE_ENUM = { 0: "Cliente", 1: "Cliente (mute)", 2: "Router", 3: "Router + Cliente", 4: "Repetidor", 5: "Tracker", 6: "Sensor", 7: "TAK", 8: "Cliente oculto", 9: "Lost & Found", 10: "TAK Tracker", 11: "Router (late)" };
+const ROLE_STR = { CLIENT: "Cliente", CLIENT_MUTE: "Cliente (mute)", CLIENT_BASE: "Cliente (base)", CLIENT_HIDDEN: "Cliente oculto", ROUTER: "Router", ROUTER_CLIENT: "Router + Cliente", ROUTER_LATE: "Router (late)", REPEATER: "Repetidor", TRACKER: "Tracker", SENSOR: "Sensor" };
+function roleLabel(role) {
+  if (role == null) return "—";
+  if (typeof role === "number") return ROLE_ENUM[role] || ("rol " + role);
+  if (role === "repeater") return "Repetidor hipotético";
+  return ROLE_STR[String(role).toUpperCase()] || String(role);
 }
+function hexId(id) { const nn = Number(id); return Number.isInteger(nn) && nn > 0 && nn <= 0xffffffff ? "!" + (nn >>> 0).toString(16).padStart(8, "0") : null; }
+window.copyText = (t) => { try { navigator.clipboard.writeText(t); banner("Copiado: " + t); setTimeout(() => banner(""), 1400); } catch (e) { prompt("Copia:", t); } };
+
 function nodePopupHtml(id) {
   const nodes = lastNodes, n = nodes[id];
   if (!n) return "";
-  const tag = n.placeholder ? " <span style='color:#8b93a1'>(directorio)</span>" : "";
-  const vivo = n.estimated ? `<span class="badge" style="background:rgba(181,122,255,.2);color:var(--est)">VIVO · sin GPS</span>`
-    : n.t ? `<span class="badge ok">VIVO · ${fmtAge(n.t)}</span>`
-    : `<span class="badge" style="background:rgba(122,131,145,.2);color:#7a8391">nominal</span>`;
-  const estNote = n.estimated ? `<div class="nb" style="color:var(--est)">📍 Ubicación ESTIMADA a partir de ${n.estRefs} nodo(s) que lo escuchan — geometría aproximada; enlace y SNR reales.</div>` : "";
-  const extra = [];
-  if (n.alt != null) extra.push(`alt ${n.alt} m`);
-  if (n.batt != null) extra.push(`bat ${n.batt}%`);
-  if (n.volt != null) extra.push(`${n.volt} V`);
-  if (n.temp != null) extra.push(`${n.temp}°C`);
-  if (n.chUtil != null) extra.push(`canal ${n.chUtil}%`);
-  if (n.hw) extra.push(esc(String(n.hw)));
-  return `<div class="pt">${esc(n.name || id)}${tag} ${vivo}</div>` +
-    `<div class="pm">id ${esc(id)} · rol ${esc(String(n.role ?? "?"))}<br>${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}` +
-    (extra.length ? `<br>${extra.join(" · ")}` : "") + (isRouter(n) ? "<br>router/elevado" : "") + `</div>` +
-    estNote + neighborsOf(id, nodes) +
-    `<div class="pa"><a href="#" class="sa" onclick="setPointFromNode('${esc(id)}','A');return false">Fijar como A</a>` +
-    `<a href="#" class="sb" onclick="setPointFromNode('${esc(id)}','B');return false">Fijar como B</a></div>`;
+  const kv = (k, v) => `<div class="pop-kv"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const nm = (x) => esc((nodes[x] && nodes[x].name) || x);
+
+  // cabecera + badges
+  const badges = [];
+  if (n.estimated) badges.push(`<span class="badge" style="background:rgba(181,122,255,.2);color:var(--est)">VIVO · sin GPS</span>`);
+  else if (n.t) badges.push(`<span class="badge ok">VIVO · ${fmtAge(n.t)}</span>`);
+  else badges.push(`<span class="badge" style="background:rgba(122,131,145,.2);color:#7a8391">nominal</span>`);
+  if (isRouter(n)) badges.push(`<span class="badge" style="background:rgba(255,210,63,.18);color:var(--router)">router</span>`);
+  if (n.placeholder && !n.t) badges.push(`<span class="badge" style="background:rgba(139,147,161,.15);color:#8b93a1">directorio</span>`);
+  let h = `<div class="pt">${esc(n.name || id)}${n.alias ? ` <span style="color:var(--muted)">(${esc(n.alias)})</span>` : ""}</div><div style="margin-top:3px">${badges.join(" ")}</div>`;
+
+  // identidad
+  const hx = hexId(id);
+  h += `<div class="pop-sec"><div class="h">Identidad</div>` + kv("ID", esc(id)) + (hx ? kv("Node ID", hx) : "") + kv("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kv("Hardware", esc(String(n.hw))) : "") + `</div>`;
+
+  // ubicación
+  h += `<div class="pop-sec"><div class="h">Ubicación</div>` + kv("Coord", `${n.lat.toFixed(5)}, ${n.lon.toFixed(5)}`) +
+    (n.alt != null ? kv("Altitud", n.alt + " m") : "") +
+    kv("Fuente", n.estimated ? "estimada (vecinos)" : n.t ? "GPS reportado" : "directorio") + `</div>`;
+  if (n.estimated) h += `<div class="note" style="color:var(--est);margin-top:4px">📍 Posición estimada de ${n.estRefs} nodo(s) que lo escuchan — geometría aproximada; enlace y SNR reales.</div>`;
+
+  // telemetría
+  const tele = [];
+  if (n.batt != null) { const col = n.batt > 50 ? "#3ad07a" : n.batt > 20 ? "#ffd23f" : "#ff4d4d"; tele.push(kv("Batería", n.batt + "%") + `<div class="batt"><i style="width:${Math.max(2, Math.min(100, n.batt))}%;background:${col}"></i></div>`); }
+  if (n.volt != null) tele.push(kv("Voltaje", n.volt + " V"));
+  if (n.temp != null) tele.push(kv("Temperatura", n.temp + " °C"));
+  if (n.chUtil != null) tele.push(kv("Uso de canal", n.chUtil + "%"));
+  if (tele.length) h += `<div class="pop-sec"><div class="h">Telemetría</div>${tele.join("")}</div>`;
+
+  // directorio MeshChile (si el snapshot trae metadatos)
+  if (n.meta) {
+    const m = n.meta, dm = [];
+    if (m.user) dm.push(kv("Registrado por", esc(String(m.user))));
+    if (m.freq) dm.push(kv("Frecuencia", esc(String(m.freq))));
+    if (m.power) dm.push(kv("Potencia", esc(String(m.power))));
+    if (m.antenna) dm.push(kv("Antena", esc(String(m.antenna))));
+    if (m.locType) dm.push(kv("Tipo de lugar", esc(String(m.locType))));
+    if (dm.length || m.desc) h += `<div class="pop-sec"><div class="h">Directorio MeshChile</div>${dm.join("")}${m.desc ? `<div class="note" style="margin-top:3px">${esc(String(m.desc))}</div>` : ""}</div>`;
+  }
+
+  // enlaces medidos + estadística
+  const hears = linkNeighbors(liveLinks[id]);
+  const heardBy = [];
+  for (const lid in liveLinks) { const ll = liveLinks[lid]; if (!ll) continue; const from = String(ll.from != null ? ll.from : lid); if (from === id) continue; for (const nb of linkNeighbors(ll)) if (nb.id === id) heardBy.push({ id: from, snr: nb.snr, t: nb.t, src: nb.src }); }
+  const allSnr = [...hears, ...heardBy].map((x) => x.snr).filter((v) => v != null);
+  const deg = new Set([...hears.map((x) => x.id), ...heardBy.map((x) => x.id)]).size;
+  const dTo = (nid) => (nodes[nid] && typeof nodes[nid].lat === "number") ? " · " + fmtKm(haversine(n, nodes[nid])) : "";
+  const line = (x) => { const b = [x.snr != null ? x.snr + " dB" : "s/d"]; if (x.t) b.push(fmtAge(x.t)); b.push(x.src === "ni" ? "NI" : x.src === "tr" ? "TR" : "gw"); return `<div style="margin:2px 0">${nm(x.id)}<span style="color:var(--muted);font-family:'JetBrains Mono',monospace"> (${b.join(" · ")}${dTo(x.id)})</span></div>`; };
+  h += `<div class="pop-sec"><div class="h">Enlaces medidos (RF)</div>`;
+  if (deg) { const best = Math.max(...allSnr); const avg = allSnr.length ? (allSnr.reduce((a, b) => a + b, 0) / allSnr.length).toFixed(1) : "—";
+    h += kv("Grado (vecinos únicos)", deg) + (allSnr.length ? kv("SNR mejor / prom", `${best} / ${avg} dB`) : ""); }
+  else h += `<div class="note">Sin adyacencia medida aún (NeighborInfo apagado o no lo ha oído un gateway).</div>`;
+  if (hears.length) h += `<div class="nb"><b>📡 Ve a ${hears.length}:</b>${hears.sort((a, b) => (b.snr ?? -99) - (a.snr ?? -99)).slice(0, 12).map(line).join("")}${hears.length > 12 ? `<div class="note">+${hears.length - 12} más</div>` : ""}</div>`;
+  if (heardBy.length) h += `<div class="nb"><b>📡 Lo escuchan ${heardBy.length}:</b>${heardBy.sort((a, b) => (b.snr ?? -99) - (a.snr ?? -99)).slice(0, 12).map(line).join("")}${heardBy.length > 12 ? `<div class="note">+${heardBy.length - 12} más</div>` : ""}</div>`;
+  h += `</div>`;
+
+  // cobertura modelo
+  let near = 0; for (const k in nodes) { if (k !== id && haversine(n, nodes[k]) <= rangeKm) near++; }
+  h += `<div class="pop-sec"><div class="h">Cobertura (modelo)</div>${kv(`Nodos ≤ ${rangeKm} km`, near)}</div>`;
+
+  // acciones
+  const coord = `${n.lat.toFixed(5)}, ${n.lon.toFixed(5)}`;
+  h += `<div class="pop-act">` +
+    `<a class="sa" onclick="setPointFromNode('${esc(id)}','A');return false">Fijar A</a>` +
+    `<a class="sb" onclick="setPointFromNode('${esc(id)}','B');return false">Fijar B</a>` +
+    `<a onclick="window.copyText('${coord}');return false">Copiar coord</a>` +
+    (hx ? `<a onclick="window.copyText('${hx}');return false">Copiar ID</a>` : "") +
+    `<a href="https://www.google.com/maps?q=${n.lat},${n.lon}" target="_blank" rel="noopener">Google Maps ↗</a>` +
+    `</div>`;
+  return h;
 }
 window.setPointFromNode = (id, which) => {
   const n = lastNodes[id]; if (!n) return;
@@ -1079,7 +1122,7 @@ async function loadEmbedded() {
     for (const id in raw) {
       const n = raw[id];
       if (isNaN(+n.lat)) continue;
-      embeddedNodes[String(id)] = { id: String(id), name: n.name || String(id), alias: n.alias, lat: +n.lat, lon: +n.lon, role: n.role, placeholder: n.placeholder !== false };
+      embeddedNodes[String(id)] = { id: String(id), name: n.name || String(id), alias: n.alias, lat: +n.lat, lon: +n.lon, role: n.role, meta: n.meta, placeholder: n.placeholder !== false };
     }
     $("foot-n").textContent = `${Object.keys(embeddedNodes).length} nodos snapshot` + (j.generated && j.generated !== "seed" ? ` · ${j.generated.slice(0, 10)}` : "");
   } catch (err) { $("foot-n").textContent = "nodes.json no encontrado"; }
