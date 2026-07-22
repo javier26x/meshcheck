@@ -278,6 +278,8 @@
           </div>
           <label class="chk" id="fill-row" style="display:none"><input type="checkbox" id="show-fill" /> dibujar relleno modelado</label>
           <label class="chk" id="est-row" style="display:none"><input type="checkbox" id="show-est" checked /> ubicar nodos sin GPS por sus vecinos <span id="est-count" class="mono" style="color:var(--est)"></span></label>
+          <label class="chk" id="bridge-row" style="display:none"><input type="checkbox" id="show-bridges" checked /> mostrar puentes por internet <span id="bridge-count" class="mono" style="color:#22d3ee"></span></label>
+          <p class="note" id="bridge-note" style="display:none;margin-top:6px">Un <b style="color:#22d3ee">puente</b> es un enlace medido a distancia imposible por radio (&gt; 100 km): dos regiones unidas por <b>internet (MQTT)</b>, no por RF. La ruta A→B los <b>ignora</b> (es radio pura).</p>
         </div>
         <div class="sec">
           <h2>Visualización</h2>
@@ -357,7 +359,8 @@
         <div class="li"><span class="sw" style="background:#7a8391;opacity:.7"></span> Nominal (directorio, sin señal)</div>
         <div class="li"><span class="sw" style="background:#14171c;border:2px solid var(--router)"></span> Router / elevado</div>
         <div class="li"><span class="sw" style="background:var(--accent)"></span> Repetidor hipotético</div>
-        <div class="li"><span class="ln" style="border-color:rgb(240,158,32)"></span> Enlace medido (color = SNR)</div>
+        <div class="li"><span class="ln" style="border-color:rgb(240,158,32)"></span> Enlace RF medido (color = SNR)</div>
+        <div class="li"><span class="ln" style="border-color:#22d3ee; border-top-style:dashed"></span> Puente por internet (regiones lejanas)</div>
         <div class="li"><span class="ln" style="border-color:#3a4250; border-top-style:dashed"></span> Enlace modelado</div>
         <div class="snr-bar"></div>
         <div class="snr-lbl"><span>SNR bajo</span><span>SNR alto</span></div>
@@ -393,12 +396,16 @@ let liveNodes = {}, liveLinks = {}, liveMeta = null, embeddedNodes = {};
 let useLive = false, rangeKm = 15, ttlHours = 2, hopLimit = 7;
 let hypRepeaters = [], repeaterArmed = false, repIdSeq = 1;
 let pointA = null, pointB = null, armPoint = null;
-let showModelFill = false, showEstimated = true, focusDim = true, showLabels = false;
+let showModelFill = false, showEstimated = true, focusDim = true, showLabels = false, showBridges = true;
 let filters = { live: false, routers: false, measured: false, hideDir: false };
 let selectedId = null, openPopupId = null, basemapIdx = 0;
 let lastNodes = {}, markerById = {}, prevLiveIds = new Set();
 let lastUpdate = 0, userLocMarker = null, redrawing = false;
 const MAX_DRAW_EDGES = 5000;
+// Un enlace "medido" más largo que esto es físicamente imposible por radio en
+// terreno comunitario → casi seguro es un PUENTE por internet (MQTT bridging),
+// no RF. Se dibuja distinto y NO cuenta para la ruta de radio.
+const BRIDGE_KM = 100;
 const $ = (id) => document.getElementById(id);
 
 /* ---- 3. Mapa + capas ------------------------------------------------------ */
@@ -533,7 +540,7 @@ function buildGraph(nodes) {
   const adj = new Map(), edges = [], etype = new Map();
   const add = (x, y) => { if (!adj.has(x)) adj.set(x, new Set()); adj.get(x).add(y); };
   const ids = Object.keys(nodes), reporters = new Set();
-  let realCount = 0;
+  let realCount = 0, bridgeCount = 0;
   if (useLive) {
     const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
     const now = Date.now();
@@ -546,6 +553,14 @@ function buildGraph(nodes) {
       reporters.add(from);
       for (const nb of nbs) {
         if (!nodes[nb.id]) continue;
+        const dist = haversine(nodes[from], nodes[nb.id]);
+        if (dist > BRIDGE_KM) {
+          // distancia imposible por radio → puente por internet: se dibuja, pero
+          // NO entra al grafo de ruteo (la ruta A→B es radio pura)
+          edges.push({ a: from, b: nb.id, snr: nb.snr, src: nb.src, bridge: true, km: dist });
+          bridgeCount++;
+          continue;
+        }
         add(from, nb.id); add(nb.id, from);
         edges.push({ a: from, b: nb.id, snr: nb.snr, src: nb.src, live: true });
         etype.set(ekey(from, nb.id), { live: true, snr: nb.snr });
@@ -561,7 +576,7 @@ function buildGraph(nodes) {
       const k = ekey(ids[i], ids[j]); if (!etype.has(k)) etype.set(k, { model: true });
     }
   }
-  return { adj, edges, etype, realCount };
+  return { adj, edges, etype, realCount, bridgeCount };
 }
 
 /* ---- 7. Popup de nodo (ficha completa) ------------------------------------ */
@@ -765,33 +780,43 @@ function redraw() {
   if (!hasLive && useLive) useLive = false;
   syncToggle();
 
-  const { adj, edges, etype, realCount } = buildGraph(nodes);
+  const { adj, edges, etype, realCount, bridgeCount } = buildGraph(nodes);
   const measuredIds = new Set();
   for (const e of edges) if (e.live) { measuredIds.add(e.a); measuredIds.add(e.b); }
   const visible = visiblePredicate(measuredIds);
   const isVis = (id) => nodes[id] && visible(nodes[id]);
 
-  // enlaces (con tooltip: distancia + SNR + origen del dato)
+  // enlaces con tooltip. Tres tipos visualmente distintos:
+  //   RF medido (color=SNR) · puente internet (cyan) · modelado (gris punteado)
   const nm = (id) => esc((nodes[id] && nodes[id].name) || id);
   const srcTxt = (s) => s === "ni" ? "NeighborInfo" : s === "tr" ? "traceroute" : "gateway";
   let drawn = 0;
   for (const e of edges) {
+    if (e.bridge && !showBridges) continue;
     if (e.model && useLive && !showModelFill) continue;
     if (e.model && drawn >= MAX_DRAW_EDGES) continue;
     const a = nodes[e.a], b = nodes[e.b];
     if (!a || !b || !isVis(e.a) || !isVis(e.b)) continue;
     const focus = selectedId && focusDim;
     const incident = !focus || e.a === selectedId || e.b === selectedId;
-    const estGeom = a.estimated || b.estimated;
-    let opa = e.live ? (estGeom ? 0.6 : 0.9) : 0.32;
-    if (focus && !incident) opa *= 0.14;
-    const poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], e.live
-      ? { color: snrColor(e.snr ?? -20), weight: incident ? 2.4 : 1.6, opacity: opa, dashArray: estGeom ? "4,6" : null }
-      : { color: "#3a4250", weight: 1, opacity: opa, dashArray: "3,5" });
-    const dkm = haversine(a, b);
-    const tip = e.live
-      ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · SNR <span class="v">${e.snr != null ? e.snr + " dB" : "s/d"}</span> · ${srcTxt(e.src)}${estGeom ? " · geom. estimada" : ""}`
-      : `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · enlace modelado (≤ ${rangeKm} km)`;
+    let poly, tip;
+    if (e.bridge) {
+      // puente por internet: cyan tipo "cable de datos"
+      const opa = incident ? 0.85 : 0.16;
+      poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { color: "#22d3ee", weight: incident ? 2.2 : 1.4, opacity: opa, dashArray: "10,7" });
+      tip = `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v" style="color:#22d3ee">${fmtKm(e.km)}</span> · 🌐 puente por INTERNET (probable)<br><span style="color:var(--muted)">demasiado lejos para radio directa (> ${BRIDGE_KM} km) — regiones unidas por MQTT, no por RF</span>`;
+    } else {
+      const estGeom = a.estimated || b.estimated;
+      let opa = e.live ? (estGeom ? 0.6 : 0.9) : 0.32;
+      if (focus && !incident) opa *= 0.14;
+      poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], e.live
+        ? { color: snrColor(e.snr ?? -20), weight: incident ? 2.4 : 1.6, opacity: opa, dashArray: estGeom ? "4,6" : null }
+        : { color: "#3a4250", weight: 1, opacity: opa, dashArray: "3,5" });
+      const dkm = haversine(a, b);
+      tip = e.live
+        ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · SNR <span class="v">${e.snr != null ? e.snr + " dB" : "s/d"}</span> · ${srcTxt(e.src)} (RF)${estGeom ? " · geom. estimada" : ""}`
+        : `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · enlace modelado (≤ ${rangeKm} km)`;
+    }
     poly.bindTooltip(tip, { sticky: true, className: "linktip", opacity: 1 });
     poly.bindPopup(tip);   // tap en móvil
     poly.addTo(linkLayer);
@@ -848,6 +873,7 @@ function redraw() {
   $("s-live").textContent = liveCount;
   $("s-src").textContent = hasLive ? "RTDB" : "local"; $("s-src").style.fontSize = "13px";
   $("est-count").textContent = estCount ? `(${estCount} ubicados)` : "";
+  $("bridge-count").textContent = bridgeCount ? `(${bridgeCount})` : "";
   updateStatus(hasLive);
 
   // reabrir el popup del nodo que estaba abierto (o el recién clickeado)
@@ -909,6 +935,8 @@ function syncToggle() {
   $("btn-model").classList.toggle("active", !useLive);
   $("fill-row").style.display = useLive ? "flex" : "none";
   $("est-row").style.display = useLive ? "flex" : "none";
+  $("bridge-row").style.display = useLive ? "flex" : "none";
+  $("bridge-note").style.display = useLive ? "block" : "none";
 }
 function updateStatus(hasLive) {
   const st = $("status"), stt = $("status-txt");
@@ -1003,7 +1031,7 @@ function saveState() {
   try {
     const c = map.getCenter();
     localStorage.setItem(LS, JSON.stringify({
-      useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels,
+      useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels, showBridges,
       filters, basemapIdx, view: { c: [c.lat, c.lng], z: map.getZoom() },
       a: pointA, b: pointB,
     }));
@@ -1017,7 +1045,7 @@ function loadState() {
   if (s.ttlHours != null) ttlHours = s.ttlHours;
   if (s.hopLimit) hopLimit = s.hopLimit;
   showModelFill = !!s.showModelFill; showEstimated = s.showEstimated !== false;
-  focusDim = s.focusDim !== false; showLabels = !!s.showLabels;
+  focusDim = s.focusDim !== false; showLabels = !!s.showLabels; showBridges = s.showBridges !== false;
   if (s.filters) filters = Object.assign(filters, s.filters);
   if (s.basemapIdx) setBasemap(s.basemapIdx);
   if (s.a) pointA = s.a; if (s.b) pointB = s.b;
@@ -1036,7 +1064,7 @@ function syncControls() {
   $("range").value = rangeKm; $("range-val").textContent = rangeKm + " km";
   $("ttl").value = String(ttlHours); $("hoplimit").value = hopLimit;
   $("show-fill").checked = showModelFill; $("show-est").checked = showEstimated;
-  $("show-focus").checked = focusDim; $("show-labels").checked = showLabels;
+  $("show-focus").checked = focusDim; $("show-labels").checked = showLabels; $("show-bridges").checked = showBridges;
   if (pointA) $("addr-a").value = pointA.label || ""; if (pointB) $("addr-b").value = pointB.label || "";
   document.querySelectorAll("#chips .chip").forEach((c) => c.classList.toggle("active", filters[c.dataset.f]));
   syncToggle();
@@ -1064,6 +1092,7 @@ $("hoplimit").addEventListener("input", (e) => { hopLimit = +e.target.value || 7
 $("ttl").addEventListener("change", (e) => { ttlHours = +e.target.value; saveState(); redraw(); });
 $("show-fill").addEventListener("change", (e) => { showModelFill = e.target.checked; saveState(); redraw(); });
 $("show-est").addEventListener("change", (e) => { showEstimated = e.target.checked; saveState(); redraw(); });
+$("show-bridges").addEventListener("change", (e) => { showBridges = e.target.checked; saveState(); redraw(); });
 $("show-focus").addEventListener("change", (e) => { focusDim = e.target.checked; saveState(); redraw(); });
 $("show-labels").addEventListener("change", (e) => { showLabels = e.target.checked; saveState(); redraw(); });
 // ruta
