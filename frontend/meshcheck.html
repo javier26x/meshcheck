@@ -94,6 +94,12 @@
   .badge.ok { background: rgba(58,208,122,.15); color: var(--ok); }
   .badge.no { background: rgba(255,77,77,.15); color: var(--warn); }
   #geo-msg { font-size: 11px; color: var(--muted); min-height: 14px; margin-top: 4px; }
+  .ac-box { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: none; margin: -2px 0 8px; background: var(--panel2); }
+  .ac-box.open { display: block; }
+  .ac-box .r { padding: 7px 10px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  .ac-box .r:hover { background: var(--panel); }
+  .ac-box .r .d { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .ac-box .r .sn { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 10px; margin-left: auto; }
 
   /* Ruta: tarjetas por salto */
   .route-sum { font-size: 12px; line-height: 1.6; margin: 8px 0; }
@@ -107,6 +113,19 @@
 
   .note { font-size: 11px; color: var(--muted); line-height: 1.5; }
   .note b { color: var(--accent); }
+
+  /* tabla de la vista Lista */
+  .list-wrap { overflow-x: auto; }
+  .ntable { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ntable th { position: sticky; top: 0; background: var(--panel); text-align: left; padding: 8px 10px; color: var(--muted);
+    font-size: 10px; text-transform: uppercase; letter-spacing: .6px; cursor: pointer; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ntable th:hover { color: var(--accent); }
+  .ntable th.sorted { color: var(--accent); }
+  .ntable td { padding: 7px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ntable td:first-child { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+  .ntable tbody tr { cursor: pointer; }
+  .ntable tbody tr:hover { background: var(--panel2); }
+  .ntable .d { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
 
   /* ---------- Mapa ---------- */
   .map-wrap { position: relative; min-width: 0; }
@@ -208,6 +227,16 @@
     border-radius: 8px; font-size: 12px; max-width: 80%; text-align: center; backdrop-filter: blur(6px); }
   #panel-toggle { display: none; }
 
+  /* onboarding */
+  .intro { position: absolute; inset: 0; z-index: 2000; background: rgba(5,7,10,.72); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center; padding: 20px; }
+  .intro.open { display: flex; }
+  .intro-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; max-width: 430px;
+    padding: 22px 24px; box-shadow: 0 14px 44px rgba(0,0,0,.6); }
+  .intro-card h3 { margin: 0 0 6px; color: var(--accent); font-size: 17px; }
+  .intro-card p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .intro-card ul { margin: 0 0 18px; padding-left: 18px; font-size: 12px; line-height: 1.75; color: var(--txt); }
+
   /* ---------- Móvil: bottom-sheet ---------- */
   @media (max-width: 820px) {
     #app { grid-template-columns: 1fr; }
@@ -233,6 +262,7 @@
 
     <div class="tabs">
       <button data-tab="ruta" class="active">Ruta</button>
+      <button data-tab="lista">Lista</button>
       <button data-tab="capas">Capas</button>
       <button data-tab="red">Red</button>
     </div>
@@ -252,6 +282,7 @@
             <input type="text" id="addr-b" placeholder="Destino (dirección o lugar)" />
             <button class="mini" id="pin-b" title="Fijar B con clic en el mapa">📍</button>
           </div>
+          <div class="ac-box" id="ac-box"></div>
           <button class="btn" id="btn-route" style="background:var(--accent);color:#1a1005;border-color:var(--accent);margin-top:2px">🔍 Buscar ruta</button>
           <div id="geo-msg"></div>
           <div class="rowbtns">
@@ -264,6 +295,23 @@
           <h2>Resultado</h2>
           <div class="route-sum" id="route-sum">Fija A y B para trazar la ruta.</div>
           <div class="hops" id="route-hops"></div>
+        </div>
+      </div>
+
+      <!-- ===== LISTA ===== -->
+      <div class="pane" data-pane="lista">
+        <div class="sec" style="padding-bottom:8px">
+          <h2>Nodos <span id="list-count" class="mono" style="color:var(--muted)">0</span> <span class="hint" title="Toca un encabezado para ordenar. Toca una fila para centrar el nodo en el mapa. Respeta los filtros/chips activos.">?</span></h2>
+        </div>
+        <div class="list-wrap">
+          <table class="ntable">
+            <thead><tr>
+              <th data-sort="name">Nodo</th><th data-sort="role">Rol</th>
+              <th data-sort="batt">Bat</th><th data-sort="t">Últ.</th>
+              <th data-sort="deg">Vec</th><th data-sort="snr">SNR</th>
+            </tr></thead>
+            <tbody id="list-body"></tbody>
+          </table>
         </div>
       </div>
 
@@ -300,6 +348,9 @@
               <option value="6">6 h</option><option value="24">24 h</option><option value="0">Sin TTL</option>
             </select>
           </div>
+          <div class="row"><label>Distancia máx RF <span class="hint" title="Un enlace medido más largo que esto se marca como puente por internet, no como radio.">?</span></label>
+            <input type="number" id="bridge-km" value="100" min="20" max="500" step="10" style="width:80px" /> <span style="color:var(--muted)">km</span>
+          </div>
         </div>
       </div>
 
@@ -319,7 +370,7 @@
           <p class="note mono" id="diag" style="margin:0">Esperando datos…</p>
         </div>
         <div class="sec">
-          <p class="note" id="foot">Datos vivos vía Firebase RTDB (bridge MQTT MeshChile). Snapshot base: <code id="foot-n">nodes.json</code>. Geocodificación: OpenStreetMap Nominatim.</p>
+          <p class="note" id="foot">Datos vivos vía Firebase RTDB (bridge MQTT MeshChile). Snapshot base: <code id="foot-n">nodes.json</code>. Geocodificación: OpenStreetMap Nominatim. · <a href="#" id="foot-help" style="color:var(--accent)">ver intro</a></p>
         </div>
       </div>
     </div>
@@ -368,6 +419,20 @@
 
     <div id="banner" style="display:none"></div>
     <div id="map"></div>
+
+    <div id="intro" class="intro">
+      <div class="intro-card">
+        <h3>👋 MeshCheck Live</h3>
+        <p>Visor en vivo de la malla LoRa de MeshChile.</p>
+        <ul>
+          <li><b style="color:#3ad07a">Verde</b> = nodo vivo · <b style="color:#7a8391">plomo</b> = registrado sin señal reciente · <b style="color:#b57aff">violeta</b> = vivo sin GPS (posición estimada)</li>
+          <li>Líneas de color = enlaces de <b>radio medidos</b> (color = SNR). <b style="color:#22d3ee">Cyan</b> = puente por internet, no radio.</li>
+          <li><b>Toca un nodo</b> para ver su ficha completa. <b>🔍 arriba</b> busca nodos.</li>
+          <li>Traza <b>rutas A→B</b> en la pestaña Ruta (prioriza enlaces reales). Filtra con los <b>chips</b> y alterna <b>Malla en vivo / Modelo</b>.</li>
+        </ul>
+        <button class="btn" id="intro-ok" style="background:var(--accent);color:#1a1005;border-color:var(--accent)">Entendido</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -403,8 +468,8 @@ let lastUpdate = 0, userLocMarker = null, redrawing = false;
 const MAX_DRAW_EDGES = 5000;
 // Un enlace "medido" más largo que esto es físicamente imposible por radio en
 // terreno comunitario → casi seguro es un PUENTE por internet (MQTT bridging),
-// no RF. Se dibuja distinto y NO cuenta para la ruta de radio.
-const BRIDGE_KM = 100;
+// no RF. Ajustable en Ajustes. Se dibuja distinto y NO cuenta para la ruta.
+let BRIDGE_KM = 100;
 const $ = (id) => document.getElementById(id);
 
 /* ---- 3. Mapa + capas ------------------------------------------------------ */
@@ -479,13 +544,16 @@ const normName = (s) => String(s || "").trim().toLowerCase();
 function activeNodes() {
   const ttlMs = ttlHours > 0 ? ttlHours * 3600 * 1000 : Infinity;
   const now = Date.now();
-  const out = {}, unlocated = [], nameIdx = new Map();
-  const indexName = (nm, id) => { if (nm && nm !== id && !nameIdx.has(nm)) nameIdx.set(nm, id); };
-  for (const id in embeddedNodes) {
-    out[id] = embeddedNodes[id];
-    indexName(normName(embeddedNodes[id].name), id);
-    indexName(normName(embeddedNodes[id].alias), id);
-  }
+  const out = {}, unlocated = [];
+  // índice por nombre SOLO para nombres únicos y no triviales en el directorio,
+  // para no fusionar por error dos nodos distintos con el mismo nombre (ej.
+  // varios "Meshtastic" o shortNames repetidos).
+  const nameCount = new Map();
+  const bump = (nm) => { if (nm && nm.length >= 3) nameCount.set(nm, (nameCount.get(nm) || 0) + 1); };
+  for (const id in embeddedNodes) { out[id] = embeddedNodes[id]; bump(normName(embeddedNodes[id].name)); bump(normName(embeddedNodes[id].alias)); }
+  const nameIdx = new Map();
+  const indexName = (nm, id) => { if (nm && nm.length >= 3 && nameCount.get(nm) === 1 && nm !== id && !nameIdx.has(nm)) nameIdx.set(nm, id); };
+  for (const id in embeddedNodes) { indexName(normName(embeddedNodes[id].name), id); indexName(normName(embeddedNodes[id].alias), id); }
   let liveCount = 0;
   for (const id in liveNodes) {
     const n = liveNodes[id];
@@ -588,6 +656,13 @@ function roleLabel(role) {
   return ROLE_STR[String(role).toUpperCase()] || String(role);
 }
 function hexId(id) { const nn = Number(id); return Number.isInteger(nn) && nn > 0 && nn <= 0xffffffff ? "!" + (nn >>> 0).toString(16).padStart(8, "0") : null; }
+// modelos de hardware Meshtastic más comunes (enum HardwareModel)
+const HW_ENUM = { 1: "TLoRa V2", 2: "TLoRa V1", 4: "T-Beam", 5: "Heltec V2.0", 6: "T-Beam v0.7", 7: "T-Echo", 9: "RAK4631", 10: "Heltec V2.1", 11: "Heltec V1", 12: "T-Beam S3-Core", 14: "Nano G1", 15: "TLoRa V2.1-1.8", 16: "TLoRa T3-S3", 18: "Nano G2 Ultra", 25: "Station G1", 30: "RP2040 LoRa", 31: "Station G2", 39: "DIY v1", 43: "Heltec V3", 44: "Heltec WSL V3", 48: "Heltec Tracker", 49: "Heltec Paper", 50: "T-Deck", 51: "T-Watch S3", 61: "Xiao ESP32-S3", 66: "Heltec Vision T190", 69: "Heltec T114", 71: "Tracker T1000-E", 72: "RAK3172", 73: "Wio-E5" };
+function hwLabel(hw) {
+  if (hw == null) return "—";
+  if (typeof hw === "number") return HW_ENUM[hw] || ("HW #" + hw);
+  return String(hw);
+}
 window.copyText = (t) => { try { navigator.clipboard.writeText(t); banner("Copiado: " + t); setTimeout(() => banner(""), 1400); } catch (e) { prompt("Copia:", t); } };
 
 function nodePopupHtml(id) {
@@ -607,7 +682,7 @@ function nodePopupHtml(id) {
 
   // identidad
   const hx = hexId(id);
-  h += `<div class="pop-sec"><div class="h">Identidad</div>` + kv("ID", esc(id)) + (hx ? kv("Node ID", hx) : "") + kv("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kv("Hardware", esc(String(n.hw))) : "") + `</div>`;
+  h += `<div class="pop-sec"><div class="h">Identidad</div>` + kv("ID", esc(id)) + (hx ? kv("Node ID", hx) : "") + kv("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kv("Hardware", esc(hwLabel(n.hw))) : "") + `</div>`;
 
   // ubicación
   h += `<div class="pop-sec"><div class="h">Ubicación</div>` + kv("Coord", `${n.lat.toFixed(5)}, ${n.lon.toFixed(5)}`) +
@@ -879,6 +954,7 @@ function redraw() {
   if (openPopupId && markerById[openPopupId]) {
     try { markerById[openPopupId].openPopup(); } catch (e) {}
   }
+  if (activeTab === "lista") renderList();
   redrawing = false;
 }
 
@@ -926,6 +1002,41 @@ function renderRoute(nodes, adj, etype) {
     hopsEl.insertAdjacentHTML("beforeend", `<div class="hop"><span class="dot" style="background:${col}"></span><span class="nm">${esc(n.name || id)}</span><span class="d">${dtxt}</span></div>`);
   }
   hopsEl.insertAdjacentHTML("beforeend", `<div class="hop ep"><span class="dot" style="background:#ff5b8c"></span><span class="nm">B · ${esc(pointB.label || "")}</span><span class="d">${fmtKm(exitDist)}</span></div>`);
+}
+
+/* ---- 10b. Vista de lista -------------------------------------------------- */
+let listSort = { key: "t", dir: -1 }, activeTab = "ruta";
+function linkStatsMap() {
+  const deg = {}, best = {};
+  for (const lid in liveLinks) {
+    const from = String(lid);
+    for (const nb of linkNeighbors(liveLinks[lid])) {
+      (deg[from] = deg[from] || new Set()).add(nb.id);
+      (deg[nb.id] = deg[nb.id] || new Set()).add(from);
+      if (nb.snr != null) { best[from] = Math.max(best[from] ?? -99, nb.snr); best[nb.id] = Math.max(best[nb.id] ?? -99, nb.snr); }
+    }
+  }
+  return { deg, best };
+}
+function renderList() {
+  const body = $("list-body"); if (!body) return;
+  const { deg, best } = linkStatsMap();
+  const measuredIds = new Set(Object.keys(deg));
+  const vis = visiblePredicate(measuredIds);           // respeta los chips de filtro
+  const rows = [];
+  for (const id in lastNodes) {
+    const n = lastNodes[id];
+    if (typeof n.lat !== "number" || !vis(n)) continue;
+    rows.push({ id, name: n.name || id, live: n.estimated ? 1 : n.t ? 2 : 0, t: n.t || 0, role: roleLabel(n.role), batt: n.batt ?? null, deg: deg[id] ? deg[id].size : 0, snr: best[id] ?? null });
+  }
+  const { key, dir } = listSort;
+  const val = (r) => key === "name" ? r.name.toLowerCase() : key === "role" ? r.role.toLowerCase() : (r[key] == null ? -Infinity : r[key]);
+  rows.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir; });
+  $("list-count").textContent = rows.length;
+  body.innerHTML = rows.slice(0, 600).map((r) => {
+    const c = r.live === 1 ? "#b57aff" : r.live === 2 ? "#3ad07a" : "#7a8391";
+    return `<tr data-id="${esc(r.id)}"><td><span class="d" style="background:${c}"></span>${esc(r.name)}</td><td>${esc(r.role)}</td><td>${r.batt != null ? r.batt + "%" : "—"}</td><td>${r.t ? fmtAge(r.t) : "—"}</td><td>${r.deg || "—"}</td><td>${r.snr != null ? r.snr + " dB" : "—"}</td></tr>`;
+  }).join("") || `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px">Sin nodos (revisa los filtros)</td></tr>`;
 }
 
 /* ---- 11. Estado / status -------------------------------------------------- */
@@ -987,9 +1098,33 @@ async function geocode(q) {
   return j.length ? { lat: +j[0].lat, lon: +j[0].lon, label: j[0].display_name } : null;
 }
 function geoMsg(t) { $("geo-msg").textContent = t || ""; }
-// Buscar ruta tipo Google Maps: geocodifica AMBOS campos de una vez. No re-busca
-// un punto que ya fue fijado por pin/nodo (si el texto coincide con su etiqueta).
+// ¿el texto coincide EXACTO con el nombre/alias de un nodo? → usar sus coords
+function findNodeByName(q) {
+  const ql = q.trim().toLowerCase(); if (!ql) return null;
+  for (const id in lastNodes) { const n = lastNodes[id]; if (typeof n.lat !== "number") continue; if (String(n.name || "").toLowerCase() === ql || String(n.alias || "").toLowerCase() === ql) return n; }
+  return null;
+}
+// Autocompletado: sugiere nodos mientras escribes en A/B
+let acWhich = null;
+function acShow(which, q) {
+  acWhich = which; const box = $("ac-box"); q = q.trim().toLowerCase();
+  if (q.length < 2) { box.classList.remove("open"); box.innerHTML = ""; return; }
+  const matches = [];
+  for (const id in lastNodes) { const n = lastNodes[id]; if (typeof n.lat !== "number") continue; if (String(n.name || id).toLowerCase().includes(q) || String(n.alias || "").toLowerCase().includes(q)) matches.push(n); if (matches.length >= 6) break; }
+  if (!matches.length) { box.classList.remove("open"); return; }
+  box.innerHTML = matches.map((n) => { const c = n.estimated ? "#b57aff" : n.t ? "#3ad07a" : "#7a8391"; return `<div class="r" data-id="${esc(n.id)}"><span class="d" style="background:${c}"></span>${esc(n.name || n.id)}<span class="sn">${esc(String(n.alias || ""))}</span></div>`; }).join("");
+  box.classList.add("open");
+}
+function acPick(id) {
+  const n = lastNodes[id]; if (!n || !acWhich) return;
+  const pt = { lat: n.lat, lon: n.lon, label: n.name || id };
+  if (acWhich === "A") { pointA = pt; $("addr-a").value = n.name || id; } else { pointB = pt; $("addr-b").value = n.name || id; }
+  $("ac-box").classList.remove("open"); fitPoints(); saveState(); redraw();
+}
+// Buscar ruta tipo Google Maps: resuelve AMBOS campos de una vez. Reconoce
+// nombres de nodo (sin geocodificar) y no re-busca un punto ya fijado.
 async function doRouteSearch() {
+  $("ac-box").classList.remove("open");
   const qa = $("addr-a").value.trim(), qb = $("addr-b").value.trim();
   if (!qa && !qb) { geoMsg("Escribe origen y destino."); return; }
   const btn = $("btn-route"); btn.disabled = true; const prev = btn.textContent; btn.textContent = "Buscando…";
@@ -997,6 +1132,8 @@ async function doRouteSearch() {
   const fails = [];
   const one = async (q, which, cur) => {
     if (!q || (cur && cur.label === q)) return;         // vacío o ya fijado
+    const node = findNodeByName(q);                     // ¿es un nodo? → sin geocodificar
+    if (node) { const pt = { lat: node.lat, lon: node.lon, label: node.name || node.id }; if (which === "A") pointA = pt; else pointB = pt; return; }
     try { const p = await geocode(q); if (p) { if (which === "A") pointA = p; else pointB = p; } else fails.push(`${which}: "${q}" sin resultado`); }
     catch (e) { fails.push(`${which}: error de búsqueda`); }
   };
@@ -1043,7 +1180,7 @@ function saveState() {
   try {
     const c = map.getCenter();
     localStorage.setItem(LS, JSON.stringify({
-      useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels, showBridges,
+      useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels, showBridges, bridgeKm: BRIDGE_KM,
       filters, basemapIdx, view: { c: [c.lat, c.lng], z: map.getZoom() },
       a: pointA, b: pointB,
     }));
@@ -1058,6 +1195,7 @@ function loadState() {
   if (s.hopLimit) hopLimit = s.hopLimit;
   showModelFill = !!s.showModelFill; showEstimated = s.showEstimated !== false;
   focusDim = s.focusDim !== false; showLabels = !!s.showLabels; showBridges = s.showBridges !== false;
+  if (s.bridgeKm) BRIDGE_KM = s.bridgeKm;
   if (s.filters) filters = Object.assign(filters, s.filters);
   if (s.basemapIdx) setBasemap(s.basemapIdx);
   if (s.a) pointA = s.a; if (s.b) pointB = s.b;
@@ -1074,7 +1212,7 @@ function applyDeepLinks() {
 }
 function syncControls() {
   $("range").value = rangeKm; $("range-val").textContent = rangeKm + " km";
-  $("ttl").value = String(ttlHours); $("hoplimit").value = hopLimit;
+  $("ttl").value = String(ttlHours); $("hoplimit").value = hopLimit; $("bridge-km").value = BRIDGE_KM;
   $("show-fill").checked = showModelFill; $("show-est").checked = showEstimated;
   $("show-focus").checked = focusDim; $("show-labels").checked = showLabels; $("show-bridges").checked = showBridges;
   if (pointA) $("addr-a").value = pointA.label || ""; if (pointB) $("addr-b").value = pointB.label || "";
@@ -1095,7 +1233,16 @@ function shareUrl() {
 document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
   document.querySelectorAll(".tabs button").forEach((x) => x.classList.toggle("active", x === b));
   document.querySelectorAll(".pane").forEach((p) => p.classList.toggle("active", p.dataset.pane === b.dataset.tab));
+  activeTab = b.dataset.tab;
+  if (activeTab === "lista") renderList();
 }));
+document.querySelectorAll(".ntable th[data-sort]").forEach((th) => th.addEventListener("click", () => {
+  const k = th.dataset.sort;
+  listSort = { key: k, dir: listSort.key === k ? -listSort.dir : (k === "name" || k === "role" ? 1 : -1) };
+  document.querySelectorAll(".ntable th").forEach((x) => x.classList.toggle("sorted", x === th));
+  renderList();
+}));
+$("list-body").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-id]"); if (tr) focusNode(tr.dataset.id); });
 // modo, controles
 $("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b || b.disabled) return; useLive = b.dataset.mode === "live"; saveState(); syncToggle(); redraw(); });
 $("range").addEventListener("input", (e) => { rangeKm = +e.target.value; $("range-val").textContent = rangeKm + " km"; redraw(); });
@@ -1105,12 +1252,17 @@ $("ttl").addEventListener("change", (e) => { ttlHours = +e.target.value; saveSta
 $("show-fill").addEventListener("change", (e) => { showModelFill = e.target.checked; saveState(); redraw(); });
 $("show-est").addEventListener("change", (e) => { showEstimated = e.target.checked; saveState(); redraw(); });
 $("show-bridges").addEventListener("change", (e) => { showBridges = e.target.checked; saveState(); redraw(); });
+$("bridge-km").addEventListener("change", (e) => { BRIDGE_KM = Math.max(20, +e.target.value || 100); saveState(); redraw(); });
 $("show-focus").addEventListener("change", (e) => { focusDim = e.target.checked; saveState(); redraw(); });
 $("show-labels").addEventListener("change", (e) => { showLabels = e.target.checked; saveState(); redraw(); });
 // ruta
 $("btn-route").addEventListener("click", doRouteSearch);
 $("addr-a").addEventListener("keydown", (e) => { if (e.key === "Enter") doRouteSearch(); });
 $("addr-b").addEventListener("keydown", (e) => { if (e.key === "Enter") doRouteSearch(); });
+$("addr-a").addEventListener("input", (e) => acShow("A", e.target.value));
+$("addr-b").addEventListener("input", (e) => acShow("B", e.target.value));
+$("ac-box").addEventListener("click", (e) => { const r = e.target.closest(".r[data-id]"); if (r) acPick(r.dataset.id); });
+document.addEventListener("click", (e) => { if (!e.target.closest(".addr-row") && !e.target.closest("#ac-box")) $("ac-box").classList.remove("open"); });
 $("btn-swap").addEventListener("click", () => { const t = pointA; pointA = pointB; pointB = t;
   const va = $("addr-a").value; $("addr-a").value = $("addr-b").value; $("addr-b").value = va; saveState(); redraw(); });
 $("btn-clear-ab").addEventListener("click", () => { pointA = pointB = null; $("addr-a").value = ""; $("addr-b").value = ""; geoMsg(""); saveState(); redraw(); });
@@ -1148,6 +1300,9 @@ $("mb-full").addEventListener("click", () => { const el = document.documentEleme
 $("legend-h").addEventListener("click", () => { $("legend").classList.toggle("open"); $("legend-cx").textContent = $("legend").classList.contains("open") ? "▾" : "▸"; });
 // móvil: brand como handle del bottom-sheet
 $("brand").addEventListener("click", () => { if (window.matchMedia("(max-width:820px)").matches) $("panel").classList.toggle("open"); });
+// onboarding
+$("intro-ok").addEventListener("click", () => { $("intro").classList.remove("open"); try { localStorage.setItem("meshcheck.intro", "1"); } catch (e) {} });
+$("foot-help").addEventListener("click", (e) => { e.preventDefault(); $("intro").classList.add("open"); });
 // mapa: clic
 map.on("click", (e) => {
   if (repeaterArmed) { const id = "rep-" + (repIdSeq++); hypRepeaters.push({ id, name: "Repetidor " + (hypRepeaters.length + 1), lat: e.latlng.lat, lon: e.latlng.lng, role: "repeater" }); repeaterArmed = false; $("btn-repeater").classList.remove("armed"); $("btn-repeater").textContent = "＋ Repetidor hipotético"; redraw(); return; }
@@ -1173,21 +1328,31 @@ async function loadEmbedded() {
   } catch (err) { $("foot-n").textContent = "nodes.json no encontrado"; }
 }
 const compact = (o) => { const r = {}; for (const k in o) if (o[k] !== undefined) r[k] = o[k]; return r; };
-function normalizeLive(val) {
-  const out = {};
-  for (const id in val) { const n = val[id]; if (!n) continue;
-    out[String(id)] = compact({ id: String(id), name: n.name || String(id), alias: n.sn,
-      lat: typeof n.lat === "number" ? n.lat : undefined, lon: typeof n.lon === "number" ? n.lon : undefined,
-      t: n.t, role: n.role, alt: n.alt, hw: n.hw, batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil }); }
-  return out;
+function normOne(id, n) {
+  if (!n) return null;
+  return compact({ id: String(id), name: n.name || String(id), alias: n.sn,
+    lat: typeof n.lat === "number" ? n.lat : undefined, lon: typeof n.lon === "number" ? n.lon : undefined,
+    t: n.t, role: n.role, alt: n.alt, hw: n.hw, batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil });
 }
+// redraw debounced: coalesce ráfagas de child-events en un solo repintado
+let redrawTimer = null;
+function scheduleRedraw() { lastUpdate = Date.now(); if (redrawTimer) return; redrawTimer = setTimeout(() => { redrawTimer = null; redraw(); }, 200); }
+
 function initFirebase() {
   if (!FIREBASE_READY) { banner("Firebase no configurado — modelo con snapshot local."); return; }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
     const db = firebase.database();
-    db.ref("nodes").on("value", (s) => { liveNodes = normalizeLive(s.val() || {}); lastUpdate = Date.now(); if (Object.keys(liveNodes).length && !useLive && !localStorage.getItem(LS)) useLive = true; redraw(); });
-    db.ref("links").on("value", (s) => { liveLinks = s.val() || {}; lastUpdate = Date.now(); redraw(); });
+    const autoLive = () => { if (Object.keys(liveNodes).length && !useLive && !localStorage.getItem(LS)) useLive = true; };
+    // child-events en vez de value → solo baja el nodo/enlace que cambió (no toda la base)
+    const nref = db.ref("nodes");
+    nref.on("child_added", (s) => { const n = normOne(s.key, s.val()); if (n) liveNodes[s.key] = n; autoLive(); scheduleRedraw(); });
+    nref.on("child_changed", (s) => { const n = normOne(s.key, s.val()); if (n) liveNodes[s.key] = n; scheduleRedraw(); });
+    nref.on("child_removed", (s) => { delete liveNodes[s.key]; scheduleRedraw(); });
+    const lref = db.ref("links");
+    lref.on("child_added", (s) => { liveLinks[s.key] = s.val(); scheduleRedraw(); });
+    lref.on("child_changed", (s) => { liveLinks[s.key] = s.val(); scheduleRedraw(); });
+    lref.on("child_removed", (s) => { delete liveLinks[s.key]; scheduleRedraw(); });
     db.ref("meta/stats").on("value", (s) => { liveMeta = s.val(); updateDiag(); });
   } catch (err) { banner("No se pudo conectar a Firebase — modo modelo."); }
 }
@@ -1200,5 +1365,6 @@ function initFirebase() {
   applyDeepLinks();
   redraw();
   initFirebase();
+  try { if (!localStorage.getItem("meshcheck.intro")) $("intro").classList.add("open"); } catch (e) {}
 })();
 </script>

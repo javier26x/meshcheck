@@ -27,19 +27,19 @@ function stmtEnd(s, i) { let d = 0; while (i < s.length) { const c = s[i]; if (c
 function grab(name) {
   let i = SCRIPT.indexOf(`function ${name}(`);
   if (i >= 0) { const j = SCRIPT.indexOf("{", i); return SCRIPT.slice(i, matchBrace(SCRIPT, j) + 1); }
-  const rx = new RegExp(`const ${name}\\s*=`); const m = rx.exec(SCRIPT);
+  const rx = new RegExp(`(?:const|let|var) ${name}\\s*=`); const m = rx.exec(SCRIPT);
   if (m) return SCRIPT.slice(m.index, stmtEnd(SCRIPT, m.index) + 1);
   throw new Error("no se encontró en el script: " + name);
 }
 
-const NAMES = ["R", "haversine", "snrColor", "isRouter", "ekey", "isNominalNode", "P_NOMINAL", "BRIDGE_KM", "linkNeighbors", "buildGraph", "computeRoute", "visiblePredicate", "ROLE_ENUM", "ROLE_STR", "roleLabel", "hexId"];
+const NAMES = ["R", "haversine", "snrColor", "isRouter", "ekey", "isNominalNode", "P_NOMINAL", "BRIDGE_KM", "compact", "normName", "linkNeighbors", "buildGraph", "computeRoute", "visiblePredicate", "activeNodes", "ROLE_ENUM", "ROLE_STR", "roleLabel", "hexId"];
 const GRABBED = NAMES.map(grab).join("\n");
 
 // crea un scope fresco con el estado dado y devuelve las funciones
 function scope(state) {
-  const st = Object.assign({ useLive: true, ttlHours: 2, rangeKm: 15, hopLimit: 7, pointA: null, pointB: null, filters: { live: false, routers: false, measured: false, hideDir: false }, liveLinks: {} }, state);
+  const st = Object.assign({ useLive: true, ttlHours: 2, rangeKm: 15, hopLimit: 7, pointA: null, pointB: null, filters: { live: false, routers: false, measured: false, hideDir: false }, liveLinks: {}, liveNodes: {}, embeddedNodes: {}, hypRepeaters: [] }, state);
   const decls = Object.keys(st).map((k) => `let ${k} = __s.${k};`).join("\n");
-  const body = decls + "\n" + GRABBED + "\n; return { haversine, snrColor, roleLabel, hexId, isNominalNode, linkNeighbors, buildGraph, computeRoute, visiblePredicate };";
+  const body = decls + "\n" + GRABBED + "\n; return { haversine, snrColor, roleLabel, hexId, isNominalNode, linkNeighbors, buildGraph, computeRoute, visiblePredicate, activeNodes };";
   return new Function("__s", body)(st);
 }
 const ekey = (x, y) => (x < y ? x + "|" + y : y + "|" + x);
@@ -99,6 +99,26 @@ test("computeRoute: prioridad ESTRICTA medido > vivo > nominal", () => {
   r = scope({ ...s, liveLinks: {} }).computeRoute(nodes, g.adj, g.et);
   assert.equal(r.tier, "hibrida");
   assert.equal(r.nominal, 2);
+});
+
+test("activeNodes: fusiona por nombre único; NO fusiona nombres duplicados", () => {
+  const now = Date.now();
+  const embeddedNodes = {
+    dupA: { id: "dupA", name: "Meshtastic", lat: -33.1, lon: -70.1, placeholder: true },
+    dupB: { id: "dupB", name: "Meshtastic", lat: -33.2, lon: -70.2, placeholder: true },
+    uniq: { id: "uniq", name: "Cerro Renca", alias: "CRNC", lat: -33.4, lon: -70.7, role: "ROUTER", placeholder: true },
+  };
+  const liveNodes = {
+    "111": { id: "111", name: "Meshtastic", t: now },   // duplicado → NO fusiona
+    "222": { id: "222", name: "Cerro Renca", t: now },   // único → fusiona bajo 222
+  };
+  const { nodes } = scope({ embeddedNodes, liveNodes }).activeNodes();
+  assert.ok(nodes["222"]);
+  assert.equal(Math.round(nodes["222"].lat * 10), -334);       // heredó coords del directorio
+  assert.equal(nodes["222"].role, "ROUTER");
+  assert.equal(nodes["uniq"], undefined);                       // gemelo único reemplazado
+  assert.ok(nodes["dupA"] && nodes["dupB"]);                    // duplicados intactos
+  assert.equal(nodes["111"], undefined);                        // vivo ambiguo sin pos → no dibujable
 });
 
 test("buildGraph: enlace > 100 km = puente internet (fuera del ruteo)", () => {

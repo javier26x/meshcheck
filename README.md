@@ -113,8 +113,20 @@ propia y el diagnóstico muestra `descifrados 0/N`, pon su PSK (base64) en la en
 `CHANNEL_KEY` de `ecosystem.config.js`.
 
 **Diagnóstico**: `node tools/diag.mjs` lee la RTDB pública y dicta un veredicto
-(versión del bridge, tráfico por topic, descifrado, enlaces dibujables, calce de
-IDs snapshot↔vivo).
+(versión del bridge, tráfico por topic, descifrado por canal, enlaces
+dibujables, correlación por nombre directorio↔vivo).
+
+**Eficiencia del bridge**: escribe con un solo PATCH multi-ubicación por lote,
+deduplica (solo escribe lo que cambió; refresca `t` cada 5–10 min) y **purga**
+periódicamente lo más viejo que `PURGE_HOURS` (default 24h) para que la RTDB no
+crezca sin límite. El frontend escucha `child_*` (no `value`) para bajar solo lo
+que cambió.
+
+**Tests / CI**: `npm test` (node:test) cubre bridge (dedupe/purga), descifrado
+Meshtastic (protobuf/AES), extractor y la lógica del frontend (ruteo con
+prioridad estricta, filtros, clasificación de puentes). GitHub Actions corre los
+tests en cada push (`.github/workflows/ci.yml`) y refresca el snapshot a diario
+(`refresh-nodes.yml`).
 
 ### 4. Frontend
 
