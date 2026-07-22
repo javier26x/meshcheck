@@ -241,19 +241,18 @@
       <!-- ===== RUTA ===== -->
       <div class="pane active" data-pane="ruta">
         <div class="sec">
-          <h2>Ruta A → B <span class="hint" title="Escribe una dirección y pulsa 🔍, o 📍 y haz clic en el mapa, o 'Fijar como A/B' desde un nodo. Puedes arrastrar los pines.">?</span></h2>
+          <h2>Ruta A → B <span class="hint" title="Escribe origen y destino y pulsa Buscar ruta. También puedes usar 📍 para fijar con clic en el mapa, o 'Fijar como A/B' desde un nodo. Los pines se pueden arrastrar.">?</span></h2>
           <div class="addr-row">
             <span class="tag a">A</span>
-            <input type="text" id="addr-a" placeholder="Dirección o lugar (ej: Plaza Ñuñoa)" />
-            <button class="mini" id="geo-a" title="Buscar dirección">🔍</button>
+            <input type="text" id="addr-a" placeholder="Origen (dirección o lugar)" />
             <button class="mini" id="pin-a" title="Fijar A con clic en el mapa">📍</button>
           </div>
           <div class="addr-row">
             <span class="tag b">B</span>
-            <input type="text" id="addr-b" placeholder="Dirección o lugar (ej: Cerro Alegre)" />
-            <button class="mini" id="geo-b" title="Buscar dirección">🔍</button>
+            <input type="text" id="addr-b" placeholder="Destino (dirección o lugar)" />
             <button class="mini" id="pin-b" title="Fijar B con clic en el mapa">📍</button>
           </div>
+          <button class="btn" id="btn-route" style="background:var(--accent);color:#1a1005;border-color:var(--accent);margin-top:2px">🔍 Buscar ruta</button>
           <div id="geo-msg"></div>
           <div class="rowbtns">
             <button class="btn ghost" id="btn-swap" title="Intercambiar A y B">⇅ Intercambiar</button>
@@ -988,16 +987,24 @@ async function geocode(q) {
   return j.length ? { lat: +j[0].lat, lon: +j[0].lon, label: j[0].display_name } : null;
 }
 function geoMsg(t) { $("geo-msg").textContent = t || ""; }
-async function doGeocode(which) {
-  const input = $(which === "A" ? "addr-a" : "addr-b"), q = input.value.trim();
-  if (!q) { geoMsg("Escribe una dirección o lugar."); return; }
-  geoMsg(`Buscando ${which}…`);
-  try {
-    const pt = await geocode(q);
-    if (!pt) { geoMsg(`No se encontró "${q}" en Chile.`); return; }
-    if (which === "A") pointA = pt; else pointB = pt;
-    geoMsg(""); fitPoints(); saveState(); redraw();
-  } catch (e) { geoMsg("Error: " + e.message); }
+// Buscar ruta tipo Google Maps: geocodifica AMBOS campos de una vez. No re-busca
+// un punto que ya fue fijado por pin/nodo (si el texto coincide con su etiqueta).
+async function doRouteSearch() {
+  const qa = $("addr-a").value.trim(), qb = $("addr-b").value.trim();
+  if (!qa && !qb) { geoMsg("Escribe origen y destino."); return; }
+  const btn = $("btn-route"); btn.disabled = true; const prev = btn.textContent; btn.textContent = "Buscando…";
+  geoMsg("");
+  const fails = [];
+  const one = async (q, which, cur) => {
+    if (!q || (cur && cur.label === q)) return;         // vacío o ya fijado
+    try { const p = await geocode(q); if (p) { if (which === "A") pointA = p; else pointB = p; } else fails.push(`${which}: "${q}" sin resultado`); }
+    catch (e) { fails.push(`${which}: error de búsqueda`); }
+  };
+  await one(qa, "A", pointA);                            // secuencial (política Nominatim)
+  await one(qb, "B", pointB);
+  btn.disabled = false; btn.textContent = prev;
+  geoMsg(fails.length ? "⚠ " + fails.join(" · ") + " (prueba agregando comuna/ciudad)" : "");
+  fitPoints(); saveState(); redraw();
 }
 function fitPoints() {
   const pts = [pointA, pointB].filter(Boolean).map((p) => [p.lat, p.lon]);
@@ -1096,10 +1103,9 @@ $("show-bridges").addEventListener("change", (e) => { showBridges = e.target.che
 $("show-focus").addEventListener("change", (e) => { focusDim = e.target.checked; saveState(); redraw(); });
 $("show-labels").addEventListener("change", (e) => { showLabels = e.target.checked; saveState(); redraw(); });
 // ruta
-$("geo-a").addEventListener("click", () => doGeocode("A"));
-$("geo-b").addEventListener("click", () => doGeocode("B"));
-$("addr-a").addEventListener("keydown", (e) => { if (e.key === "Enter") doGeocode("A"); });
-$("addr-b").addEventListener("keydown", (e) => { if (e.key === "Enter") doGeocode("B"); });
+$("btn-route").addEventListener("click", doRouteSearch);
+$("addr-a").addEventListener("keydown", (e) => { if (e.key === "Enter") doRouteSearch(); });
+$("addr-b").addEventListener("keydown", (e) => { if (e.key === "Enter") doRouteSearch(); });
 $("btn-swap").addEventListener("click", () => { const t = pointA; pointA = pointB; pointB = t;
   const va = $("addr-a").value; $("addr-a").value = $("addr-b").value; $("addr-b").value = va; saveState(); redraw(); });
 $("btn-clear-ab").addEventListener("click", () => { pointA = pointB = null; $("addr-a").value = ""; $("addr-b").value = ""; geoMsg(""); saveState(); redraw(); });
