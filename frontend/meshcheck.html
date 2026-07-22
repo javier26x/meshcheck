@@ -116,14 +116,17 @@
   .leaflet-control-attribution a { color: var(--muted) !important; }
   .leaflet-bar a { background: var(--panel) !important; color: var(--txt) !important; border-color: var(--line) !important; }
   .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--panel); color: var(--txt); border: 1px solid var(--line); }
-  .leaflet-popup-content { margin: 10px 12px; font-size: 12px; width: 264px !important; max-height: 62vh; overflow-y: auto; }
-  .leaflet-popup-content .pt { font-weight: 700; margin-bottom: 3px; font-size: 13px; }
+  /* Leaflet maneja ancho/alto/scroll vía las opciones maxWidth/maxHeight del popup */
+  .leaflet-popup-content { margin: 12px 14px 12px 12px; font-size: 12px; }
+  .leaflet-popup-scrolled { padding-right: 6px; }
+  .leaflet-popup-content .pt { font-weight: 700; margin-bottom: 3px; font-size: 13px; padding-right: 14px; }
   .leaflet-popup-content .nb { margin-top: 6px; font-size: 11px; }
   .leaflet-popup-content .nb b { color: var(--accent); }
-  .pop-sec { margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line); }
-  .pop-sec .h { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
-  .pop-kv { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin: 2px 0; }
-  .pop-kv .k { color: var(--muted); } .pop-kv .v { font-family: "JetBrains Mono", monospace; text-align: right; word-break: break-all; }
+  .pop-sec { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .pop-sec .h { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--accent); font-weight: 700; margin-bottom: 5px; }
+  .pop-kv { display: flex; justify-content: space-between; gap: 14px; font-size: 11px; margin: 3px 0; align-items: baseline; }
+  .pop-kv .k { color: var(--muted); flex: none; white-space: nowrap; }
+  .pop-kv .v { font-family: "JetBrains Mono", monospace; text-align: right; flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .batt { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 2px 0 4px; }
   .batt > i { display: block; height: 100%; }
   .pop-act { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
@@ -816,7 +819,7 @@ function redraw() {
         weight: sel ? 3 : (router ? 2 : 1), fillColor: fill, fillOpacity: alive ? 0.95 : 0.55 });
     }
     m._nodeId = id; m._live = !!n.t && !n.estimated;
-    m.bindPopup(() => nodePopupHtml(id), { autoPan: true, maxHeight: 380 });
+    m.bindPopup(() => nodePopupHtml(id), { autoPan: true, maxWidth: 300, minWidth: 258, maxHeight: 360 });
     m.on("click", () => { selectedId = id; openPopupId = id; redraw(); });
     if (showLabels && (n.name || n.alias)) m.bindTooltip(esc(String(n.alias || n.name)), { permanent: true, direction: "right", className: "nlabel", offset: [6, 0] });
     markers.push(m); markerById[id] = m;
