@@ -612,13 +612,17 @@ window.setPointFromNode = (id, which) => {
   map.closePopup(); saveState(); redraw();
 };
 
-/* ---- 8. Ruta A→B: camino más corto PONDERADO ------------------------------
- * Dijkstra sobre (nodo, profundidad). El coste hace que saltar por un nodo
- * MEDIDO/VIVO sea barato y por uno NOMINAL (gris, del directorio) sea caro, así
- * la ruta prefiere la malla real y solo usa nominales para tapar huecos —en vez
- * del antiguo "todo o nada" que caía a puros nominales. Respeta el hop limit.
- *   coste de salto a v = 1 (base) + 2 si el enlace es modelado + 8 si v es nominal
- * En modo Modelo no hay enlaces medidos: se comporta como distancia pura.      */
+/* ---- 8. Ruta A→B: camino más corto con PRIORIDAD ESTRICTA (lexicográfica) ---
+ * Dijkstra sobre (nodo, profundidad) con coste jerárquico: cada criterio pesa
+ * tanto más que el siguiente que domina por completo. Orden de preferencia:
+ *   1º  ENLACES MEDIDOS existentes (NeighborInfo/gateway/traceroute)
+ *   2º  NODOS VIVOS (enlaces estimados por distancia entre vivos)
+ *   3º  (último recurso) el listado NOMINAL del directorio meshchile
+ * Un nodo nominal cuesta 1e6; un enlace modelado 1e3; cada salto 1. Así JAMÁS
+ * mete un nodo nominal si existe cualquier ruta viva dentro del hop limit, y
+ * entre rutas vivas prefiere la que usa más enlaces medidos, luego menos saltos.
+ * En modo Modelo (sin enlaces medidos) se comporta como distancia pura.        */
+const P_NOMINAL = 1e6, P_MODEL = 1e3;
 const isNominalNode = (n) => !n.t && !n.estimated && n.role !== "repeater";
 function computeRoute(nodes, adj, etype) {
   if (!pointA || !pointB) return null;
@@ -640,7 +644,7 @@ function computeRoute(nodes, adj, etype) {
 
   const dist = new Map(), prev = new Map(), key = (id, d) => id + "#" + d;
   for (const e of entries) {
-    const c = (isNominalNode(nodes[e.id]) ? 8 : 0) + e.d * 0.05;   // prefiere entrar por un vivo cercano
+    const c = (isNominalNode(nodes[e.id]) ? P_NOMINAL : 0) + e.d * 0.05;   // prefiere entrar por un vivo cercano
     const k = key(e.id, 0);
     if (!(dist.get(k) <= c)) { dist.set(k, c); prev.set(k, null); hpush(c, e.id, 0); }
   }
@@ -654,7 +658,7 @@ function computeRoute(nodes, adj, etype) {
     for (const v of (adj.get(id) || [])) {
       if (!nodes[v]) continue;
       const t = etype.get(ekey(id, v)) || {};
-      const ec = 1 + (t.live ? 0 : 2) + (isNominalNode(nodes[v]) ? 8 : 0);
+      const ec = 1 + (t.live ? 0 : P_MODEL) + (isNominalNode(nodes[v]) ? P_NOMINAL : 0);
       const nd = d + 1, nc = c + ec, nk = key(v, nd);
       if (!(dist.get(nk) <= nc)) { dist.set(nk, nc); prev.set(nk, k); hpush(nc, v, nd); }
     }
