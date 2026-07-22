@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-21T22:38:45.945Z",
+  "generated": "2026-07-22T01:45:14.329Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 288,
   "nodes": {
@@ -10,7 +10,15 @@
       "lat": -33.4078421,
       "lon": -70.7153924,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Fabián T",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec V3 pruebas"
+      }
     },
     "06QXMvxF28IZLgZh5IK0": {
       "id": "06QXMvxF28IZLgZh5IK0",
@@ -19,7 +27,13 @@
       "lon": -70.5101824,
       "placeholder": false,
       "alias": "0248",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ramon Camiruaga",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "0Dy0ew2Le6m973cFJIcV": {
       "id": "0Dy0ew2Le6m973cFJIcV",
@@ -28,7 +42,14 @@
       "lon": -70.5750096,
       "placeholder": false,
       "alias": "ff46",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "ale zapio",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Es un nodo que podría estar en movimiento en algunos casos o desactivados, ya que se están haciendo pruebas. Mientras que pueda dejaré prendido. "
+      }
     },
     "0GmmdBlMhjxK2aF3ebzp": {
       "id": "0GmmdBlMhjxK2aF3ebzp",
@@ -37,7 +58,13 @@
       "lon": -71.5577723,
       "placeholder": false,
       "alias": "vin1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Nicopinas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "0JYa9PCMnTUPBvtSzPL0": {
       "id": "0JYa9PCMnTUPBvtSzPL0",
@@ -45,7 +72,15 @@
       "lat": -33.45141584868638,
       "lon": -70.64069515472546,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Cesar Clericus",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec Mesh Node T114"
+      }
     },
     "0MsoBy5Wi7IvcMfftqGK": {
       "id": "0MsoBy5Wi7IvcMfftqGK",
@@ -54,7 +89,14 @@
       "lon": -70.59921,
       "placeholder": false,
       "alias": "J001",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Montes",
+        "power": "22dBm",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo de pruebas (Heltec Wireless stick lite)"
+      }
     },
     "0NuW1xe0zH3R6bXivNUa": {
       "id": "0NuW1xe0zH3R6bXivNUa",
@@ -63,7 +105,14 @@
       "lon": -71.61009,
       "placeholder": false,
       "alias": "BMFR",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Luis Felipe Monsalve",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo base en sector las rastras para retransmisión"
+      }
     },
     "0Q2mnWEpw7cl4EN8uRLo": {
       "id": "0Q2mnWEpw7cl4EN8uRLo",
@@ -72,7 +121,14 @@
       "lon": -72.32678388835889,
       "placeholder": false,
       "alias": "TGG",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Francisco Acencio",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "T-Deck Plus"
+      }
     },
     "0wsqV7L8iR0EgE10qthr": {
       "id": "0wsqV7L8iR0EgE10qthr",
@@ -80,7 +136,13 @@
       "lat": -32.934069,
       "lon": -71.53561,
       "placeholder": false,
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cone",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "1Jr9SINUK7Yg6llQxStA": {
       "id": "1Jr9SINUK7Yg6llQxStA",
@@ -89,7 +151,14 @@
       "lon": -72.36001420004179,
       "placeholder": false,
       "alias": "MLVS",
-      "role": "REPEATER"
+      "role": "REPEATER",
+      "meta": {
+        "user": "M “V3rDuG0x” V",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Wisblock RAK4631, con la finalidad de mantener una malla permanente y alternativa en caso de emergencias. Por el momento en modo Prueba."
+      }
     },
     "1WSE4nIMnHMHjinU4MXN": {
       "id": "1WSE4nIMnHMHjinU4MXN",
@@ -98,7 +167,14 @@
       "lon": -71.6379837,
       "placeholder": false,
       "alias": "TA01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "sebastian rojas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Heltec v3 con modulo gps "
+      }
     },
     "239IEWsWzrMfmKwN9asJ": {
       "id": "239IEWsWzrMfmKwN9asJ",
@@ -107,7 +183,14 @@
       "lon": -70.77517280347284,
       "placeholder": false,
       "alias": "EV01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ignacio K.",
+        "power": "medium",
+        "antenna": "915Mhz - No Stock",
+        "locType": "non_residential",
+        "desc": "Heltec v3 en pruebas."
+      }
     },
     "29FA5XxtyzuqZdEwzl7h": {
       "id": "29FA5XxtyzuqZdEwzl7h",
@@ -116,7 +199,13 @@
       "lon": -70.515326,
       "placeholder": false,
       "alias": "jtr",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jorge Moreno",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "2hJVJ3EfITBae0NsVPbb": {
       "id": "2hJVJ3EfITBae0NsVPbb",
@@ -125,7 +214,13 @@
       "lon": -71.625071,
       "placeholder": false,
       "alias": "2MGP",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mario Escobar ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "2hVR9zIEhwS3uRcZSjKd": {
       "id": "2hVR9zIEhwS3uRcZSjKd",
@@ -134,7 +229,14 @@
       "lon": -70.609809,
       "placeholder": false,
       "alias": "n3h2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Giovanni Morchio",
+        "power": "high",
+        "antenna": "directional",
+        "locType": "residential",
+        "desc": "Nodo conectado a antena yagui apuntando al sur de la RM"
+      }
     },
     "2qX1A8GjTKNs9t8kioys": {
       "id": "2qX1A8GjTKNs9t8kioys",
@@ -142,7 +244,14 @@
       "lat": -33.456128,
       "lon": -70.6543616,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Peter John Santis Sandoval",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "2vMmXGpGaLz3kPWlhi5E": {
       "id": "2vMmXGpGaLz3kPWlhi5E",
@@ -151,7 +260,13 @@
       "lon": -80.3136396,
       "placeholder": false,
       "alias": "ZCL1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jesus Toledo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "3PCjscreQCYdBCtstqoS": {
       "id": "3PCjscreQCYdBCtstqoS",
@@ -160,7 +275,14 @@
       "lon": -70.7067904,
       "placeholder": false,
       "alias": "TQY3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mauro Poblete",
+        "power": "low",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Tarjeta Heltec ESP32 SX1262 en pruebas de RF con antena exterior"
+      }
     },
     "3SEKomhJIXUhObPI83Td": {
       "id": "3SEKomhJIXUhObPI83Td",
@@ -169,7 +291,14 @@
       "lon": -63.2368616,
       "placeholder": false,
       "alias": "HXF1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Sergio Delpino",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "UBICADO EN EL CENTRO GEOGRÁFICO DE LA REPÚBLICA ARGENTINA."
+      }
     },
     "3X5XVxYuwnwuSPDFclag": {
       "id": "3X5XVxYuwnwuSPDFclag",
@@ -178,7 +307,14 @@
       "lon": -70.1409,
       "placeholder": false,
       "alias": "Elo",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Matías Alonso (Elonso)",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Iquique"
+      }
     },
     "3sknl3dGaQaalI7ET796": {
       "id": "3sknl3dGaQaalI7ET796",
@@ -187,7 +323,13 @@
       "lon": -70.7162593,
       "placeholder": false,
       "alias": "c344",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Gonzalo Silva Alvarez",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "4F72zdK29oBBHveElG3j": {
       "id": "4F72zdK29oBBHveElG3j",
@@ -196,7 +338,14 @@
       "lon": -71.1305655,
       "placeholder": false,
       "alias": "UOB2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Miguel Ángel Pérez Echeverría",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "EXPERIMENTAL POR LA ZONA DE CURACAVI CENTRO"
+      }
     },
     "4iASn9Xvf7D3bWRsNsgF": {
       "id": "4iASn9Xvf7D3bWRsNsgF",
@@ -205,7 +354,13 @@
       "lon": -70.6045,
       "placeholder": false,
       "alias": "CL27",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cristián Rojas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "4kkeN668m9uaxay7Y83u": {
       "id": "4kkeN668m9uaxay7Y83u",
@@ -214,7 +369,14 @@
       "lon": -71.5130329,
       "placeholder": false,
       "alias": "2SLJ",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Samuel Matias Lucero Mejias",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "NODO QUINTERO-LONCURA"
+      }
     },
     "4oL3U2Ulr9S7XZilWQdu": {
       "id": "4oL3U2Ulr9S7XZilWQdu",
@@ -223,7 +385,13 @@
       "lon": -71.62861868947286,
       "placeholder": false,
       "alias": "CRUC",
-      "role": "ROUTER_CLIENT"
+      "role": "ROUTER_CLIENT",
+      "meta": {
+        "user": "Carlos Díaz",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "4sVtHZ3H1ADv8rB6sChH": {
       "id": "4sVtHZ3H1ADv8rB6sChH",
@@ -232,7 +400,13 @@
       "lon": -70.79217686121206,
       "placeholder": false,
       "alias": "M270",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hugo Muñoz",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "52nIQmRJlbbuuF3fPj58": {
       "id": "52nIQmRJlbbuuF3fPj58",
@@ -241,7 +415,14 @@
       "lon": -73.0988035,
       "placeholder": false,
       "alias": "0f71",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Zackpls",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "modelo wio tracker L1 PRO"
+      }
     },
     "5Ppllkm63bHdBemI9Zxv": {
       "id": "5Ppllkm63bHdBemI9Zxv",
@@ -249,7 +430,15 @@
       "lat": -33.5258489,
       "lon": -70.5847745,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "thomas elliott",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "non_residential",
+        "desc": "equipo modificado"
+      }
     },
     "5fse93eKs4iW6msZ9hXE": {
       "id": "5fse93eKs4iW6msZ9hXE",
@@ -258,7 +447,13 @@
       "lon": -71.23,
       "placeholder": false,
       "alias": "V3-2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Sergio Radioaficion (XQ2CG)",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "5q6PO3sUqiw28QFBqtB9": {
       "id": "5q6PO3sUqiw28QFBqtB9",
@@ -267,7 +462,13 @@
       "lon": -70.57,
       "placeholder": false,
       "alias": "6a46",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ivan Lizana",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "650rjwGxu4Vlie77gxkt": {
       "id": "650rjwGxu4Vlie77gxkt",
@@ -276,7 +477,14 @@
       "lon": -72.5996,
       "placeholder": false,
       "alias": "6MJS",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcos Andres Pozas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo residencial 6MJS"
+      }
     },
     "66I30s4pAmYDbtuL95wV": {
       "id": "66I30s4pAmYDbtuL95wV",
@@ -285,7 +493,14 @@
       "lon": -78.836105,
       "placeholder": false,
       "alias": "APJF",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Raymundo Recabarren",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo base para futuras antenas LoRa en Juan Fernández."
+      }
     },
     "6QzDZyQe0ccHnExoTzBc": {
       "id": "6QzDZyQe0ccHnExoTzBc",
@@ -294,7 +509,13 @@
       "lon": -70.67440390975256,
       "placeholder": false,
       "alias": "apdh",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro Parra Durán",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "6cD7n5o6V4AENBmDhKvO": {
       "id": "6cD7n5o6V4AENBmDhKvO",
@@ -303,7 +524,13 @@
       "lon": -70.66209475469564,
       "placeholder": false,
       "alias": "P01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cristian Gallegos",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "785fZ1YAt01a4G7qb6DT": {
       "id": "785fZ1YAt01a4G7qb6DT",
@@ -312,7 +539,13 @@
       "lon": -72.3981549,
       "placeholder": false,
       "alias": "CL8V",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cabrero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "7KqQkHFtXZfpQZfKeBfI": {
       "id": "7KqQkHFtXZfpQZfKeBfI",
@@ -321,7 +554,14 @@
       "lon": -73.0848274,
       "placeholder": false,
       "alias": "Thno",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcelo Veloso",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo en casa fijo"
+      }
     },
     "7M06S8GN8S0mJ1GJEk98": {
       "id": "7M06S8GN8S0mJ1GJEk98",
@@ -330,7 +570,13 @@
       "lon": -71.6320102815408,
       "placeholder": false,
       "alias": "🦉",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ivey Foster",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "7Q1upabfEdYKqnt1ANDC": {
       "id": "7Q1upabfEdYKqnt1ANDC",
@@ -339,7 +585,14 @@
       "lon": -71.23668525979994,
       "placeholder": false,
       "alias": "GSD1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "gsmith@gsmith.cl",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Estacion base en casa, Heltec V3 con antena Omni"
+      }
     },
     "7VZsP8RZuv0xt9ffRLV7": {
       "id": "7VZsP8RZuv0xt9ffRLV7",
@@ -348,7 +601,14 @@
       "lon": -70.5590979,
       "placeholder": false,
       "alias": "3CUP",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fabián Carvajal ",
+        "power": "medium",
+        "antenna": "externa",
+        "locType": "residential",
+        "desc": "Nodo fijo Puente Alto RM."
+      }
     },
     "7frLuRvhoWLdBnc3cxfr": {
       "id": "7frLuRvhoWLdBnc3cxfr",
@@ -357,7 +617,13 @@
       "lon": -70.47813,
       "placeholder": false,
       "alias": "a3rm",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Abraham Ermann Ermann",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "8ab4ef9NvMAuyQMNw2Hv": {
       "id": "8ab4ef9NvMAuyQMNw2Hv",
@@ -366,7 +632,14 @@
       "lon": -71.835945,
       "placeholder": false,
       "alias": "EASS",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ernesto Sepulveda",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "testeando tecnologia"
+      }
     },
     "8dMfPaxpKKciwSUM0EcO": {
       "id": "8dMfPaxpKKciwSUM0EcO",
@@ -375,7 +648,14 @@
       "lon": -73.130343,
       "placeholder": false,
       "alias": "494a",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Felipe Barroso",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo solar en techo"
+      }
     },
     "8nzGUSvrRmSjlnQgdKrN": {
       "id": "8nzGUSvrRmSjlnQgdKrN",
@@ -384,7 +664,14 @@
       "lon": -71.97444,
       "placeholder": false,
       "alias": "ZPC",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ricardo C. Cabezas Romero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo comuna de Pucón"
+      }
     },
     "96clK5dq8CtZgTjtgYwT": {
       "id": "96clK5dq8CtZgTjtgYwT",
@@ -393,7 +680,14 @@
       "lon": -70.6588448,
       "placeholder": false,
       "alias": "a4d8",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Nicolás Müller",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "."
+      }
     },
     "9TfsKln0QGaFidI9kuCY": {
       "id": "9TfsKln0QGaFidI9kuCY",
@@ -401,7 +695,13 @@
       "lat": -33.5917,
       "lon": -70.5133,
       "placeholder": false,
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eduardo Villagrán Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "9dMrSS9xk8KBm5ljh5U7": {
       "id": "9dMrSS9xk8KBm5ljh5U7",
@@ -410,7 +710,14 @@
       "lon": -70.68,
       "placeholder": false,
       "alias": "Bitu",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jorge Iturra M.",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Desde La Cisterna aprendiendo y aportando"
+      }
     },
     "Ah5HF91wCue5ELTk0YqZ": {
       "id": "Ah5HF91wCue5ELTk0YqZ",
@@ -419,7 +726,13 @@
       "lon": -70.59034946175798,
       "placeholder": false,
       "alias": "gato",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Carlos Antonio Reyes Cifuentes",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "Ak2MyzU3EvKt52nOIo2R": {
       "id": "Ak2MyzU3EvKt52nOIo2R",
@@ -427,7 +740,15 @@
       "lat": -33.519604,
       "lon": -70.536285,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Jaime Cruz M.",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo Heltec v3 ubicado en sector Alto Macul, La Florida"
+      }
     },
     "Aq8OLsAKU2cdHG5OqXLd": {
       "id": "Aq8OLsAKU2cdHG5OqXLd",
@@ -436,7 +757,14 @@
       "lon": -70.62766974681224,
       "placeholder": false,
       "alias": "FL02",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "beto fisch",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "cardputer corriendo meshclient"
+      }
     },
     "Cu7DFdsXS3zuHC8gPy6M": {
       "id": "Cu7DFdsXS3zuHC8gPy6M",
@@ -444,7 +772,15 @@
       "lat": -33.518013,
       "lon": -70.602046,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Ignacio Rodríguez",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec v3 en caja original, Probando antenas y rangos"
+      }
     },
     "Cztp7hObymmemcIdDESk": {
       "id": "Cztp7hObymmemcIdDESk",
@@ -453,7 +789,14 @@
       "lon": -70.409,
       "placeholder": false,
       "alias": "GODI",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Diego Urrutia-Astorga",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo móvil Wismesh (RAK)"
+      }
     },
     "DNcD1iVHFXZciaZROhPQ": {
       "id": "DNcD1iVHFXZciaZROhPQ",
@@ -462,7 +805,15 @@
       "lon": -70.33427,
       "placeholder": false,
       "alias": "rrlp",
-      "role": "ROUTER"
+      "role": "ROUTER",
+      "meta": {
+        "user": "Francisco Villalobos",
+        "freq": "915",
+        "power": "high",
+        "antenna": "external",
+        "locType": "non_residential",
+        "desc": "Router ubicado cerro Los Morros"
+      }
     },
     "DilQZY0QkYqhPBeMNJcD": {
       "id": "DilQZY0QkYqhPBeMNJcD",
@@ -470,7 +821,15 @@
       "lat": -33.41258804,
       "lon": -70.5743298,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "JuanIgnacio Guldman",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo fijo, futuro modo solar. Modo Silent Client"
+      }
     },
     "DkyFu3PZqvPXec74j5FA": {
       "id": "DkyFu3PZqvPXec74j5FA",
@@ -479,7 +838,14 @@
       "lon": -71.34980164171903,
       "placeholder": false,
       "alias": "LU1Y",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eliseo Pariz",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "LU1YD"
+      }
     },
     "DuCuEQgSHATaUjnniiNa": {
       "id": "DuCuEQgSHATaUjnniiNa",
@@ -488,7 +854,13 @@
       "lon": -71.2422372,
       "placeholder": false,
       "alias": "DMR1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ruben Dario Muñoz",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "E3xDjWqDEtCMBQ4MuYu2": {
       "id": "E3xDjWqDEtCMBQ4MuYu2",
@@ -497,7 +869,13 @@
       "lon": -70.610373,
       "placeholder": false,
       "alias": "51ad",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Christopher Isler",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "EDd1acxOq9nPXpOm6D1c": {
       "id": "EDd1acxOq9nPXpOm6D1c",
@@ -506,7 +884,13 @@
       "lon": -70.65832602895578,
       "placeholder": false,
       "alias": "ZBBX",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Etore Modena",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "EEs9qwLRMGqlXtpw99Qe": {
       "id": "EEs9qwLRMGqlXtpw99Qe",
@@ -515,7 +899,14 @@
       "lon": -70.55744125,
       "placeholder": false,
       "alias": "Pau1",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "cristian escudero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Movil"
+      }
     },
     "ESGphPRkhLtJJKZ8ZMsn": {
       "id": "ESGphPRkhLtJJKZ8ZMsn",
@@ -524,7 +915,14 @@
       "lon": -70.565888,
       "placeholder": false,
       "alias": "T114",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fabián Carvajal ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo Portatil GPS Incorporado Heltec T114"
+      }
     },
     "EYFjEUpP6X4ipljVHaLg": {
       "id": "EYFjEUpP6X4ipljVHaLg",
@@ -533,7 +931,14 @@
       "lon": -72.35995387922885,
       "placeholder": false,
       "alias": "MLVS",
-      "role": "TRACKER"
+      "role": "TRACKER",
+      "meta": {
+        "user": "M “V3rDuG0x” V",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Dispositivo móvil por la ciudad."
+      }
     },
     "EYl4PL6xracvBmZPbWxA": {
       "id": "EYl4PL6xracvBmZPbWxA",
@@ -542,7 +947,14 @@
       "lon": -71.23668588738109,
       "placeholder": false,
       "alias": "GSD2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "gsmith@gsmith.cl",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "mobile",
+        "desc": "Modulo Heltec V3 con GPS y sensor BME280"
+      }
     },
     "EbS7oxETkFfBlajmJbHt": {
       "id": "EbS7oxETkFfBlajmJbHt",
@@ -551,7 +963,14 @@
       "lon": -70.7598485,
       "placeholder": false,
       "alias": "Chum",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alfonso",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Un nodo de un niño random seguramente usado en colegio o casa ubicación aproximada Antena no potente (puede ser que en algún momento pare de estar activo"
+      }
     },
     "F9YbwO0Yq75KvxgyurxT": {
       "id": "F9YbwO0Yq75KvxgyurxT",
@@ -560,7 +979,14 @@
       "lon": -72.502361,
       "placeholder": false,
       "alias": "RAY2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando ",
+        "power": "high",
+        "antenna": "directional",
+        "locType": "remote",
+        "desc": "Direccional + heltec v3"
+      }
     },
     "FBsBZrETkTtxBsRJv4al": {
       "id": "FBsBZrETkTtxBsRJv4al",
@@ -569,7 +995,14 @@
       "lon": -70.7396539,
       "placeholder": false,
       "alias": "4bf4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Paulo Cendegui",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "paulo@ce3vna.cl"
+      }
     },
     "FHaMf5wqZccRZ5CT2Rpl": {
       "id": "FHaMf5wqZccRZ5CT2Rpl",
@@ -578,7 +1011,13 @@
       "lon": -70.971118,
       "placeholder": false,
       "alias": "3b5c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Carlos Gonzalez Araya",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "FWlSyRYHAErUm2HI7CQL": {
       "id": "FWlSyRYHAErUm2HI7CQL",
@@ -586,7 +1025,13 @@
       "lat": -33.5917,
       "lon": -70.5133,
       "placeholder": false,
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eduardo Villagrán Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "FnBBrARPvosR73xVtXfw": {
       "id": "FnBBrARPvosR73xVtXfw",
@@ -595,7 +1040,13 @@
       "lon": 70.1266789,
       "placeholder": false,
       "alias": "HLS",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hugo Luis Cortes Cerda",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "GumxPF6uhFHOyXcIod1K": {
       "id": "GumxPF6uhFHOyXcIod1K",
@@ -604,7 +1055,13 @@
       "lon": -71.2590546,
       "placeholder": false,
       "alias": "Mov2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Roberto Moya Miño ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "HFzuZCJKjCkKIY9GDh6X": {
       "id": "HFzuZCJKjCkKIY9GDh6X",
@@ -613,7 +1070,13 @@
       "lon": -70.7724811,
       "placeholder": false,
       "alias": "Fpm",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando Povea",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "HPFF0FHQxgcddcCDHHQU": {
       "id": "HPFF0FHQxgcddcCDHHQU",
@@ -621,7 +1084,14 @@
       "lat": -33.02,
       "lon": -71.55,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Bart ",
+        "freq": "915",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "Hgr6ac1fXaqXIB9BlptI": {
       "id": "Hgr6ac1fXaqXIB9BlptI",
@@ -630,7 +1100,13 @@
       "lon": -71.637969,
       "placeholder": false,
       "alias": "TA02",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "sebastian rojas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "I19rm704MFrfzvOB4i7p": {
       "id": "I19rm704MFrfzvOB4i7p",
@@ -638,7 +1114,15 @@
       "lat": -33.4223428,
       "lon": -70.5809653,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "JuanIgnacio Guldman",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "non_residential",
+        "desc": "Heltec V3, en movimiento"
+      }
     },
     "IGzWc18sEITxu75r2sV4": {
       "id": "IGzWc18sEITxu75r2sV4",
@@ -647,7 +1131,13 @@
       "lon": -71.6537856,
       "placeholder": false,
       "alias": "b1cu",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro Sophila",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "IKkqas7z3kWMymCxWAgl": {
       "id": "IKkqas7z3kWMymCxWAgl",
@@ -655,7 +1145,15 @@
       "lat": -33.044341,
       "lon": -71.61546,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Junta de Vecinos Cerro Castillo",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Escuela de Ingeniería DUOC UC"
+      }
     },
     "IT6QO64egHOS7qey5WVL": {
       "id": "IT6QO64egHOS7qey5WVL",
@@ -664,7 +1162,14 @@
       "lon": -70.7552667,
       "placeholder": false,
       "alias": "cd84",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Pablo Rocco",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "mobile",
+        "desc": "Nodo portátil \nHeltec E213"
+      }
     },
     "IydpPIgUD4ea2T14bZkc": {
       "id": "IydpPIgUD4ea2T14bZkc",
@@ -673,7 +1178,13 @@
       "lon": -70.6546603,
       "placeholder": false,
       "alias": "HH01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernan Ponce",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "Izokqf1apOSiR6KuLBzl": {
       "id": "Izokqf1apOSiR6KuLBzl",
@@ -681,7 +1192,15 @@
       "lat": -33.6043057,
       "lon": -70.8530587,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Juan",
+        "freq": "915",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo en pruebas"
+      }
     },
     "J2EhdwDql98M3caZPpUO": {
       "id": "J2EhdwDql98M3caZPpUO",
@@ -690,7 +1209,14 @@
       "lon": -70.65344632603934,
       "placeholder": false,
       "alias": "clay",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Claudio Bustos",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo de pruebas"
+      }
     },
     "J2XY6hNxEKQTmHeFdo8c": {
       "id": "J2XY6hNxEKQTmHeFdo8c",
@@ -699,7 +1225,13 @@
       "lon": -70.5495,
       "placeholder": false,
       "alias": "1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro Navarro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "JN6I5isldC744CFm8ycq": {
       "id": "JN6I5isldC744CFm8ycq",
@@ -708,7 +1240,14 @@
       "lon": -81.5002,
       "placeholder": false,
       "alias": "8be4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Claudio Leiva",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Radio aficionado.DMR, FM All-star "
+      }
     },
     "JUlK7UDO3J5LOJiQeFjh": {
       "id": "JUlK7UDO3J5LOJiQeFjh",
@@ -717,7 +1256,13 @@
       "lon": -70.61171714178357,
       "placeholder": false,
       "alias": "PrSt",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Bruno Daniel",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "JpQwcccnTLO26PyGzbTr": {
       "id": "JpQwcccnTLO26PyGzbTr",
@@ -726,7 +1271,13 @@
       "lon": -70.56617,
       "placeholder": false,
       "alias": "2DEF",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "andres miranda",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "Jr2B73JQm7MiCHILnCQa": {
       "id": "Jr2B73JQm7MiCHILnCQa",
@@ -735,7 +1286,14 @@
       "lon": -70.586844,
       "placeholder": false,
       "alias": "RPIR",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Iberé Ranieri",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Repetidor"
+      }
     },
     "KCZaeEDGJQRCm3U07aS2": {
       "id": "KCZaeEDGJQRCm3U07aS2",
@@ -744,7 +1302,13 @@
       "lon": -70.7497,
       "placeholder": false,
       "alias": "4lap",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mauricio Lara Meneses",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "KLEfSpTwrbh8UCXc9LZA": {
       "id": "KLEfSpTwrbh8UCXc9LZA",
@@ -753,7 +1317,13 @@
       "lon": -70.55724526736499,
       "placeholder": false,
       "alias": "AV3M",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Cabané Toledo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "KLcf6EBGqxvSGQa5pNz2": {
       "id": "KLcf6EBGqxvSGQa5pNz2",
@@ -762,7 +1332,13 @@
       "lon": -70.8635,
       "placeholder": false,
       "alias": "13a8",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Felipe Barros",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "KLnjeDYSWdpbnBU1TQQo": {
       "id": "KLnjeDYSWdpbnBU1TQQo",
@@ -770,7 +1346,14 @@
       "lat": -33.03256,
       "lon": -71.55851,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Bart ",
+        "freq": "433",
+        "power": "high",
+        "antenna": "custom",
+        "locType": "residential"
+      }
     },
     "KfNvtTmhvcsD5wCxGLU4": {
       "id": "KfNvtTmhvcsD5wCxGLU4",
@@ -779,7 +1362,14 @@
       "lon": -80.33184428710948,
       "placeholder": false,
       "alias": "4fle",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jose Ollino",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec v3 meshtastic \nMiami Florida "
+      }
     },
     "KvRoFzt8FTIjDa1w9gXP": {
       "id": "KvRoFzt8FTIjDa1w9gXP",
@@ -788,7 +1378,13 @@
       "lon": -71.95552802836262,
       "placeholder": false,
       "alias": "AKYM",
-      "role": "TRACKER"
+      "role": "TRACKER",
+      "meta": {
+        "user": "José Julio Enrique Rubilar Elgueta",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "KyDjOxkjLtUXIZw4INSe": {
       "id": "KyDjOxkjLtUXIZw4INSe",
@@ -797,7 +1393,13 @@
       "lon": -70.6222423,
       "placeholder": false,
       "alias": "3784",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Ramirez J",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "L9nFnojN5ZFs1DCdqOIx": {
       "id": "L9nFnojN5ZFs1DCdqOIx",
@@ -806,7 +1408,14 @@
       "lon": -70.58837936817378,
       "placeholder": false,
       "alias": "CD3S",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eduardo Olivares G.",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "\nSEEED SOLAR NODE"
+      }
     },
     "LFuQbrR38LovM8IZNppC": {
       "id": "LFuQbrR38LovM8IZNppC",
@@ -815,7 +1424,13 @@
       "lon": -70.5270808,
       "placeholder": false,
       "alias": "Peña",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Morral",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "LSXh9nw87thcZ2b9OcJ9": {
       "id": "LSXh9nw87thcZ2b9OcJ9",
@@ -824,7 +1439,14 @@
       "lon": -72.63462651323691,
       "placeholder": false,
       "alias": "6sax",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Mesh Temuco Poniente"
+      }
     },
     "LpW80GVvbsjzdWqAIuZz": {
       "id": "LpW80GVvbsjzdWqAIuZz",
@@ -833,7 +1455,14 @@
       "lon": -70.631424,
       "placeholder": false,
       "alias": "v13",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Cristian Manuel Balboa vidal",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "nodo de prueba"
+      }
     },
     "LxsDprb2iiaXjaV7gwUq": {
       "id": "LxsDprb2iiaXjaV7gwUq",
@@ -842,7 +1471,13 @@
       "lon": -70.6223854,
       "placeholder": false,
       "alias": "dbcc",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Ramirez J",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "MC7FVP47JFq525LJlJuS": {
       "id": "MC7FVP47JFq525LJlJuS",
@@ -851,7 +1486,13 @@
       "lon": -70.6692655,
       "placeholder": false,
       "alias": "7bfc",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando Tapia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "MR8P800PWFdiBy4tWj76": {
       "id": "MR8P800PWFdiBy4tWj76",
@@ -860,7 +1501,13 @@
       "lon": -70.86229142717038,
       "placeholder": false,
       "alias": "SLC2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "luis antonio cea sierra",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "MZ2d1LLGY3WtxbNSumBC": {
       "id": "MZ2d1LLGY3WtxbNSumBC",
@@ -869,7 +1516,14 @@
       "lon": -70.69696,
       "placeholder": false,
       "alias": "GMSH",
-      "role": "ROUTER_CLIENT"
+      "role": "ROUTER_CLIENT",
+      "meta": {
+        "user": "jaime luis borjes carrasco",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "HELTEC V3 Y ANTENA OMNI "
+      }
     },
     "Me9zCJgG7AmgMbXdKlLB": {
       "id": "Me9zCJgG7AmgMbXdKlLB",
@@ -877,7 +1531,15 @@
       "lat": -33.5196,
       "lon": -70.5365,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Jaime Cruz M.",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo Heltec v3 ubicado en sector Alto Macul, La Florida"
+      }
     },
     "MqJpWnTxxLt31ox98SmP": {
       "id": "MqJpWnTxxLt31ox98SmP",
@@ -886,7 +1548,14 @@
       "lon": -71.259012,
       "placeholder": false,
       "alias": "Ccó",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Roberto Moya Miño ",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo Móvil que se moverá por la Región del Maule"
+      }
     },
     "Mv6DWH9Y5DMhnO8Zkbk4": {
       "id": "Mv6DWH9Y5DMhnO8Zkbk4",
@@ -895,7 +1564,13 @@
       "lon": -70.5852314,
       "placeholder": false,
       "alias": "gg",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Gonzalo Villegas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "N8pHgP8Mcy3Qg2dsxsts": {
       "id": "N8pHgP8Mcy3Qg2dsxsts",
@@ -904,7 +1579,13 @@
       "lon": -70.6161826,
       "placeholder": false,
       "alias": "e418",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "alcides salazar",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "NRWgWVKs8A2MXjcbjqNp": {
       "id": "NRWgWVKs8A2MXjcbjqNp",
@@ -912,7 +1593,15 @@
       "lat": -33.48630246602054,
       "lon": -70.57617391552508,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Alexis Collao",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo 1"
+      }
     },
     "O58E9RiPGi8CiwyT5Z3y": {
       "id": "O58E9RiPGi8CiwyT5Z3y",
@@ -921,7 +1610,13 @@
       "lon": -70.7548938,
       "placeholder": false,
       "alias": "3AID",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ariel Arriagada Cifuentes",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "O7zanKUmfD2mQlCVZ9vF": {
       "id": "O7zanKUmfD2mQlCVZ9vF",
@@ -930,7 +1625,15 @@
       "lon": -70.62386,
       "placeholder": false,
       "alias": "n3p0",
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Giovanni Morchio",
+        "freq": "915",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Iluminando parte de providencia"
+      }
     },
     "ObewsCCwMeeC5in2aY3m": {
       "id": "ObewsCCwMeeC5in2aY3m",
@@ -939,7 +1642,13 @@
       "lon": -70.5611927,
       "placeholder": false,
       "alias": "3NEB",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcelo Tassara",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "OgzGI3DRi7urNTB6YYjh": {
       "id": "OgzGI3DRi7urNTB6YYjh",
@@ -948,7 +1657,13 @@
       "lon": -73.6031775,
       "placeholder": false,
       "alias": "APU0",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Álvaro Parra Urbina",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "OoKDigqEZislRCEQnLZX": {
       "id": "OoKDigqEZislRCEQnLZX",
@@ -957,7 +1672,13 @@
       "lon": -72.97874300557103,
       "placeholder": false,
       "alias": "pv01",
-      "role": "ROUTER"
+      "role": "ROUTER",
+      "meta": {
+        "user": "Jaime Oyarzun Knittel ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "OvnAQ6OYJvOBcHLr7EAp": {
       "id": "OvnAQ6OYJvOBcHLr7EAp",
@@ -966,7 +1687,13 @@
       "lon": -71.16794680671165,
       "placeholder": false,
       "alias": "K2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernán Valdés ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "OyVOBUTbnIjQsZkg5PgT": {
       "id": "OyVOBUTbnIjQsZkg5PgT",
@@ -975,7 +1702,14 @@
       "lon": -70.7548938,
       "placeholder": false,
       "alias": "4AID",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ariel Arriagada Cifuentes",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo de prueba movil"
+      }
     },
     "P7AjBCt6qCRPkOB1oyFQ": {
       "id": "P7AjBCt6qCRPkOB1oyFQ",
@@ -983,7 +1717,14 @@
       "lat": -33.48630246602054,
       "lon": -70.57617391552508,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Alexis Collao",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "PHm7imvvfG5TXbg7ulfs": {
       "id": "PHm7imvvfG5TXbg7ulfs",
@@ -992,7 +1733,14 @@
       "lon": -70.5713492,
       "placeholder": false,
       "alias": "PDT1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Dominguez",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Tracker T11000 E"
+      }
     },
     "PLXXNiU9f3YZVR0eDcGF": {
       "id": "PLXXNiU9f3YZVR0eDcGF",
@@ -1001,7 +1749,13 @@
       "lon": -70.69923016779705,
       "placeholder": false,
       "alias": "b47c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Oscar Belmar Madrid",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "PS3ruFaUnEcI2wvA1JcG": {
       "id": "PS3ruFaUnEcI2wvA1JcG",
@@ -1010,7 +1764,13 @@
       "lon": 70.335779,
       "placeholder": false,
       "alias": "Vl",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Víctor Labra Cuevas",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "mobile"
+      }
     },
     "QXMDB27ePwV7yu3ZjA1f": {
       "id": "QXMDB27ePwV7yu3ZjA1f",
@@ -1019,7 +1779,14 @@
       "lon": -70.6510848,
       "placeholder": false,
       "alias": "a7dc",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Carlos Salas Contreras",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Cliente de Prueba móvil para rastreo de mascota"
+      }
     },
     "Qew4WgjGg7W4bi4H3lUa": {
       "id": "Qew4WgjGg7W4bi4H3lUa",
@@ -1028,7 +1795,13 @@
       "lon": -73.21479,
       "placeholder": false,
       "alias": "lib3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "cristian ojeda",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "R6isbFXP1lXrnWArgwQP": {
       "id": "R6isbFXP1lXrnWArgwQP",
@@ -1037,7 +1810,14 @@
       "lon": 139.53721,
       "placeholder": false,
       "alias": "csna",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Camilo Saldías",
+        "power": "high",
+        "antenna": "external",
+        "locType": "non_residential",
+        "desc": "Nodo instalado en las oficinas del ALMA Project del National Astronomical Observatory of Japan"
+      }
     },
     "RQRmiBons9N9UTAx2yJ4": {
       "id": "RQRmiBons9N9UTAx2yJ4",
@@ -1046,7 +1826,15 @@
       "lon": -70.617439,
       "placeholder": false,
       "alias": "GZKB",
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Gabriel Criado",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo Heltec V3 encendido 24/7 con una antena externa para mejor recepción. No atendido"
+      }
     },
     "S8nwTiLFWHlr8nTxcZgT": {
       "id": "S8nwTiLFWHlr8nTxcZgT",
@@ -1054,7 +1842,15 @@
       "lat": -33.4832032,
       "lon": -70.6062354,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "JuanIgnacio Guldman",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "non_residential",
+        "desc": "Nodo Heltec v3 en movimiento"
+      }
     },
     "SXIP15q1Wn07hhlwb5X1": {
       "id": "SXIP15q1Wn07hhlwb5X1",
@@ -1063,7 +1859,14 @@
       "lon": -70.77489921816088,
       "placeholder": false,
       "alias": "EV00",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ignacio K.",
+        "power": "Max",
+        "antenna": "915Mhz - No Stock",
+        "locType": "mobile",
+        "desc": "M5Card En Pruebas\n"
+      }
     },
     "SgGks2bw5yjkHUThbZv5": {
       "id": "SgGks2bw5yjkHUThbZv5",
@@ -1072,7 +1875,14 @@
       "lon": -71.6182663,
       "placeholder": false,
       "alias": "LFMO",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Luis Felipe Monsalve",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo portatil para transmitir mensajes en Talca y alrededores"
+      }
     },
     "TGB1JKAYBzraOjkGswuG": {
       "id": "TGB1JKAYBzraOjkGswuG",
@@ -1081,7 +1891,14 @@
       "lon": -72.22074,
       "placeholder": false,
       "alias": "jhr",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jose Huaiquimil Rivera",
+        "power": "medium",
+        "antenna": "externa en torre",
+        "locType": "residential",
+        "desc": "Nodo ubicado cerca del Cruce Monte Aguila por CD3HRS"
+      }
     },
     "TXQt0ZNzc3kpxNfzHN2U": {
       "id": "TXQt0ZNzc3kpxNfzHN2U",
@@ -1090,7 +1907,14 @@
       "lon": -70.6090848,
       "placeholder": false,
       "alias": "FL00",
-      "role": "ROUTER_CLIENT"
+      "role": "ROUTER_CLIENT",
+      "meta": {
+        "user": "beto fisch",
+        "power": "high",
+        "antenna": "custom",
+        "locType": "residential",
+        "desc": "Cliente base. Para uso familiar en caso de emergencia "
+      }
     },
     "TY27lz5zsu43lKPLkgWD": {
       "id": "TY27lz5zsu43lKPLkgWD",
@@ -1099,7 +1923,13 @@
       "lon": -70.5968401,
       "placeholder": false,
       "alias": "KQK1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Felipe",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "TbQC2DYjO49VtA6tgMD3": {
       "id": "TbQC2DYjO49VtA6tgMD3",
@@ -1108,7 +1938,14 @@
       "lon": -70.65636974383395,
       "placeholder": false,
       "alias": "MyM0",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcelo Linares",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Avenida Independencia 1443. Edificio - Santiago"
+      }
     },
     "Tio8N5q3FhJEKkoMm9Vz": {
       "id": "Tio8N5q3FhJEKkoMm9Vz",
@@ -1117,7 +1954,14 @@
       "lon": -70.4904039,
       "placeholder": false,
       "alias": "dd38",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Paulo Cendegui",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "cliente"
+      }
     },
     "Ts1yA4uZJ0mf1IniAEYh": {
       "id": "Ts1yA4uZJ0mf1IniAEYh",
@@ -1126,7 +1970,14 @@
       "lon": -71.29581880889701,
       "placeholder": false,
       "alias": "BM01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "sebastian Messina",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo  Lilygo Conectado a red electrica"
+      }
     },
     "TsAO1lpGLnB9gNfSbGBb": {
       "id": "TsAO1lpGLnB9gNfSbGBb",
@@ -1135,7 +1986,13 @@
       "lon": -70.653251,
       "placeholder": false,
       "alias": "moko",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "EMILIO PAVEL QUINTEROS GONZÁLEZ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "TuyPOA5o1JzDWw8WrDuU": {
       "id": "TuyPOA5o1JzDWw8WrDuU",
@@ -1144,7 +2001,14 @@
       "lon": -70.7067904,
       "placeholder": false,
       "alias": "TQY4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mauro Poblete",
+        "power": "low",
+        "antenna": "custom",
+        "locType": "residential",
+        "desc": "Nodo Heltec V3 con Antena Portátil (Handy)"
+      }
     },
     "U0vOCNuRcxjV32Z6G8IA": {
       "id": "U0vOCNuRcxjV32Z6G8IA",
@@ -1153,7 +2017,14 @@
       "lon": -70.3939378,
       "placeholder": false,
       "alias": "CFV",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Francisco Villalobos",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Casa Francisco Villalobos "
+      }
     },
     "U7b6Zh5xzvbqs32WN1dU": {
       "id": "U7b6Zh5xzvbqs32WN1dU",
@@ -1162,7 +2033,13 @@
       "lon": -70.3266597,
       "placeholder": false,
       "alias": "1DIL",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Carlos Carrasco Varas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "UCOUTp87Png82YjhE9hn": {
       "id": "UCOUTp87Png82YjhE9hn",
@@ -1171,7 +2048,13 @@
       "lon": -70.1366272,
       "placeholder": false,
       "alias": "ILI1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Iván Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "UM2ziE1LzVhgSg0wNMT1": {
       "id": "UM2ziE1LzVhgSg0wNMT1",
@@ -1180,7 +2063,14 @@
       "lon": -70.609,
       "placeholder": false,
       "alias": "1193",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marc Llambías",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Móvil de prueba para traqueo y comunicación en desastres"
+      }
     },
     "Utqv69gnclpO1Zspp3qV": {
       "id": "Utqv69gnclpO1Zspp3qV",
@@ -1189,7 +2079,14 @@
       "lon": -70.7149,
       "placeholder": false,
       "alias": "TQY2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mauro Poblete",
+        "power": "Baja",
+        "antenna": "Portátil",
+        "locType": "residential",
+        "desc": "Nodo Autónomo Solar en Proceso de Configuración y Pruebas - Tarjeta Heltec V3"
+      }
     },
     "UurXyMqE9ncrfLIicNUQ": {
       "id": "UurXyMqE9ncrfLIicNUQ",
@@ -1198,7 +2095,14 @@
       "lon": -70.72523914771112,
       "placeholder": false,
       "alias": "3b0c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Dc-Power-Supply",
+        "power": "Medium",
+        "antenna": "Omlidireccional 11dbi",
+        "locType": "residential",
+        "desc": "LilYGO TLoRa32 portátil"
+      }
     },
     "VPZoxgoWbTSETB7cIZhS": {
       "id": "VPZoxgoWbTSETB7cIZhS",
@@ -1207,7 +2111,14 @@
       "lon": -70.38612111369564,
       "placeholder": false,
       "alias": "GSD3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Gerardo Smith Donald",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "remote",
+        "desc": "Nodo de prueba en Observatorio Paranal Heltec V3"
+      }
     },
     "VolP0Xtv5grEvzi3YTLi": {
       "id": "VolP0Xtv5grEvzi3YTLi",
@@ -1215,7 +2126,14 @@
       "lat": -33.451385500494055,
       "lon": -70.6407471639074,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Cesar Clericus",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "W4KIC4d5SnXJHmaAKcwJ": {
       "id": "W4KIC4d5SnXJHmaAKcwJ",
@@ -1224,7 +2142,13 @@
       "lon": -70.12669688474085,
       "placeholder": false,
       "alias": "HLS2",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Hugo Luis Cortes Cerda",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "W9qWV3OhhHeDHG2GXnuM": {
       "id": "W9qWV3OhhHeDHG2GXnuM",
@@ -1233,7 +2157,14 @@
       "lon": -70.3986,
       "placeholder": false,
       "alias": "crlp",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Francisco Villalobos",
+        "power": "high",
+        "antenna": "external",
+        "locType": "non_residential",
+        "desc": "Nodo desatendido sector centro Antofagasta Radio club La Portada"
+      }
     },
     "WmhnwIdwb7ojgjfsBSDK": {
       "id": "WmhnwIdwb7ojgjfsBSDK",
@@ -1242,7 +2173,14 @@
       "lon": -70.62765378663366,
       "placeholder": false,
       "alias": "FL01",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "beto fisch",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "nodo móvil para emergencia de uso familiar"
+      }
     },
     "X0k1JbnHMlafju3JsknC": {
       "id": "X0k1JbnHMlafju3JsknC",
@@ -1251,7 +2189,15 @@
       "lon": -70.609803,
       "placeholder": false,
       "alias": "nbot",
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Giovanni Morchio",
+        "freq": "915",
+        "power": "alta",
+        "antenna": "Omni fibra 8dbi",
+        "locType": "residential",
+        "desc": "Nodo cliente transformado en bot"
+      }
     },
     "X2gSBqwJ8LArLxb0aXe1": {
       "id": "X2gSBqwJ8LArLxb0aXe1",
@@ -1259,7 +2205,14 @@
       "lat": -33.48766127869681,
       "lon": -70.6009106289776,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Héctor Palma Téllez",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "XophKZTsTlIu4MWSfow2": {
       "id": "XophKZTsTlIu4MWSfow2",
@@ -1267,7 +2220,15 @@
       "lat": -41.34011,
       "lon": -72.95468,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Cristián A. Roblero Figueroa",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Seeed Xiao ESP32-S3"
+      }
     },
     "XwcNDRmGPCkTtgbf9d2G": {
       "id": "XwcNDRmGPCkTtgbf9d2G",
@@ -1276,7 +2237,13 @@
       "lon": -71.62825417,
       "placeholder": false,
       "alias": "b22c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "CD3TEJ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "Y7Mbd6siWUUMdD8jyQ7M": {
       "id": "Y7Mbd6siWUUMdD8jyQ7M",
@@ -1285,7 +2252,14 @@
       "lon": -73.21381,
       "placeholder": false,
       "alias": "lib1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "cristian ojeda",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo con finalidad de ampliar la red mesh"
+      }
     },
     "Y9OZUbrlH3BWysXz6CtJ": {
       "id": "Y9OZUbrlH3BWysXz6CtJ",
@@ -1294,7 +2268,13 @@
       "lon": -70.515326,
       "placeholder": false,
       "alias": "jtr2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jorge Moreno",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "YGxKvs30ao8MrCQsCp3I": {
       "id": "YGxKvs30ao8MrCQsCp3I",
@@ -1302,7 +2282,15 @@
       "lat": -33.4521288,
       "lon": -70.6011664,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "thomas elliott",
+        "freq": "433",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "non_residential",
+        "desc": "prueba en 433"
+      }
     },
     "YpJkDHINVlxSUbNE1JCp": {
       "id": "YpJkDHINVlxSUbNE1JCp",
@@ -1311,7 +2299,13 @@
       "lon": -73.3114619,
       "placeholder": false,
       "alias": "ppm1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "pedro patricio palacios maulen",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "ZGTFnGT9rZl9aWP7PrVk": {
       "id": "ZGTFnGT9rZl9aWP7PrVk",
@@ -1320,7 +2314,14 @@
       "lon": -80.3622522,
       "placeholder": false,
       "alias": "nGYB",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "KC4GYB - Miami",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo Solar a 10 metros de altura, módulo RAK WisBlock 4631, Batería de 10\n000 mAh"
+      }
     },
     "ZJnEJfCPPxhRaYHrcOS7": {
       "id": "ZJnEJfCPPxhRaYHrcOS7",
@@ -1329,7 +2330,14 @@
       "lon": -73.742,
       "placeholder": false,
       "alias": "48f2",
-      "role": "TRACKER"
+      "role": "TRACKER",
+      "meta": {
+        "user": "Fernando Tapia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Tracker en rodaje"
+      }
     },
     "ZMCCSNsm7qPe2KiOf7Ro": {
       "id": "ZMCCSNsm7qPe2KiOf7Ro",
@@ -1338,7 +2346,13 @@
       "lon": -70.86231195915114,
       "placeholder": false,
       "alias": "SLC1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "luis antonio cea sierra",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "ZZof1sNVmlqJsjopaDRg": {
       "id": "ZZof1sNVmlqJsjopaDRg",
@@ -1347,7 +2361,13 @@
       "lon": -70.94579787312536,
       "placeholder": false,
       "alias": "UOB3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Miguel Ángel Pérez Echeverría",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "non_residential"
+      }
     },
     "Zii1ZrLdxqhiwaoNUSpO": {
       "id": "Zii1ZrLdxqhiwaoNUSpO",
@@ -1356,7 +2376,14 @@
       "lon": -70.7557473,
       "placeholder": false,
       "alias": "Fee9",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rocco",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo meshtastic Xiao nrf solar autónomo\nSi se apaga se reinicia automáticamente cada 4 horas. \n\nUbicado a 4 metros de altura"
+      }
     },
     "a7fpcPqQLaIfr14UjMfv": {
       "id": "a7fpcPqQLaIfr14UjMfv",
@@ -1365,7 +2392,15 @@
       "lon": -70.6216548,
       "placeholder": false,
       "alias": "VVO1",
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Federico Videla",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "custom",
+        "locType": "residential",
+        "desc": "Nodo solar RAK autonomía 1-2 semanas sin luz solar, antena dipolo swr 1.0 "
+      }
     },
     "aJNPHx2y7zkYAJs2HWp7": {
       "id": "aJNPHx2y7zkYAJs2HWp7",
@@ -1373,7 +2408,15 @@
       "lat": -39.23323469329868,
       "lon": -71.76200390985642,
       "placeholder": false,
-      "role": "router"
+      "role": "router",
+      "meta": {
+        "user": "David Alcántara",
+        "freq": "915",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Este nodo aporta a extender red dentro del Sector de Huife, comuna de Pucón, región de la Araucanía."
+      }
     },
     "aLGjQUp6CzCxwGajY1fq": {
       "id": "aLGjQUp6CzCxwGajY1fq",
@@ -1382,7 +2425,13 @@
       "lon": -70.559286614068,
       "placeholder": false,
       "alias": "CN_T",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Cabané",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "aWP63aZnR6iWKcVu6dgR": {
       "id": "aWP63aZnR6iWKcVu6dgR",
@@ -1391,7 +2440,14 @@
       "lon": -73.6031603,
       "placeholder": false,
       "alias": "apu1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Álverich PU (alverich)",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Probando la tecnología"
+      }
     },
     "aZ3ctChGnPIhdfkQRJV8": {
       "id": "aZ3ctChGnPIhdfkQRJV8",
@@ -1400,7 +2456,14 @@
       "lon": -70,
       "placeholder": false,
       "alias": "2b5c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "L3Cat70",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec V3 conectado a una antena de fibra (Puente alto)"
+      }
     },
     "abXoESUyWUp9KkkGwULK": {
       "id": "abXoESUyWUp9KkkGwULK",
@@ -1409,7 +2472,14 @@
       "lon": -100.457993,
       "placeholder": false,
       "alias": "IoT",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Yair Olvera",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "a"
+      }
     },
     "adZQkdkfeCEt9cXP6OOZ": {
       "id": "adZQkdkfeCEt9cXP6OOZ",
@@ -1418,7 +2488,14 @@
       "lon": -73.036207,
       "placeholder": false,
       "alias": "LILA",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Freddy Arevalo",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Con panel solar y respaldo batería en techo de vivienda"
+      }
     },
     "ajRtseXhxdyP0mkmlgZJ": {
       "id": "ajRtseXhxdyP0mkmlgZJ",
@@ -1427,7 +2504,14 @@
       "lon": -71.1555,
       "placeholder": false,
       "alias": "4NBE",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Roberto Moya Miño ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Ubicado en Curicó "
+      }
     },
     "au9xrKkzmauCldr3nJUP": {
       "id": "au9xrKkzmauCldr3nJUP",
@@ -1436,7 +2520,14 @@
       "lon": -71.7060999,
       "placeholder": false,
       "alias": "RAY5",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando Seguy - CE4RAY",
+        "power": "high",
+        "antenna": "external",
+        "locType": "remote",
+        "desc": "pronto nodo en altura 400 mts para conectar nodo Talca y Curicó"
+      }
     },
     "awdylFvdncr3ZMrjROcs": {
       "id": "awdylFvdncr3ZMrjROcs",
@@ -1445,7 +2536,13 @@
       "lon": -70.722215,
       "placeholder": false,
       "alias": "C3R2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jose Oyarzun",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "b9BIfT8IRE9NBOHeDqmT": {
       "id": "b9BIfT8IRE9NBOHeDqmT",
@@ -1453,7 +2550,14 @@
       "lat": -33.4401615,
       "lon": -70.6579547,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "erik schaper",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "bBREr7Fhqu9tQL1ZaM01": {
       "id": "bBREr7Fhqu9tQL1ZaM01",
@@ -1462,7 +2566,13 @@
       "lon": -71.16794680671165,
       "placeholder": false,
       "alias": "Kmar",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernán Valdés ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "bJfpcdOnf2cYb3PtHEIw": {
       "id": "bJfpcdOnf2cYb3PtHEIw",
@@ -1471,7 +2581,14 @@
       "lon": -70.5854898445817,
       "placeholder": false,
       "alias": "3PFL",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Jose Ernesto CD3PFL",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Analizando comportamiento de la red."
+      }
     },
     "baV3FVWc5nVR5nRryqTr": {
       "id": "baV3FVWc5nVR5nRryqTr",
@@ -1479,7 +2596,15 @@
       "lat": -33.4078438,
       "lon": -70.7153999,
       "placeholder": false,
-      "role": "router"
+      "role": "router",
+      "meta": {
+        "user": "Fabián T",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Pruebas"
+      }
     },
     "be7ykgukfcwvXLht6uwn": {
       "id": "be7ykgukfcwvXLht6uwn",
@@ -1488,7 +2613,13 @@
       "lon": -70.5697283,
       "placeholder": false,
       "alias": "JLTH",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Javier Larrondo",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "bgnrLDYeARUKNQwrLi3m": {
       "id": "bgnrLDYeARUKNQwrLi3m",
@@ -1497,7 +2628,13 @@
       "lon": -70.13096783435121,
       "placeholder": false,
       "alias": "bb81",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro Silva A.",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "brzxLLeEHgx7q0P3cYQt": {
       "id": "brzxLLeEHgx7q0P3cYQt",
@@ -1506,7 +2643,13 @@
       "lon": -71.23378,
       "placeholder": false,
       "alias": "OVPq",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Caceres",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "cxgBeu3XST290VJPRtbS": {
       "id": "cxgBeu3XST290VJPRtbS",
@@ -1515,7 +2658,13 @@
       "lon": -73.10152723503649,
       "placeholder": false,
       "alias": "CCP",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "NicoVenya8 8",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "d3WLmDKd8GLohdiaW3XD": {
       "id": "d3WLmDKd8GLohdiaW3XD",
@@ -1524,7 +2673,13 @@
       "lon": -71.65,
       "placeholder": false,
       "alias": "Nono",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Nolberto Antonio González Troncoso",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "dD6cWePVjvHWs9SScUoN": {
       "id": "dD6cWePVjvHWs9SScUoN",
@@ -1533,7 +2688,14 @@
       "lon": -70.6510848,
       "placeholder": false,
       "alias": "b234",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Carlos Salas Contreras",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Pruebas de nodo base para rastreo mascotas"
+      }
     },
     "dSTXcPo2Zn5jgwHfUzMY": {
       "id": "dSTXcPo2Zn5jgwHfUzMY",
@@ -1542,7 +2704,13 @@
       "lon": -72.95410958915483,
       "placeholder": false,
       "alias": "Pato",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Tapia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "dYVnrQCTuZsJRBCyK2PJ": {
       "id": "dYVnrQCTuZsJRBCyK2PJ",
@@ -1551,7 +2719,13 @@
       "lon": -71.6546744,
       "placeholder": false,
       "alias": "HH02",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernan Ponce",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "deIPR3wZvjvMfCaBtN7D": {
       "id": "deIPR3wZvjvMfCaBtN7D",
@@ -1560,7 +2734,14 @@
       "lon": -71.5851442,
       "placeholder": false,
       "alias": "1KYS",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Leonardo Sereño Azócar",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec V3"
+      }
     },
     "dfXFMjU6Cj29xTpaz2hc": {
       "id": "dfXFMjU6Cj29xTpaz2hc",
@@ -1569,7 +2750,14 @@
       "lon": -71.2705331,
       "placeholder": false,
       "alias": "NRDP",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Román Carvajal ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo a 6 mts de altura con panel solar autónomo "
+      }
     },
     "dnKlgKCYiGWzoTvEJrZ3": {
       "id": "dnKlgKCYiGWzoTvEJrZ3",
@@ -1578,7 +2766,14 @@
       "lon": -70.28607166666666,
       "placeholder": false,
       "alias": "4JVU",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Victor Rodrigo “CE4JVU” Jimenez Valenzuela",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "NODO DE PRUEBA EN TRABAJO"
+      }
     },
     "dsA2Rp3luF30F89tmui2": {
       "id": "dsA2Rp3luF30F89tmui2",
@@ -1586,7 +2781,14 @@
       "lat": -33.99155251517639,
       "lon": -71.21176221157259,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Simón Garcia Simontti",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "dslHGoWUYz3E5X2RFk2Q": {
       "id": "dslHGoWUYz3E5X2RFk2Q",
@@ -1595,7 +2797,14 @@
       "lon": -73.1158105,
       "placeholder": false,
       "alias": "🏠",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Felipe Barroso",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo solar heltec V3. En prueba de funcionamiento."
+      }
     },
     "egtZ5b6qAO89lXa6ZpoA": {
       "id": "egtZ5b6qAO89lXa6ZpoA",
@@ -1604,7 +2813,13 @@
       "lon": -71.16794680671165,
       "placeholder": false,
       "alias": "K3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernán Valdés ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "fCTcMO6HYUjzxcCzxHYW": {
       "id": "fCTcMO6HYUjzxcCzxHYW",
@@ -1613,7 +2828,14 @@
       "lon": -72.368963,
       "placeholder": false,
       "alias": "0f9a",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "José Mella Cid",
+        "power": "high",
+        "antenna": "directional",
+        "locType": "residential",
+        "desc": "NRF52 Faketec - Nodo fijo, Los Ángeles Sur Poniente. "
+      }
     },
     "fWx9l7BIY90D6yAO5a23": {
       "id": "fWx9l7BIY90D6yAO5a23",
@@ -1622,7 +2844,13 @@
       "lon": -70.5901561,
       "placeholder": false,
       "alias": "1957",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Claudio Zamora o",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "fYCCnPm8UtzhnL49cDMR": {
       "id": "fYCCnPm8UtzhnL49cDMR",
@@ -1631,7 +2859,14 @@
       "lon": -78.836106,
       "placeholder": false,
       "alias": "JFM1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Raymundo R",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Estación móvil de pruebas de recepción - emisión  en el poblado de San Juan Bautista, Isla Robinson Crusoe."
+      }
     },
     "faDyTpOmJBnzsxXBZKy3": {
       "id": "faDyTpOmJBnzsxXBZKy3",
@@ -1640,7 +2875,14 @@
       "lon": -70.60294527840786,
       "placeholder": false,
       "alias": "nod1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "pedro fuentes",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "test node "
+      }
     },
     "fdRznVsHwJFk1UhgMbdV": {
       "id": "fdRznVsHwJFk1UhgMbdV",
@@ -1648,7 +2890,15 @@
       "lat": -33.4401909,
       "lon": -70.6579754,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "erik schaper",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "tablet de prueba "
+      }
     },
     "g0vdgpXZC8eg3GQcuOFy": {
       "id": "g0vdgpXZC8eg3GQcuOFy",
@@ -1657,7 +2907,14 @@
       "lon": -71.31105526905019,
       "placeholder": false,
       "alias": "2REF",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Felipe Ramírez Espina",
+        "power": "22 dBm",
+        "antenna": "vertical HG-908U",
+        "locType": "residential",
+        "desc": "XIAO ESP32 + WIO SX1262 fijo, batería 1100mAh antena Vertical HG908U-PRO"
+      }
     },
     "gp13kWnWIsbGSux189xy": {
       "id": "gp13kWnWIsbGSux189xy",
@@ -1666,7 +2923,14 @@
       "lon": -71.2693999,
       "placeholder": false,
       "alias": "KPDR",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "KakoPedreros",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Un humilde Lilygo T-Beam con batería, probando esto del meshtastic..."
+      }
     },
     "hmF3C7vv6FaRo6zT1ScS": {
       "id": "hmF3C7vv6FaRo6zT1ScS",
@@ -1675,7 +2939,15 @@
       "lon": -68.9780833,
       "placeholder": false,
       "alias": "41D0",
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Jimmy Romero",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo en Calama"
+      }
     },
     "hqHtExvErdWLvF8EdXKf": {
       "id": "hqHtExvErdWLvF8EdXKf",
@@ -1684,7 +2956,14 @@
       "lon": -70.3986,
       "placeholder": false,
       "alias": "hrlp",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Francisco Villalobos",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo sector Hospital\nInstalado por CE1RLP"
+      }
     },
     "hzVrd5uhdZO695Ji5n2G": {
       "id": "hzVrd5uhdZO695Ji5n2G",
@@ -1693,7 +2972,13 @@
       "lon": -72.96,
       "placeholder": false,
       "alias": "58eb",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "JOHN EDWARDS BURGOS NAVARRO",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "iEcEg4emEr5HszRgPWx4": {
       "id": "iEcEg4emEr5HszRgPWx4",
@@ -1702,7 +2987,14 @@
       "lon": -72.9529193,
       "placeholder": false,
       "alias": "RX4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Heraldo Moscoso",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "modo pruebas para Tome y Dichato "
+      }
     },
     "iEcZmoNMEScPixisrjYN": {
       "id": "iEcZmoNMEScPixisrjYN",
@@ -1711,7 +3003,13 @@
       "lon": -73.096235,
       "placeholder": false,
       "alias": "RKTH",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "rodrigo PEDREROS",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "jA5wa1G8qFPpPM1fWS4A": {
       "id": "jA5wa1G8qFPpPM1fWS4A",
@@ -1720,7 +3018,13 @@
       "lon": -70.9949093,
       "placeholder": false,
       "alias": "4UGK",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Manuel Lisboa Cordero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "jLLjwWAd6weTbPpTOTvd": {
       "id": "jLLjwWAd6weTbPpTOTvd",
@@ -1729,7 +3033,13 @@
       "lon": -70.8530192,
       "placeholder": false,
       "alias": "FFAC",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fabian",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "jMrb9EV5eh2t7aByMEer": {
       "id": "jMrb9EV5eh2t7aByMEer",
@@ -1738,7 +3048,13 @@
       "lon": -70.63788604464055,
       "placeholder": false,
       "alias": "a5e0",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Francisco Dulanto (fcobcn)",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "jOSZhPZp7ZdSSVaPit5N": {
       "id": "jOSZhPZp7ZdSSVaPit5N",
@@ -1747,7 +3063,14 @@
       "lon": -71.61009,
       "placeholder": false,
       "alias": "FAMR",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Luis Felipe Monsalve",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo para Talca - Sector Las Rastras"
+      }
     },
     "jbMDXRngVA5Iv6PKOcbb": {
       "id": "jbMDXRngVA5Iv6PKOcbb",
@@ -1756,7 +3079,14 @@
       "lon": -73.03037056105828,
       "placeholder": false,
       "alias": "AIF1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Freddy Arevalo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Con Panel solar y bateria"
+      }
     },
     "jyaoZAZIQ3ELPFbQ6wqF": {
       "id": "jyaoZAZIQ3ELPFbQ6wqF",
@@ -1765,7 +3095,14 @@
       "lon": -70.7416172,
       "placeholder": false,
       "alias": "3b7f",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rocco",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo autónomo solar\nUbicado a 12  metros de altura \n"
+      }
     },
     "k7LLDXS0EHKjwIpk2hVe": {
       "id": "k7LLDXS0EHKjwIpk2hVe",
@@ -1773,7 +3110,13 @@
       "lat": -33.5917,
       "lon": -70.5133,
       "placeholder": false,
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eduardo Villagrán Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "kIfemFUGUh77E6YSsnKx": {
       "id": "kIfemFUGUh77E6YSsnKx",
@@ -1782,7 +3125,13 @@
       "lon": -71.5849728,
       "placeholder": false,
       "alias": "V2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Nicopinas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "kRELultKGgvOnFxYEptu": {
       "id": "kRELultKGgvOnFxYEptu",
@@ -1791,7 +3140,14 @@
       "lon": -70.3938,
       "placeholder": false,
       "alias": "prlp",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Francisco Villalobos",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo Parque Nicolás Tirado\nPropiedad CE1RLP"
+      }
     },
     "kW7LosMBHEMj6g3ZM3er": {
       "id": "kW7LosMBHEMj6g3ZM3er",
@@ -1800,7 +3156,14 @@
       "lon": -72.3517,
       "placeholder": false,
       "alias": "LSQ",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ricardo C. Cabezas Romero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo comuna de Los Ángeles"
+      }
     },
     "kWwbM4VfbD89mhdlOjN3": {
       "id": "kWwbM4VfbD89mhdlOjN3",
@@ -1809,7 +3172,13 @@
       "lon": -71.371079,
       "placeholder": false,
       "alias": "GSD2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Gerardo Smith Donald",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "koJZ7QtdQc6HnwkC5q3T": {
       "id": "koJZ7QtdQc6HnwkC5q3T",
@@ -1818,7 +3187,13 @@
       "lon": -70.60605699516691,
       "placeholder": false,
       "alias": "REN1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Horacio Matta",
+        "power": "high",
+        "antenna": "custom",
+        "locType": "residential"
+      }
     },
     "kptrc23YyumEI7hjs4ag": {
       "id": "kptrc23YyumEI7hjs4ag",
@@ -1826,7 +3201,15 @@
       "lat": -33.5039272,
       "lon": -70.7904328,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Daniel piña",
+        "freq": "915",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Heltec v3 en pruebas "
+      }
     },
     "kt4Us263xI5ks6JifB6f": {
       "id": "kt4Us263xI5ks6JifB6f",
@@ -1835,7 +3218,13 @@
       "lon": -70.13095508077338,
       "placeholder": false,
       "alias": "42e0",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Alejandro Silva A.",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "ktaFvdMz6XbYiwtvU2us": {
       "id": "ktaFvdMz6XbYiwtvU2us",
@@ -1844,7 +3233,13 @@
       "lon": -70.552,
       "placeholder": false,
       "alias": "d03c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Bastian Garrido Aedo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "kxfMWSvvrniCf6fYGs0o": {
       "id": "kxfMWSvvrniCf6fYGs0o",
@@ -1853,7 +3248,14 @@
       "lon": -70.9710728,
       "placeholder": false,
       "alias": "96d0",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Carlos Gonzalez Araya",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Conectado al wifi. "
+      }
     },
     "l7WIuuYmBBRT0G0OwSB0": {
       "id": "l7WIuuYmBBRT0G0OwSB0",
@@ -1862,7 +3264,13 @@
       "lon": -71.5591,
       "placeholder": false,
       "alias": "4PKZ",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Catalán Castro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "mASrA15q2kxTqlZY3due": {
       "id": "mASrA15q2kxTqlZY3due",
@@ -1870,7 +3278,15 @@
       "lat": -33.51801329348308,
       "lon": -70.60204561080099,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Ignacio Rodríguez",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Heltec v3, probando antenas"
+      }
     },
     "mDuGxGchX5TsRWVYa9d4": {
       "id": "mDuGxGchX5TsRWVYa9d4",
@@ -1879,7 +3295,14 @@
       "lon": -70.3101732322972,
       "placeholder": false,
       "alias": "otep",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rivas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "usuario nuevo aprendiendo"
+      }
     },
     "mXp8fKd20kTbG3aL5eVx": {
       "id": "mXp8fKd20kTbG3aL5eVx",
@@ -1888,7 +3311,13 @@
       "lon": -72.23699,
       "placeholder": false,
       "alias": "5580",
-      "role": "REPEATER"
+      "role": "REPEATER",
+      "meta": {
+        "user": "Marcelo Vargas",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "non_residential"
+      }
     },
     "mg1eyFS8BkynlMwIYP36": {
       "id": "mg1eyFS8BkynlMwIYP36",
@@ -1896,7 +3325,15 @@
       "lat": -35.8454907,
       "lon": -71.5842527,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Claudio Zurita Aravena",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Linares"
+      }
     },
     "muk3IuOe8GfJoY2A1Ctk": {
       "id": "muk3IuOe8GfJoY2A1Ctk",
@@ -1905,7 +3342,13 @@
       "lon": -70.60066681535301,
       "placeholder": false,
       "alias": "corg",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Francisco Silva",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "n7RX0psB5EyLob27hGWr": {
       "id": "n7RX0psB5EyLob27hGWr",
@@ -1914,7 +3357,13 @@
       "lon": -71.233121,
       "placeholder": false,
       "alias": "SEP8",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Secha",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "nEMzPHm9f4r0qC7xMcE8": {
       "id": "nEMzPHm9f4r0qC7xMcE8",
@@ -1923,7 +3372,14 @@
       "lon": -70.97029875999999,
       "placeholder": false,
       "alias": "7c22",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ivan Flores",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "nodo en construcción, cada x tiempo le cambio cosas"
+      }
     },
     "nT4Z1g7Q34r9uNqvg50o": {
       "id": "nT4Z1g7Q34r9uNqvg50o",
@@ -1931,7 +3387,14 @@
       "lat": -32.9389632,
       "lon": -71.5273075,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Felipe Ureta",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "nXVvpthwEqZ21TWZwnV9": {
       "id": "nXVvpthwEqZ21TWZwnV9",
@@ -1940,7 +3403,13 @@
       "lon": -71.1740668,
       "placeholder": false,
       "alias": "JSF1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jorge Sepúlveda Fuentes",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "nba7lqoJnHYEUz55CZ6M": {
       "id": "nba7lqoJnHYEUz55CZ6M",
@@ -1949,7 +3418,14 @@
       "lon": -70.5713624,
       "placeholder": false,
       "alias": "PDC3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Dominguez",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Heltec v3"
+      }
     },
     "njl17foMZZsgElOIkTvI": {
       "id": "njl17foMZZsgElOIkTvI",
@@ -1958,7 +3434,13 @@
       "lon": -72.9310608,
       "placeholder": false,
       "alias": "JLTM",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Javier Larrondo",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "nscgizNF5VIaNNc1fNmo": {
       "id": "nscgizNF5VIaNNc1fNmo",
@@ -1967,7 +3449,14 @@
       "lon": -73.1024921,
       "placeholder": false,
       "alias": "Thn2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcelo Veloso",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo 2 Thno"
+      }
     },
     "oJCJnOmWqyXrI2QJ85C3": {
       "id": "oJCJnOmWqyXrI2QJ85C3",
@@ -1976,7 +3465,14 @@
       "lon": -71.2228068,
       "placeholder": false,
       "alias": "RAY1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando ",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Antena 5.5 dbi heltec v3"
+      }
     },
     "oKwlKGkkgLxS38osRKP5": {
       "id": "oKwlKGkkgLxS38osRKP5",
@@ -1985,7 +3481,13 @@
       "lon": -70.549423,
       "placeholder": false,
       "alias": "1488",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "JULIO LUTJENS",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "oVdTL8YbbiCf8qrCrSl3": {
       "id": "oVdTL8YbbiCf8qrCrSl3",
@@ -1994,7 +3496,14 @@
       "lon": -70.5574515,
       "placeholder": false,
       "alias": "Ta1W",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "cristian escudero",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Solar 1 Watt RAK"
+      }
     },
     "oiLaDwU3tBu1QrQhi9Ws": {
       "id": "oiLaDwU3tBu1QrQhi9Ws",
@@ -2002,7 +3511,15 @@
       "lat": -33.4078356,
       "lon": -70.7153696,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Fabián T",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec V3 pruebas"
+      }
     },
     "paaDTWqYR8o8nbiH4Lnj": {
       "id": "paaDTWqYR8o8nbiH4Lnj",
@@ -2011,7 +3528,13 @@
       "lon": -71.83585636146788,
       "placeholder": false,
       "alias": "EASS",
-      "role": "ROUTER"
+      "role": "ROUTER",
+      "meta": {
+        "user": "Ernesto Sepulveda",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "pc2JFsCVT8htjJFofSyM": {
       "id": "pc2JFsCVT8htjJFofSyM",
@@ -2020,7 +3543,14 @@
       "lon": -80.3622522,
       "placeholder": false,
       "alias": "4GYB",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "KC4GYB - Miami",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo Portátil y Móvil, Heltec v2, Batería 3000 mAh"
+      }
     },
     "ph5OPGftntSeoJVGQc5g": {
       "id": "ph5OPGftntSeoJVGQc5g",
@@ -2029,7 +3559,14 @@
       "lon": -71.5439682690155,
       "placeholder": false,
       "alias": "FSM",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "FSM",
+        "power": "medium",
+        "antenna": "custom",
+        "locType": "mobile",
+        "desc": "haciendo pruebas"
+      }
     },
     "q0ZQoTIOnmAJXiMfMofR": {
       "id": "q0ZQoTIOnmAJXiMfMofR",
@@ -2038,7 +3575,13 @@
       "lon": -70.78178345810403,
       "placeholder": false,
       "alias": "Suza",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Suzakun",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "q1OOkBcaMOmcD42C9bbF": {
       "id": "q1OOkBcaMOmcD42C9bbF",
@@ -2047,7 +3590,14 @@
       "lon": -72.377093,
       "placeholder": false,
       "alias": "RAY4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando ",
+        "power": "high",
+        "antenna": "directional",
+        "locType": "residential",
+        "desc": "Futuro nodo Cauquenes seeed + direccional "
+      }
     },
     "qWBmW6ydY5RYSqcuu4U6": {
       "id": "qWBmW6ydY5RYSqcuu4U6",
@@ -2056,7 +3606,13 @@
       "lon": -71.9558644427124,
       "placeholder": false,
       "alias": "AKYM",
-      "role": "TRACKER"
+      "role": "TRACKER",
+      "meta": {
+        "user": "José Julio Enrique Rubilar Elgueta",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "qkZuG1twxKZlvlW7XksA": {
       "id": "qkZuG1twxKZlvlW7XksA",
@@ -2065,7 +3621,14 @@
       "lon": -70.664584,
       "placeholder": false,
       "alias": "1b64",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cristian Arriaza Ulloa",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Condominio rodeado de muros"
+      }
     },
     "r5DoDE6LrN2V4Odv7VAa": {
       "id": "r5DoDE6LrN2V4Odv7VAa",
@@ -2074,7 +3637,14 @@
       "lon": -72.3517,
       "placeholder": false,
       "alias": "LSQ",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ricardo C. Cabezas Romero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo LA acceso norte"
+      }
     },
     "rZcaoABRpJAoRAwitjfw": {
       "id": "rZcaoABRpJAoRAwitjfw",
@@ -2083,7 +3653,14 @@
       "lon": -70.65636974383395,
       "placeholder": false,
       "alias": "MyM1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcelo Linares",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Modo que se mueve conmigo en mis actividades"
+      }
     },
     "rcEwQkucOcbvov3tLVFg": {
       "id": "rcEwQkucOcbvov3tLVFg",
@@ -2092,7 +3669,14 @@
       "lon": -70.61974238535318,
       "placeholder": false,
       "alias": "OWA1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Orlando Alarcon",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "nodos solar en prueba "
+      }
     },
     "riWQMMNgkZYR5edgRhdA": {
       "id": "riWQMMNgkZYR5edgRhdA",
@@ -2101,7 +3685,13 @@
       "lon": -70.586844,
       "placeholder": false,
       "alias": "trk3",
-      "role": "TRACKER"
+      "role": "TRACKER",
+      "meta": {
+        "user": "Iberé Ranieri",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "rpIARYQvEZ3YHlkzaq9r": {
       "id": "rpIARYQvEZ3YHlkzaq9r",
@@ -2110,7 +3700,14 @@
       "lon": 139.535535,
       "placeholder": false,
       "alias": "CSTD",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Camilo Saldías",
+        "power": "high",
+        "antenna": "external",
+        "locType": "mobile",
+        "desc": "TDeck Portátil"
+      }
     },
     "rrNGDIOhUcWjflPT5LVF": {
       "id": "rrNGDIOhUcWjflPT5LVF",
@@ -2119,7 +3716,14 @@
       "lon": -70.6646,
       "placeholder": false,
       "alias": "0d94",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cristian Arriaza Ulloa",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Departamento bloqueado de edificios"
+      }
     },
     "rzbHLb6nG1e8wxewl9Ra": {
       "id": "rzbHLb6nG1e8wxewl9Ra",
@@ -2128,7 +3732,13 @@
       "lon": -70.6772992,
       "placeholder": false,
       "alias": "PRB!",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Christopher Isler",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "sJxiScc7MeqR0neogxSN": {
       "id": "sJxiScc7MeqR0neogxSN",
@@ -2137,7 +3747,13 @@
       "lon": -70.586844,
       "placeholder": false,
       "alias": "ILJ",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Iberé Ranieri",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "sR6BpLnl84DV7ENfJtUU": {
       "id": "sR6BpLnl84DV7ENfJtUU",
@@ -2146,7 +3762,13 @@
       "lon": -71.1895981443468,
       "placeholder": false,
       "alias": "k1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernán Valdés ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "sRwd5yYCyJO83AvzgOmM": {
       "id": "sRwd5yYCyJO83AvzgOmM",
@@ -2155,7 +3777,14 @@
       "lon": -70.565888,
       "placeholder": false,
       "alias": "CUP2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fabián Carvajal ",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "mobile",
+        "desc": "Nodo movil "
+      }
     },
     "sYLumzI9eFW5zRvA12lo": {
       "id": "sYLumzI9eFW5zRvA12lo",
@@ -2164,7 +3793,14 @@
       "lon": -70.58882223065076,
       "placeholder": false,
       "alias": "AG02",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Angello Gonzalez Castro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec v3 estacion fija."
+      }
     },
     "scuQ2F1nigwLkCg8ssMz": {
       "id": "scuQ2F1nigwLkCg8ssMz",
@@ -2173,7 +3809,14 @@
       "lon": -70.56023161,
       "placeholder": false,
       "alias": "bam4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Bernardino Arance Maldonado",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "bernardino@arance.us"
+      }
     },
     "tMtPtyoluYi8E5Qb6Cri": {
       "id": "tMtPtyoluYi8E5Qb6Cri",
@@ -2182,7 +3825,14 @@
       "lon": -70.58823603083384,
       "placeholder": false,
       "alias": "AG01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Angello Gonzalez Castro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Móvil para trackeo y comunicación."
+      }
     },
     "tNYLPsSRCuAr2WhLmyUi": {
       "id": "tNYLPsSRCuAr2WhLmyUi",
@@ -2191,7 +3841,13 @@
       "lon": -70.570584,
       "placeholder": false,
       "alias": "c344",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ivan Lizana",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "tOjOW61NEQNpkWqZr9mZ": {
       "id": "tOjOW61NEQNpkWqZr9mZ",
@@ -2200,7 +3856,13 @@
       "lon": -70.985524,
       "placeholder": false,
       "alias": "UGKM",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Manuel Lisboa Cordero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "uDI4ytJhurYkIIqILQTG": {
       "id": "uDI4ytJhurYkIIqILQTG",
@@ -2209,7 +3871,14 @@
       "lon": -72.199652,
       "placeholder": false,
       "alias": "bb54",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marcelo Vargas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "THINKNODE M5 "
+      }
     },
     "uJymchDpBdTH3PwsYgQL": {
       "id": "uJymchDpBdTH3PwsYgQL",
@@ -2218,7 +3887,13 @@
       "lon": -73.3478912,
       "placeholder": false,
       "alias": "🐄",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "kotte shiro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "uYPO9cvkZrfOmRrjo4aO": {
       "id": "uYPO9cvkZrfOmRrjo4aO",
@@ -2227,7 +3902,13 @@
       "lon": -71.1294562770481,
       "placeholder": false,
       "alias": "UOB1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Miguel Ángel Pérez Echeverría",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "uenljucwmlIoc4jsNbMK": {
       "id": "uenljucwmlIoc4jsNbMK",
@@ -2236,7 +3917,14 @@
       "lon": -70.77505478627987,
       "placeholder": false,
       "alias": "NERV",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ignacio K.",
+        "power": "medium",
+        "antenna": "915Mhz - No Stock",
+        "locType": "residential",
+        "desc": "Heltec v3 en pruebas."
+      }
     },
     "ugFvOwfajM5IFSJKcGje": {
       "id": "ugFvOwfajM5IFSJKcGje",
@@ -2245,7 +3933,14 @@
       "lon": -70.55746690000001,
       "placeholder": false,
       "alias": "Tat1",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "cristian escudero",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Movil"
+      }
     },
     "v1tOMxufASmSJXLCw4gM": {
       "id": "v1tOMxufASmSJXLCw4gM",
@@ -2254,7 +3949,13 @@
       "lon": -70.9793918,
       "placeholder": false,
       "alias": "JC1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jorge Cerda ",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "v8EO6UpSTttVfR7J7q5r": {
       "id": "v8EO6UpSTttVfR7J7q5r",
@@ -2263,7 +3964,14 @@
       "lon": -70.6103713,
       "placeholder": false,
       "alias": "2c56",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Christopher Isler",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "PRobando"
+      }
     },
     "vEE973VcMu3oEgGMfuQB": {
       "id": "vEE973VcMu3oEgGMfuQB",
@@ -2272,7 +3980,14 @@
       "lon": -71.1862096,
       "placeholder": false,
       "alias": "dwj8",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jasiel Elias Maturana Aracena",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Un T-DECK como salió de la caja (por ahora)"
+      }
     },
     "vGbR6nK5J7s9meEWsoAw": {
       "id": "vGbR6nK5J7s9meEWsoAw",
@@ -2281,7 +3996,14 @@
       "lon": -70.9886,
       "placeholder": false,
       "alias": "RAY3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Fernando ",
+        "power": "high",
+        "antenna": "external",
+        "locType": "remote",
+        "desc": "xiao seed antena onmi 5,5 conversor 12-24v 5v"
+      }
     },
     "vMalOwR4o8QlDzLOaFom": {
       "id": "vMalOwR4o8QlDzLOaFom",
@@ -2290,7 +4012,13 @@
       "lon": -70.13102450773157,
       "placeholder": false,
       "alias": "dec0",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro Silva A.",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
     },
     "vNasIPtoi8P9ATI7YxDD": {
       "id": "vNasIPtoi8P9ATI7YxDD",
@@ -2299,7 +4027,13 @@
       "lon": -70.55922107786641,
       "placeholder": false,
       "alias": "CN_P",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Cabané",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "vmeYRIccYUQKJGK3pgfg": {
       "id": "vmeYRIccYUQKJGK3pgfg",
@@ -2308,7 +4042,14 @@
       "lon": -71.90856,
       "placeholder": false,
       "alias": "VRGN",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Aravena",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "remote",
+        "desc": "Nodo usando una Seeedio Wio Tracker L1, batería de 10.000 mAh y panel solar 5V 6W en cerro La Isla/Virgen/Antenas en Curacautin."
+      }
     },
     "vzgpi5Lf14Te7Dfmejr4": {
       "id": "vzgpi5Lf14Te7Dfmejr4",
@@ -2317,7 +4058,13 @@
       "lon": -70.6536,
       "placeholder": false,
       "alias": "3RUP",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Carlos Salas Contreras",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "w0yCR5lXo6qXlINziLrh": {
       "id": "w0yCR5lXo6qXlINziLrh",
@@ -2326,7 +4073,14 @@
       "lon": -70.700237,
       "placeholder": false,
       "alias": "mSH2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Seba Huili",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Seed Xiao ESP32-S3"
+      }
     },
     "wDa7nC80aE8X132CboIn": {
       "id": "wDa7nC80aE8X132CboIn",
@@ -2335,7 +4089,13 @@
       "lon": -71.23422,
       "placeholder": false,
       "alias": "OVPr",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Manuel Caceres Palta",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "remote"
+      }
     },
     "wFQVdujlLAOlBtq4SvMX": {
       "id": "wFQVdujlLAOlBtq4SvMX",
@@ -2344,7 +4104,14 @@
       "lon": -70.6090848,
       "placeholder": false,
       "alias": "FL03",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "beto fisch",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo para uso familiar en caso de emergencia "
+      }
     },
     "wMDPqW0ieWJV0ATFmyUV": {
       "id": "wMDPqW0ieWJV0ATFmyUV",
@@ -2353,7 +4120,13 @@
       "lon": -70.7493888,
       "placeholder": false,
       "alias": "wism",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Cesar Palavicino",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "wUTahUZNTRQo6dwQbFQ0": {
       "id": "wUTahUZNTRQo6dwQbFQ0",
@@ -2362,7 +4135,14 @@
       "lon": -73.10153227118592,
       "placeholder": false,
       "alias": "🛰️",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "NicoVenya8 8",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Mi nodo personal"
+      }
     },
     "wksX2sU2XgVEdVbsePJD": {
       "id": "wksX2sU2XgVEdVbsePJD",
@@ -2371,7 +4151,13 @@
       "lon": -70.55724526736499,
       "placeholder": false,
       "alias": "CN_B",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio Cabané Toledo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "wmlV22CK3SxYQNvxcPMB": {
       "id": "wmlV22CK3SxYQNvxcPMB",
@@ -2380,7 +4166,13 @@
       "lon": -70.586844,
       "placeholder": false,
       "alias": "MT34",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Iberé Ranieri",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "x0Mz1z7gG6yqhfMTtsx6": {
       "id": "x0Mz1z7gG6yqhfMTtsx6",
@@ -2389,7 +4181,14 @@
       "lon": -70.535838,
       "placeholder": false,
       "alias": "Yv4",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Homero A. Chique S",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Heltec v4 con Telemetria activa "
+      }
     },
     "x7OpzBgxXTKgUHRuqhyD": {
       "id": "x7OpzBgxXTKgUHRuqhyD",
@@ -2398,7 +4197,14 @@
       "lon": -70.53635322627646,
       "placeholder": false,
       "alias": "PiFo",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "OSCAR PIZARRO",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "la reina - pifox "
+      }
     },
     "xWaTdTMv7kBkz1dPABor": {
       "id": "xWaTdTMv7kBkz1dPABor",
@@ -2407,7 +4213,13 @@
       "lon": -70.401,
       "placeholder": false,
       "alias": "MT01",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Miguel Tapia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "xjGDpG6zylBDWvVZV074": {
       "id": "xjGDpG6zylBDWvVZV074",
@@ -2416,7 +4228,13 @@
       "lon": -71.535225,
       "placeholder": false,
       "alias": "SYR",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "CE2SYR",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "xw6iAaJO6TmwZVYF5kEv": {
       "id": "xw6iAaJO6TmwZVYF5kEv",
@@ -2425,7 +4243,13 @@
       "lon": -70.616257,
       "placeholder": false,
       "alias": "617c",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "alcides salazar",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "y2ihsJ01JWuZ4OtlDOZA": {
       "id": "y2ihsJ01JWuZ4OtlDOZA",
@@ -2434,7 +4258,14 @@
       "lon": -70.3101103,
       "placeholder": false,
       "alias": "Elu7",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rivas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "MÓVIL "
+      }
     },
     "y6dKsWMu3e1IrNlmwJZi": {
       "id": "y6dKsWMu3e1IrNlmwJZi",
@@ -2443,7 +4274,14 @@
       "lon": -70.58814465205043,
       "placeholder": false,
       "alias": "CD3D",
-      "role": "CLIENT_MUTE"
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Eduardo Olivares Godoy",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "LYLYGO  TDECK\nEn Movimiento"
+      }
     },
     "yJ8BhGnUQ7OAoWPyGXy1": {
       "id": "yJ8BhGnUQ7OAoWPyGXy1",
@@ -2452,7 +4290,14 @@
       "lon": -70.7149,
       "placeholder": false,
       "alias": "TQY1",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mauro Poblete",
+        "power": "Baja",
+        "antenna": "Portátil",
+        "locType": "mobile",
+        "desc": "Tarjeta Heltec V3 - Nodo Portátil con Antena GIZONT GT-7702, 915 MHz (Modo Handy)"
+      }
     },
     "yMSNTB2hlEq4GD6mrArA": {
       "id": "yMSNTB2hlEq4GD6mrArA",
@@ -2461,7 +4306,14 @@
       "lon": -70.765378,
       "placeholder": false,
       "alias": "ed00",
-      "role": "CLIENT_BASE"
+      "role": "CLIENT_BASE",
+      "meta": {
+        "user": "Eduardo Latorre",
+        "power": "high",
+        "antenna": "custom",
+        "locType": "residential",
+        "desc": "ESP32C3_LoRa RFM95W"
+      }
     },
     "yZzcts4zZaWGsRXdnkDa": {
       "id": "yZzcts4zZaWGsRXdnkDa",
@@ -2470,7 +4322,13 @@
       "lon": -71.5056284,
       "placeholder": false,
       "alias": "2MGP",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Mario Escobar ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "ycZnMqWRq9uZzSoSeE1N": {
       "id": "ycZnMqWRq9uZzSoSeE1N",
@@ -2478,7 +4336,14 @@
       "lat": -33.12845,
       "lon": -71.55876,
       "placeholder": false,
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Matias Peters",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo residencial, fijo en Curauma, Valparaíso."
+      }
     },
     "ydQGFIb5BcPvqzV3c6Qr": {
       "id": "ydQGFIb5BcPvqzV3c6Qr",
@@ -2486,7 +4351,15 @@
       "lat": -33.022087,
       "lon": -71.562756,
       "placeholder": false,
-      "role": "client"
+      "role": "client",
+      "meta": {
+        "user": "Junta de Vecinos Cerro Castillo",
+        "freq": "915",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo base C° Castillo "
+      }
     },
     "ypAxqWVjjXRjkhRZ922I": {
       "id": "ypAxqWVjjXRjkhRZ922I",
@@ -2495,7 +4368,13 @@
       "lon": -70.793383,
       "placeholder": false,
       "alias": "Jaus",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "sergio castro",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "yrymR1jAQPwZyFKCO0xF": {
       "id": "yrymR1jAQPwZyFKCO0xF",
@@ -2503,7 +4382,13 @@
       "lat": -33.5917,
       "lon": -70.5133,
       "placeholder": false,
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eduardo Villagrán Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
     },
     "yynUxZQ4Wk88OUGirI6P": {
       "id": "yynUxZQ4Wk88OUGirI6P",
@@ -2512,7 +4397,14 @@
       "lon": -73.0589943,
       "placeholder": false,
       "alias": "5RMZ",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Rodrigo Muñoz C.",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Heltec V3 en pruebas "
+      }
     },
     "yzxhhpK99UfblN7SMAto": {
       "id": "yzxhhpK99UfblN7SMAto",
@@ -2521,7 +4413,13 @@
       "lon": -80.3136396,
       "placeholder": false,
       "alias": "ZCL2",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jesus Toledo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
     },
     "zG3YHfTEzJvyX7IGnG5h": {
       "id": "zG3YHfTEzJvyX7IGnG5h",
@@ -2530,7 +4428,14 @@
       "lon": -71.18640611823565,
       "placeholder": false,
       "alias": "dwjE",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Jasiel Elias Maturana Aracena",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Mi T echo, va conmigo a donde esté"
+      }
     },
     "zIlRxo1orduWSUSXhYLU": {
       "id": "zIlRxo1orduWSUSXhYLU",
@@ -2539,7 +4444,13 @@
       "lon": 70.6019,
       "placeholder": false,
       "alias": "LEGO",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Lucio",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "non_residential"
+      }
     },
     "zUvk6vCkTVNmsBopbexL": {
       "id": "zUvk6vCkTVNmsBopbexL",
@@ -2548,7 +4459,14 @@
       "lon": -73.7411,
       "placeholder": false,
       "alias": "0bab",
-      "role": "TRACKER"
+      "role": "TRACKER",
+      "meta": {
+        "user": "Fernando Tapia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Cliente en rodaje"
+      }
     },
     "zssottcQzAnPxsHx0Nqy": {
       "id": "zssottcQzAnPxsHx0Nqy",
@@ -2557,7 +4475,14 @@
       "lon": -63.2368616,
       "placeholder": false,
       "alias": "HXF3",
-      "role": "CLIENT"
+      "role": "CLIENT",
+      "meta": {
+        "user": "Sergio Delpino",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "UBICADO EN EL CENTRO GEOGRÁFICO DE LA REPÚBLICA ARGENTINA. "
+      }
     }
   }
 }
