@@ -134,7 +134,8 @@ if (require.main === module) {
   function connect() {
     const tok = process.env.MC_USER ? { username: process.env.MC_USER, password: process.env.MC_PASS }
                                     : meshcore.buildAuthToken(identity, AUD);
-    const client = mqtt.connect(BROKER, { username: tok.username, password: tok.password, reconnectPeriod: 0, protocolVersion: 5, clean: true, connectTimeout: 20000 });
+    // MQTT 3.1.1 por defecto (el broker MSC rechaza v5); override con MC_MQTT_VER.
+    const client = mqtt.connect(BROKER, { username: tok.username, password: tok.password, reconnectPeriod: 0, protocolVersion: +(process.env.MC_MQTT_VER || 4), clean: true, connectTimeout: 20000 });
     client.on("connect", () => { console.log("MeshCore MQTT ok"); client.subscribe("meshcore/#", (e) => e && console.error("subscribe err", e.message)); });
     client.on("error", (e) => console.error("mqtt err", e.message));
     client.on("close", () => {
