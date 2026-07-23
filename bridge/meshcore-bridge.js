@@ -137,7 +137,13 @@ if (require.main === module) {
     const tok = process.env.MC_USER ? { username: process.env.MC_USER, password: process.env.MC_PASS }
                                     : meshcore.buildAuthToken(identity, AUD);
     // MQTT 3.1.1 por defecto (el broker MSC rechaza v5); override con MC_MQTT_VER.
-    const client = mqtt.connect(BROKER, { username: tok.username, password: tok.password, reconnectPeriod: 0, protocolVersion: +(process.env.MC_MQTT_VER || 4), clean: true, connectTimeout: 20000, keepalive: 30 });
+    // client_id = la pubkey (como el tool de referencia); overridable con MC_CLIENT_ID.
+    const clientId = process.env.MC_CLIENT_ID || identity.pubHex.toUpperCase();
+    const client = mqtt.connect(BROKER, { clientId, username: tok.username, password: tok.password, reconnectPeriod: 0, protocolVersion: +(process.env.MC_MQTT_VER || 4), clean: true, connectTimeout: 20000, keepalive: 30 });
+    if (process.env.MC_DEBUG) {
+      client.on("packetsend", (p) => console.log("  → " + p.cmd + (p.messageId ? " id=" + p.messageId : "") + (p.returnCode != null ? " rc=" + p.returnCode : "")));
+      client.on("packetreceive", (p) => console.log("  ← " + p.cmd + (p.messageId ? " id=" + p.messageId : "") + (p.returnCode != null ? " rc=" + p.returnCode : "") + (p.reasonCode != null ? " reason=" + p.reasonCode : "")));
+    }
     const SUB = process.env.MC_SUB || "meshcore/#";
     client.on("connect", () => {
       console.log("MeshCore MQTT ok · suscribiendo a", SUB);
