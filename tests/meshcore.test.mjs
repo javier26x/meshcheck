@@ -117,6 +117,31 @@ test("extractPacket: JSON {raw_hex,snr}, hex pelado y bytes crudos", () => {
   assert.equal(c.hex, "1122");
 });
 
+test("extractPacket: formato real MeshChile {raw,SNR,origin_id} (strings)", () => {
+  const msg = JSON.stringify({ type: "PACKET", direction: "rx", raw: "AABBCC", packet_type: "4", route: "F", SNR: "6.25", RSSI: "-91", origin_id: "AB12CD34EF" });
+  const r = BR.extractPacket(Buffer.from(msg));
+  assert.equal(r.hex, "AABBCC");
+  assert.equal(r.snr, 6.25);           // "6.25" (string) → número
+  assert.equal(r.rssi, -91);
+  assert.equal(r.originId, "ab12cd34ef"); // origin_id en minúsculas
+  // SNR "Unknown" → null (no rompe)
+  const u = BR.extractPacket(Buffer.from(JSON.stringify({ raw: "00", SNR: "Unknown" })));
+  assert.equal(u.snr, null);
+});
+
+test("processMeshCorePacket: usa origin_id del payload como observador", () => {
+  const pubkey = Buffer.from("ab".repeat(32), "hex");
+  const app = mkAppData({ type: 2, lat: -30, lon: -71, name: "R2" });
+  const hex = mkAdvertPacket({ pubkey, sig: Buffer.alloc(64), app });
+  const originId = "ff".repeat(32);
+  // topic sin pubkey; el observador debe salir del origin_id del payload
+  const msg = Buffer.from(JSON.stringify({ raw: hex, SNR: "3.5", origin_id: originId.toUpperCase() }));
+  const buf = {}, counters = BR.newCounters();
+  BR.processMeshCorePacket("meshcore/SCL/x/packets", msg, buf, counters);
+  assert.ok(buf["links/" + originId + "/nb/" + "ab".repeat(32)]);
+  assert.equal(buf["links/" + originId + "/nb/" + "ab".repeat(32)].snr, 3.5);
+});
+
 test("observerFromTopic: saca la pubkey del observador", () => {
   assert.equal(BR.observerFromTopic("meshcore/SCL/" + "ab".repeat(32) + "/packets"), "ab".repeat(32));
   assert.equal(BR.observerFromTopic("meshcore/SCL/x/packets"), null);

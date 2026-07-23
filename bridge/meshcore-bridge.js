@@ -48,14 +48,15 @@ function extractPacket(raw) {
   if (s[0] === "{") {
     try {
       const j = JSON.parse(s);
-      const hex = j.raw_hex || j.rawHex || j.raw || j.hex || j.packet || j.payload || j.data;
+      // el observador MeshChile publica {..., "raw":"<HEX>", "SNR":"..", "origin_id":"<PUBKEY>"}
+      const hex = j.raw || j.raw_hex || j.rawHex || j.hex || j.packet || j.payload || j.data;
       if (typeof hex === "string" && /^[0-9a-fA-Fx]+$/.test(hex)) {
-        return { hex: hex.replace(/^0x/, ""), snr: num(j.snr ?? j.SNR ?? j.rx_snr), rssi: num(j.rssi ?? j.RSSI ?? j.rx_rssi) };
+        return { hex: hex.replace(/^0x/, ""), snr: num(j.snr ?? j.SNR ?? j.rx_snr), rssi: num(j.rssi ?? j.RSSI ?? j.rx_rssi), originId: j.origin_id ? String(j.origin_id).toLowerCase() : null };
       }
     } catch { /* no era JSON válido */ }
   }
-  if (/^[0-9a-fA-F]+$/.test(s) && s.length >= 4) return { hex: s, snr: null, rssi: null };
-  return { hex: raw.toString("hex"), snr: null, rssi: null };
+  if (/^[0-9a-fA-F]+$/.test(s) && s.length >= 4) return { hex: s, snr: null, rssi: null, originId: null };
+  return { hex: raw.toString("hex"), snr: null, rssi: null, originId: null };
 }
 
 const MODE_ROLE = { Repeater: "ROUTER", RoomServer: "ROUTER", Companion: "CLIENT", Sensor: "SENSOR" };
@@ -64,7 +65,7 @@ const MODE_ROLE = { Repeater: "ROUTER", RoomServer: "ROUTER", Companion: "CLIENT
 // Llena buf con nodes/<id> (posición/nombre) y links/<obs>/nb/<nodo> (SNR).
 function processMeshCorePacket(topic, raw, buf, counters) {
   counters.seen = (counters.seen || 0) + 1;
-  const { hex, snr } = extractPacket(raw);
+  const { hex, snr, originId } = extractPacket(raw);
   const d = meshcore.decodePacketHex(hex);
   if (!d) { counters.undecoded = (counters.undecoded || 0) + 1; return; }
   const tkey = "t" + d.payloadType;
@@ -82,8 +83,9 @@ function processMeshCorePacket(topic, raw, buf, counters) {
   const k = `nodes/${id}`;
   buf[k] = Object.assign({ id }, buf[k] || {}, f, { t: now });
 
-  // enlace observador → nodo emisor (el observador oyó este advert por RF)
-  const obs = observerFromTopic(topic);
+  // enlace observador → nodo emisor (el observador oyó este advert por RF).
+  // origin_id del payload es más fiable que parsear el topic.
+  const obs = originId || observerFromTopic(topic);
   if (obs) {
     const oid = nid(obs);
     if (oid !== id) {
@@ -135,8 +137,16 @@ if (require.main === module) {
     const tok = process.env.MC_USER ? { username: process.env.MC_USER, password: process.env.MC_PASS }
                                     : meshcore.buildAuthToken(identity, AUD);
     // MQTT 3.1.1 por defecto (el broker MSC rechaza v5); override con MC_MQTT_VER.
-    const client = mqtt.connect(BROKER, { username: tok.username, password: tok.password, reconnectPeriod: 0, protocolVersion: +(process.env.MC_MQTT_VER || 4), clean: true, connectTimeout: 20000 });
-    client.on("connect", () => { console.log("MeshCore MQTT ok"); client.subscribe("meshcore/#", (e) => e && console.error("subscribe err", e.message)); });
+    const client = mqtt.connect(BROKER, { username: tok.username, password: tok.password, reconnectPeriod: 0, protocolVersion: +(process.env.MC_MQTT_VER || 4), clean: true, connectTimeout: 20000, keepalive: 30 });
+    const SUB = process.env.MC_SUB || "meshcore/#";
+    client.on("connect", () => {
+      console.log("MeshCore MQTT ok · suscribiendo a", SUB);
+      client.subscribe(SUB, { qos: 0 }, (e, granted) => {
+        if (e) return console.error("subscribe err", e.message);
+        console.log("suback:", JSON.stringify(granted || []));
+        if (granted && granted.some((g) => g.qos >= 128)) console.error("⚠ el broker NEGÓ la suscripción (ACL, QoS 0x80). No llegarán mensajes con esta identidad/topic.");
+      });
+    });
     client.on("error", (e) => console.error("mqtt err", e.message));
     client.on("close", () => {
       // el JWT caduca: reconecta con un token fresco (reconnectPeriod=0 → manual)
