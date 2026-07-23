@@ -63,7 +63,9 @@ function parseAdvert(payload) {
   if (flags & 0x80 && app.length > i) adv.name = app.subarray(i).toString("utf8").replace(/\0+$/, "");
   return adv;
 }
-// decodePacketHex(hex) → { routeType, payloadType, pathHops, advert? } | null
+// decodePacketHex(hex) → { routeType, payloadType, path, advert? } | null
+// path = array de hashes hex por salto (1-3 bytes c/u, según selector de bits 7:6),
+// igual que decodePathLenByte del decoder oficial: hashSize=(byte>>6)+1, hops=byte&63.
 function decodePacketHex(hex) {
   let b; try { b = Buffer.from(hex, "hex"); } catch { return null; }
   if (b.length < 2) return null;
@@ -77,11 +79,13 @@ function decodePacketHex(hex) {
   if (b.length <= off) return null;
   const pathLenByte = b[off]; off += 1;
   const hop = pathLenByte & 0x3f, bph = (pathLenByte >> 6) + 1;
-  const pathByteLen = bph === 4 ? pathLenByte : hop * bph;
+  const pathByteLen = hop * bph;
   if (b.length < off + pathByteLen) return null;
+  const path = [];
+  for (let i = 0; i < hop; i++) path.push(b.subarray(off + i * bph, off + (i + 1) * bph).toString("hex"));
   off += pathByteLen;
   const payload = b.subarray(off);
-  const out = { routeType, payloadType };
+  const out = { routeType, payloadType, path };
   if (payloadType === PT_ADVERT) { const a = parseAdvert(payload); if (!a || !a.pubkey) return null; out.advert = a; }
   return out;
 }

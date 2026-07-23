@@ -90,13 +90,14 @@ test("decodePacketHex: ruta TRANSPORT_FLOOD salta los 4 bytes de transporte", ()
   assert.equal(Math.round(d.advert.lat), -20);
 });
 
-test("decodePacketHex: path presente se salta correctamente", () => {
+test("decodePacketHex: path presente se salta correctamente y se devuelve", () => {
   const app = mkAppData({ type: 2, name: "H" });
   const path = Buffer.from([0xaa, 0xbb, 0xcc]);   // 3 hops, 1 byte c/u
   const hex = mkAdvertPacket({ pubkey: Buffer.from("03".repeat(32), "hex"), sig: Buffer.alloc(64), app, path });
   const d = MC.decodePacketHex(hex);
   assert.equal(d.advert.name, "H");
   assert.equal(d.advert.pubkey, "03".repeat(32));
+  assert.deepEqual(d.path, ["aa", "bb", "cc"]);
 });
 
 test("decodePacketHex: basura ⇒ null (no explota)", () => {
@@ -192,6 +193,97 @@ test("mapSnapshot: descarta censo con coords fuera de rango o ~(0,0)", () => {
   const { nodes } = BR.mapSnapshot(j, now, 0);
   assert.equal(Object.keys(nodes).length, 1);
   assert.ok(nodes["nodes/" + "aa".repeat(32)]);
+});
+
+test("registro hash→pubkey: resuelve y marca ambiguos", () => {
+  const reg = BR.newRegistry();
+  const p1 = "aa" + "11".repeat(31), p2 = "bb" + "22".repeat(31), p3 = "aa" + "33".repeat(31);
+  BR.regAdd(reg, p1); BR.regAdd(reg, p2);
+  assert.equal(reg.h2p["aa"], p1);
+  assert.equal(reg.h2p["bb"], p2);
+  BR.regAdd(reg, p3);                       // mismo primer byte que p1 → ambiguo
+  assert.equal(reg.h2p["aa"], undefined);
+  assert.ok(reg.amb["aa"]);
+});
+
+test("processMeshCorePacket: path resuelto ⇒ enlaces multi-salto reales", () => {
+  const origin = "ee".repeat(32), rep1 = "a1" + "00".repeat(31), rep2 = "b2" + "00".repeat(31), obs = "cd".repeat(32);
+  const reg = BR.newRegistry();
+  for (const p of [origin, rep1, rep2, obs]) BR.regAdd(reg, p);
+  const app = mkAppData({ type: 2, lat: -33.4, lon: -70.6, name: "Origen" });
+  const hex = mkAdvertPacket({ pubkey: Buffer.from(origin, "hex"), sig: Buffer.alloc(64), app, path: Buffer.from([0xa1, 0xb2]) });
+  const msg = Buffer.from(JSON.stringify({ raw: hex, SNR: "4.5", origin_id: obs }));
+  const buf = {}, counters = BR.newCounters();
+  BR.processMeshCorePacket("meshcore/SCL/x/packets", msg, buf, counters, reg);
+  // cadena: origen → rep1 → rep2 → observador
+  assert.ok(buf["links/" + rep1 + "/nb/" + origin], "rep1 oyó al origen");
+  assert.ok(buf["links/" + rep2 + "/nb/" + rep1], "rep2 oyó a rep1");
+  const last = buf["links/" + obs + "/nb/" + rep2];
+  assert.ok(last, "el observador oyó al ÚLTIMO repetidor, no al origen");
+  assert.equal(last.snr, 4.5);
+  assert.equal(last.src, "tr");
+  assert.equal(buf["links/" + obs + "/nb/" + origin], undefined, "NO enlace directo obs→origen (había path)");
+  assert.equal(counters.pathLinks, 2);
+});
+
+test("processMeshCorePacket: topic /status ⇒ observador online/offline", () => {
+  const obs = "ab".repeat(32);
+  const buf = {}, counters = BR.newCounters();
+  BR.processMeshCorePacket("meshcore/SCL/" + obs.toUpperCase() + "/status",
+    Buffer.from(JSON.stringify({ status: "online", origin_id: obs.toUpperCase() })), buf, counters);
+  assert.equal(buf["nodes/" + obs].online, true);
+  BR.processMeshCorePacket("meshcore/SCL/" + obs.toUpperCase() + "/status",
+    Buffer.from(JSON.stringify({ status: "offline", origin_id: obs.toUpperCase() })), buf, counters);
+  assert.equal(buf["nodes/" + obs].online, false);
+  assert.equal(counters.statusMsgs, 2);
+});
+
+test("mapSnapshot: presencia MQTT, telemetría RF, volumen y capas extra", () => {
+  const now = 1700000000000;
+  const pubA = "aa".repeat(32), pubB = "bb".repeat(32);
+  const j = {
+    devices: {
+      [pubA]: { device_id: pubA, name: "A", lat: -33.41, lon: -70.55, last_seen_ts: now / 1000 - 60, mqtt_seen_ts: now / 1000 - 120, mqtt_online_source: "packets", rssi: -95, snr: 6.5, heading: 270, speed: 42 },
+      [pubB]: { device_id: pubB, name: "B", lat: -33.5, lon: -70.6, ts: now / 1000 - 100, mqtt_status_value: "offline", mqtt_status_ts: now / 1000 },
+    },
+    history_edges: [{ a: [-33.41, -70.55], b: [-33.5, -70.6], count: 12, last_ts: now / 1000 - 30 }],
+    routes: [
+      { id: "r1", points: [[-33.41, -70.55], [-33.5, -70.6]], ts: now / 1000 - 60, route_mode: "path", sender_name: "A" },
+      { id: "viejo", points: [[-33.41, -70.55], [-33.5, -70.6]], ts: now / 1000 - 999999 },
+    ],
+    trails: { [pubA]: [[-33.41, -70.55, now / 1000 - 300], [-33.42, -70.56, now / 1000]] },
+    heat: [[-33.41, -70.55, now / 1000, 0.9], [0.001, 0.002, now / 1000, 1]],
+  };
+  const { nodes, links, extra } = BR.mapSnapshot(j, now, 24 * 3600 * 1000);
+  const a = nodes["nodes/" + pubA];
+  assert.equal(a.mqtt, now - 120000);               // presencia MQTT en ms
+  assert.equal(a.mqttSrc, "packets");
+  assert.equal(a.rssi, -95); assert.equal(a.snr, 6.5);
+  assert.equal(a.heading, 270); assert.equal(a.speed, 42);
+  assert.equal(nodes["nodes/" + pubB].mqtt, undefined, "status offline NO cuenta como presencia");
+  assert.equal(links["links/" + pubA + "/nb/" + pubB].n, 12);
+  assert.equal(extra["routes/all"].length, 1, "solo la ruta reciente (la vieja queda fuera)");
+  assert.deepEqual(extra["routes/all"][0].p[0], [-33.41, -70.55]);
+  assert.equal(extra["trails/all"][pubA].length, 2);
+  assert.equal(extra["heat/all"].length, 1, "el punto (0,0) del calor se descarta");
+  assert.equal(extra["heat/all"][0][2], 0.9);
+});
+
+test("mapPeers: incoming/outgoing → enlaces dirigidos con volumen", () => {
+  const now = 1700000000000;
+  const me = "aa".repeat(32), p1 = "bb".repeat(32), p2 = "cc".repeat(32);
+  const j = {
+    incoming: [{ peer_id: p1.toUpperCase(), count: 9, last_seen_ts: now / 1000 - 60 }],
+    outgoing: [{ peer_id: p2, count: 3, last_seen_ts: now / 1000 - 30 }],
+  };
+  const links = BR.mapPeers(me, j, now);
+  const inL = links["links/" + me + "/nb/" + p1];
+  assert.ok(inL, "incoming: yo oí al peer");
+  assert.equal(inL.n, 9);
+  assert.equal(inL.src, "peers");
+  const outL = links["links/" + p2 + "/nb/" + me];
+  assert.ok(outL, "outgoing: el peer me oyó");
+  assert.equal(outL.n, 3);
 });
 
 test("mapSnapshot: forma /api/nodes ({data:[...]})", () => {
