@@ -28,8 +28,9 @@ module.exports = {
       env: {
         RTDB_URL: "https://meshcheckci-default-rtdb.firebaseio.com",
         FB_SECRET: "PEGAR_DATABASE_SECRET",
-        // Broker MeshCore de MeshChile (MQTT sobre WSS). Ajusta si cambia.
-        MC_BROKER: "wss://mqtt-msc.meshchile.cl:443",
+        // Broker MeshCore de MeshChile. TCP 1883: es el único transporte donde
+        // el broker concede la suscripción a lectores (por WSS silencia la sesión).
+        MC_BROKER: "mqtt://mqtt-msc.meshchile.cl:1883",
         // Semilla Ed25519 (32 bytes en hex) para una identidad ESTABLE. Si la
         // dejas vacía, el bridge genera una al arrancar y la imprime en el log:
         // cópiala aquí para reusar el mismo usuario/pubkey entre reinicios.

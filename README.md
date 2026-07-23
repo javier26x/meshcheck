@@ -23,7 +23,7 @@ meshcheck/
 │   ├── bridge.js           # MQTT MeshChile (Meshtastic) → RTDB (VPS, persistente)
 │   ├── meshtastic.js       # descifrado AES-CTR + parser protobuf (Meshtastic)
 │   ├── meshcore.js         # decoder de ADVERT MeshCore + JWT Ed25519 del broker
-│   ├── meshcore-bridge.js  # MQTT/WSS MeshCore → RTDB bajo /mc/* (VPS, persistente)
+│   ├── meshcore-bridge.js  # MQTT MeshCore (TCP 1883) → RTDB bajo /mc/* (VPS)
 │   ├── ecosystem.config.js # PM2 (dos apps: mesh-bridge y meshcore-bridge)
 │   └── package.json
 ├── tools/

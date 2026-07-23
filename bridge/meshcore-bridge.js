@@ -14,7 +14,7 @@
  *
  * Env:
  *   RTDB_URL, FB_SECRET   obligatorios (database secret; salta las reglas)
- *   MC_BROKER             opcional (default wss://mqtt-msc.meshchile.cl:443)
+ *   MC_BROKER             opcional (default mqtt://mqtt-msc.meshchile.cl:1883)
  *   MC_AUD                opcional (aud del JWT; default = host del broker)
  *   MC_SEED              opcional (semilla Ed25519 en hex, 32 bytes). Si falta,
  *                        se genera una y se imprime → guárdala para reusar user.
@@ -106,7 +106,9 @@ module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid,
 if (require.main === module) {
   const mqtt = require("mqtt");
   const RTDB = process.env.RTDB_URL, SECRET = process.env.FB_SECRET;
-  const BROKER = process.env.MC_BROKER || "wss://mqtt-msc.meshchile.cl:443";
+  // TCP 1883: el broker CONCEDE la suscripción por TCP; por WSS acepta el
+  // CONNECT pero silencia la sesión al suscribirse (WSS es para publicadores).
+  const BROKER = process.env.MC_BROKER || "mqtt://mqtt-msc.meshchile.cl:1883";
   const AUD = process.env.MC_AUD || (() => { try { return new URL(BROKER).hostname; } catch { return "mqtt-msc.meshchile.cl"; } })();
   const PURGE_HOURS = +(process.env.PURGE_HOURS || 24);
   const PURGE_MS = PURGE_HOURS * 3600 * 1000;
