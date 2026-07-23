@@ -264,9 +264,23 @@ test("mapSnapshot: presencia MQTT, telemetría RF, volumen y capas extra", () =>
   assert.equal(links["links/" + pubA + "/nb/" + pubB].n, 12);
   assert.equal(extra["routes/all"].length, 1, "solo la ruta reciente (la vieja queda fuera)");
   assert.deepEqual(extra["routes/all"][0].p[0], [-33.41, -70.55]);
-  assert.equal(extra["trails/all"][pubA].length, 2);
+  assert.equal(extra["trails/" + pubA].length, 2);
   assert.equal(extra["heat/all"].length, 1, "el punto (0,0) del calor se descarta");
   assert.equal(extra["heat/all"][0][2], 0.9);
+});
+
+test("mapSnapshot: evento 'update' del WS (un device + su trail)", () => {
+  const now = 1700000000000;
+  const pub = "dd".repeat(32);
+  // forma exacta del broadcast: {type:"update", device:{...}, trail:[[lat,lon,ts]...]}
+  const mini = {
+    devices: [{ device_id: pub, name: "Móvil", lat: -33.44, lon: -70.65, ts: now / 1000, last_seen_ts: now / 1000, speed: 30, heading: 90 }],
+    trails: { [pub]: [[-33.43, -70.64, now / 1000 - 60], [-33.44, -70.65, now / 1000]] },
+  };
+  const { nodes, extra } = BR.mapSnapshot(mini, now, 24 * 3600 * 1000);
+  assert.ok(nodes["nodes/" + pub]);
+  assert.equal(nodes["nodes/" + pub].speed, 30);
+  assert.equal(extra["trails/" + pub].length, 2);
 });
 
 test("mapPeers: incoming/outgoing → enlaces dirigidos con volumen", () => {

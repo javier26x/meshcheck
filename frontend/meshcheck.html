@@ -1210,7 +1210,7 @@ function updateDiag() {
   if (liveMeta.proto === "meshcore") {
     const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
     const bt = Object.entries(liveMeta.byType || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
-    el.textContent = `bridge MeshCore (${age}) → vistos:${liveMeta.seen || 0} · adverts:${liveMeta.adverts || 0} · enlaces[RF:${liveMeta.obsLinks || 0} camino:${liveMeta.pathLinks || 0} peers:${liveMeta.peerLinks || 0}] · censo API:${liveMeta.apiNodes || 0}n/${liveMeta.apiLinks || 0}e · status:${liveMeta.statusMsgs || 0}` +
+    el.textContent = `bridge MeshCore (${age}) → tiempo real WS:${liveMeta.wsEvents || 0} eventos · MQTT vistos:${liveMeta.seen || 0} · adverts:${liveMeta.adverts || 0} · enlaces[RF:${liveMeta.obsLinks || 0} camino:${liveMeta.pathLinks || 0} peers:${liveMeta.peerLinks || 0}] · censo API:${liveMeta.apiNodes || 0}n/${liveMeta.apiLinks || 0}e · status:${liveMeta.statusMsgs || 0}` +
       (liveMeta.badPos ? ` · GPS basura descartado:${liveMeta.badPos}` : "") + ` · sin decodificar:${liveMeta.undecoded || 0}` + (bt ? ` · tipos[${bt}]` : "");
     return;
   }
@@ -1431,7 +1431,7 @@ function subscribeProto() {
   if (proto === "mc") {
     // capas extra que el bridge cosecha del API del mapa MSC
     const rr = fdb.ref("mc/routes/all"); rr.on("value", (s) => { mcRoutes = s.val() || []; scheduleRedraw(); });
-    const tr = fdb.ref("mc/trails/all"); tr.on("value", (s) => { mcTrails = s.val() || {}; scheduleRedraw(); });
+    const tr = fdb.ref("mc/trails"); tr.on("value", (s) => { mcTrails = s.val() || {}; scheduleRedraw(); });
     const hr = fdb.ref("mc/heat/all"); hr.on("value", (s) => { mcHeat = s.val() || []; scheduleRedraw(); });
     protoRefs.push(rr, tr, hr);
   }

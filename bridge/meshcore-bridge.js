@@ -23,6 +23,8 @@
  *                        censo; default https://mapa-msc.meshchile.cl; "off"=no)
  *   MC_API_MIN           opcional (minutos entre censos; default 5)
  *   MC_PEERS_MIN         opcional (minutos entre pasadas de /peers; 0=off; default 10)
+ *   MC_WS                opcional (WebSocket del mapa para tiempo real; "off"=no;
+ *                        default = MC_API con ws:// + /ws)
  *   PURGE_HOURS/PURGE_MIN  igual que el bridge Meshtastic (default 24h / 30min)
  *
  * Escribe:  /mc/nodes/<id>  /mc/links/<id>/nb/<vec>  /mc/meta/stats
@@ -237,17 +239,16 @@ function mapSnapshot(j, now, maxAgeMs) {
     rlist.push(compactObj({ p: pts, t: num(r.ts) ? Math.round(num(r.ts) * 1000) : now, mode: r.route_mode, name: r.sender_name || undefined }));
   }
   if (rlist.length) extra["routes/all"] = rlist;
-  // estelas de movimiento (solo nodos del censo, últimos 20 puntos)
-  const trails = {};
+  // estelas de movimiento: una clave por nodo (los updates incrementales del WS
+  // no deben pisar las estelas de los demás), últimos 20 puntos
   if (j.trails && typeof j.trails === "object") {
     for (const k in j.trails) {
       const id = nid(String(k).toLowerCase());
       if (!known.has(id) || !Array.isArray(j.trails[k])) continue;
       const pts = j.trails[k].filter((p) => Array.isArray(p) && validLL(num(p[0]), num(p[1]))).slice(-20).map((p) => [num(p[0]), num(p[1])]);
-      if (pts.length >= 2) trails[id] = pts;
+      if (pts.length >= 2) extra[`trails/${id}`] = pts;
     }
   }
-  if (Object.keys(trails).length) extra["trails/all"] = trails;
   // eventos de actividad para el mapa de calor: [[lat,lon,ts,peso], ...]
   const heat = (Array.isArray(j.heat) ? j.heat : [])
     .filter((h) => Array.isArray(h) && validLL(num(h[0]), num(h[1])))
@@ -353,7 +354,7 @@ if (require.main === module) {
     const now = Date.now();
     const batch = buf; buf = {};
     const { body, changed } = planFlush(batch, st, now);
-    body["meta/stats"] = { seen: counters.seen, adverts: counters.adverts, undecoded: counters.undecoded, obsLinks: counters.obsLinks, pathLinks: counters.pathLinks, statusMsgs: counters.statusMsgs, badPos: counters.badPos, apiNodes: counters.apiNodes || 0, apiLinks: counters.apiLinks || 0, peerLinks: counters.peerLinks || 0, act: counters.act, byType: counters.byType, topics: topicCounts, proto: "meshcore", t: now };
+    body["meta/stats"] = { seen: counters.seen, adverts: counters.adverts, undecoded: counters.undecoded, obsLinks: counters.obsLinks, pathLinks: counters.pathLinks, statusMsgs: counters.statusMsgs, badPos: counters.badPos, apiNodes: counters.apiNodes || 0, apiLinks: counters.apiLinks || 0, peerLinks: counters.peerLinks || 0, wsEvents: counters.wsEvents || 0, act: counters.act, byType: counters.byType, topics: topicCounts, proto: "meshcore", t: now };
     await pushMulti(body);
     console.log(`flush: ${changed} cambios de ${Object.keys(batch).length} | vistos ${counters.seen} | adverts ${counters.adverts} | obs ${counters.obsLinks} | path ${counters.pathLinks} | api ${counters.apiNodes || 0}n/${counters.apiLinks || 0}e | peers ${counters.peerLinks || 0} | badPos ${counters.badPos}`);
   }, 5000);
@@ -400,6 +401,51 @@ if (require.main === module) {
       };
       setInterval(pollPeers, PEERS_MIN * 60 * 1000);
       setTimeout(pollPeers, 20000);   // primera pasada tras el primer censo
+    }
+
+    // WebSocket del mapa: el backend transmite a sus clientes web un snapshot al
+    // conectar y luego eventos en vivo (update de nodo+estela, rutas). Es la vía
+    // en TIEMPO REAL (el broker MQTT filtra la entrega por ACL y no nos llega el
+    // tráfico crudo); el polling HTTP queda como respaldo. MC_WS="off" desactiva.
+    const WS_URL = (process.env.MC_WS !== undefined ? process.env.MC_WS : API.replace(/^http/, "ws") + "/ws").trim();
+    if (WS_URL && WS_URL !== "off" && WS_URL !== "0") {
+      let WSImpl = null;
+      try { WSImpl = require("ws"); } catch (e) { console.log("módulo 'ws' no disponible — sigo solo con polling"); }
+      if (WSImpl) {
+        let recentRoutes = [];
+        const ingest = (j, tag) => {
+          const now = Date.now();
+          const { nodes, links, extra } = mapSnapshot(j, now, PURGE_MS);
+          Object.assign(buf, nodes, links, extra);
+          for (const k in nodes) if (nodes[k].pub) regAdd(reg, nodes[k].pub);
+          if (tag === "snapshot") censusIds = Object.values(nodes).map((n) => n.pub).filter(Boolean);
+        };
+        const connectWs = () => {
+          const sock = new WSImpl(WS_URL, { handshakeTimeout: 20000 });
+          sock.on("open", () => console.log("WS del mapa conectado — datos en tiempo real"));
+          sock.on("message", (data) => {
+            let j; try { j = JSON.parse(data.toString()); } catch (e) { return; }
+            counters.wsEvents = (counters.wsEvents || 0) + 1;
+            if (j.type === "snapshot") {
+              if (Array.isArray(j.routes)) { recentRoutes = j.routes.slice(0, 40); }
+              ingest(j, "snapshot");
+            } else if (j.type === "update" && j.device) {
+              const mini = { devices: [j.device] };
+              const devId = String(j.device.device_id || j.device.public_key || "").toLowerCase();
+              if (devId && Array.isArray(j.trail) && j.trail.length >= 2) mini.trails = { [devId]: j.trail };
+              ingest(mini, "update");
+            } else if (j.type === "route" && j.route) {
+              recentRoutes.unshift(j.route);
+              recentRoutes = recentRoutes.slice(0, 40);
+              const { extra } = mapSnapshot({ routes: recentRoutes }, Date.now(), PURGE_MS);
+              if (extra["routes/all"]) buf["routes/all"] = extra["routes/all"];
+            }
+          });
+          sock.on("error", (e) => console.error("ws mapa err", e.message));
+          sock.on("close", () => { console.log("ws mapa cerrado; reintento en 15s"); setTimeout(connectWs, 15000); });
+        };
+        connectWs();
+      }
     }
   }
 
