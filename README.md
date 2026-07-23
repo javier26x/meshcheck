@@ -20,8 +20,11 @@ meshcheck/
 │   ├── meshcheck.html      # app single-file (Leaflet + Firebase, sin build)
 │   └── nodes.json          # fallback embebido (placeholder → reemplazar, ver abajo)
 ├── bridge/
-│   ├── bridge.js           # MQTT MeshChile → RTDB (VPS, persistente)
-│   ├── ecosystem.config.js # PM2
+│   ├── bridge.js           # MQTT MeshChile (Meshtastic) → RTDB (VPS, persistente)
+│   ├── meshtastic.js       # descifrado AES-CTR + parser protobuf (Meshtastic)
+│   ├── meshcore.js         # decoder de ADVERT MeshCore + JWT Ed25519 del broker
+│   ├── meshcore-bridge.js  # MQTT/WSS MeshCore → RTDB bajo /mc/* (VPS, persistente)
+│   ├── ecosystem.config.js # PM2 (dos apps: mesh-bridge y meshcore-bridge)
 │   └── package.json
 ├── tools/
 │   └── fetch_nodes.mjs     # extrae los nodos del mapa de MeshChile → nodes.json
@@ -112,6 +115,44 @@ nombre, rol, telemetría, NeighborInfo y traceroute. Si algún canal usa una lla
 propia y el diagnóstico muestra `descifrados 0/N`, pon su PSK (base64) en la env
 `CHANNEL_KEY` de `ecosystem.config.js`.
 
+### 3b. Bridge MeshCore (opcional — malla independiente)
+
+MeshChile corre **también** una malla [MeshCore](https://meshcore.co.uk/), con
+otro protocolo y otro broker. MeshCheck la muestra en el **mismo mapa** con el
+toggle **Meshtastic / MeshCore** (arriba a la izquierda); son dos fuentes de datos
+separadas (dos raíces en la RTDB: Meshtastic en `/nodes,/links,/meta`, MeshCore
+bajo `/mc/*`), así que ninguna pisa a la otra.
+
+A diferencia de Meshtastic, MeshCore **no publica JSON**: cada *observador* (un
+nodo con firmware MeshCore + puente MQTT) reenvía al broker los paquetes de RF
+que escucha, en `meshcore/{IATA}/{PUBKEY}/packets`. El bridge:
+
+1. se autentica con un **JWT Ed25519 auto-soberano** (identidad de software, sin
+   hardware — `bridge/meshcore.js` genera la clave y firma el token que el broker
+   acepta),
+2. se suscribe a `meshcore/#`,
+3. decodifica los **ADVERT** (posición + nombre + modo del nodo emisor),
+4. modela *quién escuchó a quién*: el observador del topic oyó ese advert, así
+   que crea el enlace **observador ↔ nodo** (análogo al "gw" de Meshtastic).
+
+```bash
+cd bridge
+# edita ecosystem.config.js (app "meshcore-bridge"): RTDB_URL, FB_SECRET, MC_BROKER
+# la primera vez, arráncalo y copia el MC_SEED que imprime (identidad estable):
+node meshcore-bridge.js            # imprime "MC_SEED: ..." → pégalo en el config
+pm2 start ecosystem.config.js      # levanta mesh-bridge Y meshcore-bridge
+pm2 save
+pm2 logs meshcore-bridge --lines 30  # verifica "MeshCore MQTT ok" y "adverts N"
+```
+
+El log imprime las primeras 3 muestras crudas por topic: si el broker envía otro
+formato de mensaje (no `{raw_hex,snr}`), `extractPacket` ya tolera hex pelado o
+bytes crudos, pero esas muestras confirman el esquema real. Escribe
+`/mc/nodes/<pubkey>`, `/mc/links/<obs>/nb/<nodo>` y `/mc/meta/stats`.
+
+> Si el broker rechazara el JWT (cambió el esquema de auth), pon `MC_USER`/`MC_PASS`
+> en el config y el bridge usará esas credenciales fijas en vez del token.
+
 **Diagnóstico**: `node tools/diag.mjs` lee la RTDB pública y dicta un veredicto
 (versión del bridge, tráfico por topic, descifrado por canal, enlaces
 dibujables, correlación por nombre directorio↔vivo).
@@ -123,8 +164,9 @@ crezca sin límite. El frontend escucha `child_*` (no `value`) para bajar solo l
 que cambió.
 
 **Tests / CI**: `npm test` (node:test) cubre bridge (dedupe/purga), descifrado
-Meshtastic (protobuf/AES), extractor y la lógica del frontend (ruteo con
-prioridad estricta, filtros, clasificación de puentes). GitHub Actions corre los
+Meshtastic (protobuf/AES), MeshCore (decoder de ADVERT + JWT que se valida contra
+la pubkey + procesamiento del bridge), extractor y la lógica del frontend (ruteo
+con prioridad estricta, filtros, clasificación de puentes). GitHub Actions corre los
 tests en cada push (`.github/workflows/ci.yml`) y refresca el snapshot a diario
 (`refresh-nodes.yml`).
 

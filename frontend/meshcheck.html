@@ -257,7 +257,12 @@
   <aside id="panel">
     <div class="brand" id="brand">
       <h1><span class="dot"></span> MeshCheck <span style="color:var(--accent)">Live</span></h1>
-      <div class="sub">Visor de malla en vivo · MeshChile</div>
+      <div class="sub" id="brand-sub">Visor de malla en vivo · Meshtastic (MeshChile)</div>
+    </div>
+
+    <div class="toggle" id="proto-toggle" style="margin:0 0 10px" title="Cambia la fuente de datos: dos mallas independientes de MeshChile">
+      <button data-proto="mt" class="active">Meshtastic</button>
+      <button data-proto="mc">MeshCore</button>
     </div>
 
     <div class="tabs">
@@ -457,6 +462,7 @@ const FIREBASE_READY = !FIREBASE_CONFIG.databaseURL.includes("TU-PROYECTO");
 
 /* ---- 2. Estado ------------------------------------------------------------ */
 let liveNodes = {}, liveLinks = {}, liveMeta = null, embeddedNodes = {};
+let proto = "mt", mtDirectory = {};   // "mt"=Meshtastic · "mc"=MeshCore (raíz /mc en la RTDB)
 let useLive = false, rangeKm = 15, ttlHours = 2, hopLimit = 7;
 let hypRepeaters = [], repeaterArmed = false, repIdSeq = 1;
 let pointA = null, pointB = null, armPoint = null;
@@ -681,8 +687,11 @@ function nodePopupHtml(id) {
   let h = `<div class="pt">${esc(n.name || id)}${n.alias ? ` <span style="color:var(--muted)">(${esc(n.alias)})</span>` : ""}</div><div style="margin-top:3px">${badges.join(" ")}</div>`;
 
   // identidad
-  const hx = hexId(id);
-  h += `<div class="pop-sec"><div class="h">Identidad</div>` + kv("ID", esc(id)) + (hx ? kv("Node ID", hx) : "") + kv("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kv("Hardware", esc(hwLabel(n.hw))) : "") + `</div>`;
+  const hx = hexId(id) || (n.pub ? "!" + String(n.pub).slice(0, 8) : null);
+  const copyId = n.pub ? String(n.pub) : hx;
+  h += `<div class="pop-sec"><div class="h">Identidad</div>` + kv("ID", esc(id)) + (hx ? kv(n.pub ? "Prefijo" : "Node ID", hx) : "") +
+    (n.pub ? kv("Pubkey", esc(String(n.pub).slice(0, 16)) + "…") : "") + (n.mode ? kv("Modo", esc(n.mode)) : "") +
+    kv("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kv("Hardware", esc(hwLabel(n.hw))) : "") + `</div>`;
 
   // ubicación
   h += `<div class="pop-sec"><div class="h">Ubicación</div>` + kv("Coord", `${n.lat.toFixed(5)}, ${n.lon.toFixed(5)}`) +
@@ -735,7 +744,7 @@ function nodePopupHtml(id) {
     `<a class="sa" onclick="setPointFromNode('${esc(id)}','A');return false">Fijar A</a>` +
     `<a class="sb" onclick="setPointFromNode('${esc(id)}','B');return false">Fijar B</a>` +
     `<a onclick="window.copyText('${coord}');return false">Copiar coord</a>` +
-    (hx ? `<a onclick="window.copyText('${hx}');return false">Copiar ID</a>` : "") +
+    (copyId ? `<a onclick="window.copyText('${esc(copyId)}');return false">Copiar ID</a>` : "") +
     `<a href="https://www.google.com/maps?q=${n.lat},${n.lon}" target="_blank" rel="noopener">Google Maps ↗</a>` +
     `</div>`;
   return h;
@@ -1152,7 +1161,13 @@ function fitPoints() {
 /* ---- 14. Diagnóstico ------------------------------------------------------ */
 function updateDiag() {
   const el = $("diag");
-  if (!liveMeta) { el.textContent = "Esperando datos del bridge…"; return; }
+  if (!liveMeta) { el.textContent = proto === "mc" ? "Esperando datos del bridge MeshCore…" : "Esperando datos del bridge…"; return; }
+  if (liveMeta.proto === "meshcore") {
+    const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
+    const bt = Object.entries(liveMeta.byType || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
+    el.textContent = `bridge MeshCore (${age}) → vistos:${liveMeta.seen || 0} · adverts:${liveMeta.adverts || 0} · obs-links:${liveMeta.obsLinks || 0} · sin decodificar:${liveMeta.undecoded || 0}` + (bt ? ` · tipos[${bt}]` : "");
+    return;
+  }
   const types = Object.entries(liveMeta.types || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
   const age = liveMeta.t ? fmtAge(liveMeta.t) : "?", f = liveMeta.fields || {};
   let tmix = "";
@@ -1180,7 +1195,7 @@ function saveState() {
   try {
     const c = map.getCenter();
     localStorage.setItem(LS, JSON.stringify({
-      useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels, showBridges, bridgeKm: BRIDGE_KM,
+      proto, useLive, rangeKm, ttlHours, hopLimit, showModelFill, showEstimated, focusDim, showLabels, showBridges, bridgeKm: BRIDGE_KM,
       filters, basemapIdx, view: { c: [c.lat, c.lng], z: map.getZoom() },
       a: pointA, b: pointB,
     }));
@@ -1189,6 +1204,7 @@ function saveState() {
 function loadState() {
   let s; try { s = JSON.parse(localStorage.getItem(LS)); } catch (e) {}
   if (!s) return null;
+  if (s.proto === "mc" || s.proto === "mt") { proto = s.proto; if (proto === "mc") embeddedNodes = {}; }
   if (typeof s.useLive === "boolean") useLive = s.useLive;
   if (s.rangeKm) rangeKm = s.rangeKm;
   if (s.ttlHours != null) ttlHours = s.ttlHours;
@@ -1245,6 +1261,7 @@ document.querySelectorAll(".ntable th[data-sort]").forEach((th) => th.addEventLi
 $("list-body").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-id]"); if (tr) focusNode(tr.dataset.id); });
 // modo, controles
 $("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b || b.disabled) return; useLive = b.dataset.mode === "live"; saveState(); syncToggle(); redraw(); });
+$("proto-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; switchProto(b.dataset.proto); });
 $("range").addEventListener("input", (e) => { rangeKm = +e.target.value; $("range-val").textContent = rangeKm + " km"; redraw(); });
 $("range").addEventListener("change", saveState);
 $("hoplimit").addEventListener("input", (e) => { hopLimit = +e.target.value || 7; saveState(); redraw(); });
@@ -1322,15 +1339,19 @@ async function loadEmbedded() {
     for (const id in raw) {
       const n = raw[id];
       if (isNaN(+n.lat)) continue;
-      embeddedNodes[String(id)] = { id: String(id), name: n.name || String(id), alias: n.alias, lat: +n.lat, lon: +n.lon, role: n.role, meta: n.meta, placeholder: n.placeholder !== false };
+      mtDirectory[String(id)] = { id: String(id), name: n.name || String(id), alias: n.alias, lat: +n.lat, lon: +n.lon, role: n.role, meta: n.meta, placeholder: n.placeholder !== false };
     }
-    $("foot-n").textContent = `${Object.keys(embeddedNodes).length} nodos snapshot` + (j.generated && j.generated !== "seed" ? ` · ${j.generated.slice(0, 10)}` : "");
+    // el directorio nominal es solo de Meshtastic; MeshCore es 100% en vivo
+    if (proto === "mt") embeddedNodes = mtDirectory;
+    $("foot-n").textContent = `${Object.keys(mtDirectory).length} nodos snapshot` + (j.generated && j.generated !== "seed" ? ` · ${j.generated.slice(0, 10)}` : "");
   } catch (err) { $("foot-n").textContent = "nodes.json no encontrado"; }
 }
 const compact = (o) => { const r = {}; for (const k in o) if (o[k] !== undefined) r[k] = o[k]; return r; };
 function normOne(id, n) {
   if (!n) return null;
-  return compact({ id: String(id), name: n.name || String(id), alias: n.sn,
+  const isMc = typeof n.pub === "string";
+  return compact({ id: String(id), name: n.name || (isMc ? String(n.pub).slice(0, 8) + "…" : String(id)), alias: n.sn,
+    pub: n.pub, mode: n.mode, observer: n.observer,
     lat: typeof n.lat === "number" ? n.lat : undefined, lon: typeof n.lon === "number" ? n.lon : undefined,
     t: n.t, role: n.role, alt: n.alt, hw: n.hw, batt: n.batt, volt: n.volt, temp: n.temp, chUtil: n.chUtil });
 }
@@ -1338,22 +1359,49 @@ function normOne(id, n) {
 let redrawTimer = null;
 function scheduleRedraw() { lastUpdate = Date.now(); if (redrawTimer) return; redrawTimer = setTimeout(() => { redrawTimer = null; redraw(); }, 200); }
 
+let fdb = null, protoRefs = [];
+// suscribe la raíz de la malla activa: Meshtastic en /nodes,/links,/meta;
+// MeshCore bajo /mc/*. child-events → solo baja lo que cambió (no toda la base).
+function subscribeProto() {
+  if (!fdb) return;
+  const base = proto === "mc" ? "mc/" : "";
+  const autoLive = () => { if (Object.keys(liveNodes).length && !useLive && !localStorage.getItem(LS)) useLive = true; };
+  const nref = fdb.ref(base + "nodes");
+  nref.on("child_added", (s) => { const n = normOne(s.key, s.val()); if (n) liveNodes[s.key] = n; autoLive(); scheduleRedraw(); });
+  nref.on("child_changed", (s) => { const n = normOne(s.key, s.val()); if (n) liveNodes[s.key] = n; scheduleRedraw(); });
+  nref.on("child_removed", (s) => { delete liveNodes[s.key]; scheduleRedraw(); });
+  const lref = fdb.ref(base + "links");
+  lref.on("child_added", (s) => { liveLinks[s.key] = s.val(); scheduleRedraw(); });
+  lref.on("child_changed", (s) => { liveLinks[s.key] = s.val(); scheduleRedraw(); });
+  lref.on("child_removed", (s) => { delete liveLinks[s.key]; scheduleRedraw(); });
+  const mref = fdb.ref(base + "meta/stats");
+  mref.on("value", (s) => { liveMeta = s.val(); updateDiag(); });
+  protoRefs = [nref, lref, mref];
+}
+function detachProto() {
+  for (const r of protoRefs) { try { r.off(); } catch (e) {} }
+  protoRefs = [];
+  liveNodes = {}; liveLinks = {}; liveMeta = null;
+}
+function switchProto(p) {
+  if (p === proto || (p !== "mt" && p !== "mc")) return;
+  proto = p;
+  embeddedNodes = proto === "mc" ? {} : mtDirectory;   // MeshCore no tiene directorio nominal
+  selectedId = null; openPopupId = null;
+  detachProto();
+  subscribeProto();
+  saveState(); syncProto(); updateDiag(); redraw();
+}
+function syncProto() {
+  document.querySelectorAll("#proto-toggle button").forEach((b) => b.classList.toggle("active", b.dataset.proto === proto));
+  $("brand-sub").textContent = proto === "mc" ? "Visor de malla en vivo · MeshCore (MeshChile)" : "Visor de malla en vivo · Meshtastic (MeshChile)";
+}
 function initFirebase() {
   if (!FIREBASE_READY) { banner("Firebase no configurado — modelo con snapshot local."); return; }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
-    const db = firebase.database();
-    const autoLive = () => { if (Object.keys(liveNodes).length && !useLive && !localStorage.getItem(LS)) useLive = true; };
-    // child-events en vez de value → solo baja el nodo/enlace que cambió (no toda la base)
-    const nref = db.ref("nodes");
-    nref.on("child_added", (s) => { const n = normOne(s.key, s.val()); if (n) liveNodes[s.key] = n; autoLive(); scheduleRedraw(); });
-    nref.on("child_changed", (s) => { const n = normOne(s.key, s.val()); if (n) liveNodes[s.key] = n; scheduleRedraw(); });
-    nref.on("child_removed", (s) => { delete liveNodes[s.key]; scheduleRedraw(); });
-    const lref = db.ref("links");
-    lref.on("child_added", (s) => { liveLinks[s.key] = s.val(); scheduleRedraw(); });
-    lref.on("child_changed", (s) => { liveLinks[s.key] = s.val(); scheduleRedraw(); });
-    lref.on("child_removed", (s) => { delete liveLinks[s.key]; scheduleRedraw(); });
-    db.ref("meta/stats").on("value", (s) => { liveMeta = s.val(); updateDiag(); });
+    fdb = firebase.database();
+    subscribeProto();
   } catch (err) { banner("No se pudo conectar a Firebase — modo modelo."); }
 }
 
@@ -1361,6 +1409,7 @@ function initFirebase() {
   const saved = loadState();
   if (saved && saved.view) map.setView(saved.view.c, saved.view.z);
   syncControls();
+  syncProto();
   await loadEmbedded();
   applyDeepLinks();
   redraw();
