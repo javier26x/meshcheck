@@ -19,6 +19,9 @@
  *   MC_SEED              opcional (semilla Ed25519 en hex, 32 bytes). Si falta,
  *                        se genera una y se imprime → guárdala para reusar user.
  *   MC_USER, MC_PASS     opcional (si el broker usa user/pass fijos en vez de JWT)
+ *   MC_API               opcional (base del API del mapa MSC para sembrar el
+ *                        censo; default https://mapa-msc.meshchile.cl; "off"=no)
+ *   MC_API_MIN           opcional (minutos entre censos; default 5)
  *   PURGE_HOURS/PURGE_MIN  igual que el bridge Meshtastic (default 24h / 30min)
  *
  * Escribe:  /mc/nodes/<id>  /mc/links/<id>/nb/<vec>  /mc/meta/stats
@@ -100,7 +103,46 @@ function processMeshCorePacket(topic, raw, buf, counters) {
 
 function newCounters() { return { seen: 0, undecoded: 0, adverts: 0, obsLinks: 0, byType: {} }; }
 
-module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid, newCounters };
+/* --- Censo desde el API del mapa (meshcore-mqtt-live-map) -------------------
+ * GET /snapshot → { devices:[...], history_edges:[{a,b,count,last_ts}] }.
+ * También tolera la forma de GET /api/nodes ({data:[{public_key,lat,lon,...}]}).
+ * Siembra nodos posicionados y enlaces de ruta sin esperar adverts por RF. */
+const CODE_MODE = { 1: "Companion", 2: "Repeater", 3: "RoomServer" };
+function mapSnapshot(j, now, maxAgeMs) {
+  const nodes = {}, links = {};
+  const devs = Array.isArray(j.devices) ? j.devices : Array.isArray(j.data) ? j.data : Array.isArray(j.nodes) ? j.nodes : [];
+  const known = new Set();
+  for (const d of devs) {
+    if (!d || typeof d !== "object") continue;
+    const pub = String(d.public_key || d.device_id || d.id || "").toLowerCase();
+    if (!/^[0-9a-f]{12,}$/.test(pub)) continue;
+    const lat = num(d.lat != null ? d.lat : d.location && d.location.latitude);
+    const lon = num(d.lon != null ? d.lon : d.location && d.location.longitude);
+    if (lat == null || lon == null || (lat === 0 && lon === 0)) continue;
+    const seen = num(d.last_seen_ts != null ? d.last_seen_ts : d.ts != null ? d.ts : d.timestamp);
+    const t = seen ? Math.round(seen * 1000) : now;
+    if (maxAgeMs && now - t > maxAgeMs) continue;              // más viejo que la purga: ni lo escribas
+    const id = nid(pub);
+    const n = { id, pub, lat, lon, t, src: "map" };
+    if (d.name) n.name = String(d.name);
+    const mode = typeof d.role === "string" && d.role.trim() ? d.role.trim().replace(/^./, (c) => c.toUpperCase()) : CODE_MODE[num(d.device_role)];
+    if (mode) { n.mode = mode; if (MODE_ROLE[mode]) n.role = MODE_ROLE[mode]; }
+    nodes[`nodes/${id}`] = n;
+    known.add(id);
+  }
+  for (const e of Array.isArray(j.history_edges) ? j.history_edges : []) {
+    if (!e || typeof e !== "object") continue;
+    const a = nid(e.a || ""), b = nid(e.b || "");
+    if (a === b || !known.has(a) || !known.has(b)) continue;   // solo entre nodos del censo
+    const t = num(e.last_ts);
+    const tMs = t ? Math.round(t * 1000) : now;
+    if (maxAgeMs && now - tMs > maxAgeMs) continue;
+    links[`links/${a}/nb/${b}`] = { snr: null, t: tMs, src: "ruta" };
+  }
+  return { nodes, links };
+}
+
+module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid, newCounters, mapSnapshot };
 
 /* ============================ RUNTIME (solo si se ejecuta directo) =========== */
 if (require.main === module) {
@@ -174,10 +216,30 @@ if (require.main === module) {
     const now = Date.now();
     const batch = buf; buf = {};
     const { body, changed } = planFlush(batch, st, now);
-    body["meta/stats"] = { seen: counters.seen, adverts: counters.adverts, undecoded: counters.undecoded, obsLinks: counters.obsLinks, byType: counters.byType, topics: topicCounts, proto: "meshcore", t: now };
+    body["meta/stats"] = { seen: counters.seen, adverts: counters.adverts, undecoded: counters.undecoded, obsLinks: counters.obsLinks, apiNodes: counters.apiNodes || 0, apiLinks: counters.apiLinks || 0, byType: counters.byType, topics: topicCounts, proto: "meshcore", t: now };
     await pushMulti(body);
-    console.log(`flush: ${changed} cambios de ${Object.keys(batch).length} | vistos ${counters.seen} | adverts ${counters.adverts} | obs-links ${counters.obsLinks} | sin decodificar ${counters.undecoded}`);
+    console.log(`flush: ${changed} cambios de ${Object.keys(batch).length} | vistos ${counters.seen} | adverts ${counters.adverts} | obs-links ${counters.obsLinks} | api ${counters.apiNodes || 0}n/${counters.apiLinks || 0}e | sin decodificar ${counters.undecoded}`);
   }, 5000);
+
+  // Censo desde el API del mapa MSC: siembra nodos+enlaces cada MC_API_MIN min.
+  // MC_API="" u "off" lo desactiva; default el mapa de MeshChile.
+  const API = (process.env.MC_API !== undefined ? process.env.MC_API : "https://mapa-msc.meshchile.cl").trim();
+  if (API && API !== "off" && API !== "0") {
+    const pollApi = async () => {
+      const now = Date.now();
+      let j = null;
+      try { const r = await fetch(API + "/snapshot", { signal: AbortSignal.timeout(30000) }); if (r.ok) j = await r.json(); } catch (e) {}
+      if (!j) { try { const r = await fetch(API + "/api/nodes", { signal: AbortSignal.timeout(30000) }); if (r.ok) j = await r.json(); } catch (e) { console.error("api censo fail", e.message); } }
+      if (!j) return;
+      const { nodes, links } = mapSnapshot(j, now, PURGE_MS);
+      Object.assign(buf, nodes, links);
+      counters.apiNodes = Object.keys(nodes).length;
+      counters.apiLinks = Object.keys(links).length;
+      console.log(`censo API: ${counters.apiNodes} nodos, ${counters.apiLinks} enlaces de ruta`);
+    };
+    setInterval(pollApi, Math.max(1, +(process.env.MC_API_MIN || 5)) * 60 * 1000);
+    pollApi();
+  }
 
   setInterval(async () => {
     try {

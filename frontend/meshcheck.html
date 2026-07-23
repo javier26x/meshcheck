@@ -1165,7 +1165,7 @@ function updateDiag() {
   if (liveMeta.proto === "meshcore") {
     const age = liveMeta.t ? fmtAge(liveMeta.t) : "?";
     const bt = Object.entries(liveMeta.byType || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");
-    el.textContent = `bridge MeshCore (${age}) → vistos:${liveMeta.seen || 0} · adverts:${liveMeta.adverts || 0} · obs-links:${liveMeta.obsLinks || 0} · sin decodificar:${liveMeta.undecoded || 0}` + (bt ? ` · tipos[${bt}]` : "");
+    el.textContent = `bridge MeshCore (${age}) → vistos:${liveMeta.seen || 0} · adverts:${liveMeta.adverts || 0} · obs-links:${liveMeta.obsLinks || 0} · censo API:${liveMeta.apiNodes || 0} nodos/${liveMeta.apiLinks || 0} enlaces · sin decodificar:${liveMeta.undecoded || 0}` + (bt ? ` · tipos[${bt}]` : "");
     return;
   }
   const types = Object.entries(liveMeta.types || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(" ");

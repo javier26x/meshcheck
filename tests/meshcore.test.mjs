@@ -129,6 +129,45 @@ test("extractPacket: formato real MeshChile {raw,SNR,origin_id} (strings)", () =
   assert.equal(u.snr, null);
 });
 
+test("mapSnapshot: /snapshot con devices + history_edges", () => {
+  const now = 1700000000000;
+  const pubA = "aa".repeat(32), pubB = "bb".repeat(32);
+  const j = {
+    devices: [
+      { public_key: pubA.toUpperCase(), name: "Repe LC", device_role: 2, lat: -33.4, lon: -70.55, last_seen_ts: now / 1000 - 60 },
+      { device_id: pubB, name: "Room X", role: "room", location: { latitude: -33.5, longitude: -70.6 }, ts: now / 1000 - 120 },
+      { public_key: "cc".repeat(32), name: "SinPos", lat: 0, lon: 0 },              // 0,0 → fuera
+      { public_key: "dd".repeat(32), name: "Viejo", lat: -30, lon: -70, last_seen_ts: now / 1000 - 90000 }, // > maxAge → fuera
+    ],
+    history_edges: [
+      { a: pubA, b: pubB, count: 7, last_ts: now / 1000 - 30 },
+      { a: pubA, b: "dd".repeat(32), count: 1, last_ts: now / 1000 },              // b no está en el censo → fuera
+    ],
+  };
+  const { nodes, links } = BR.mapSnapshot(j, now, 24 * 3600 * 1000);
+  assert.equal(Object.keys(nodes).length, 2);
+  const a = nodes["nodes/" + pubA];
+  assert.equal(a.name, "Repe LC");
+  assert.equal(a.mode, "Repeater");
+  assert.equal(a.role, "ROUTER");
+  assert.equal(a.t, now - 60000);
+  assert.equal(nodes["nodes/" + pubB].mode, "Room");
+  assert.equal(Object.keys(links).length, 1);
+  const l = links["links/" + pubA + "/nb/" + pubB];
+  assert.equal(l.src, "ruta");
+  assert.equal(l.t, now - 30000);
+});
+
+test("mapSnapshot: forma /api/nodes ({data:[...]})", () => {
+  const now = 1700000000000;
+  const j = { data: [{ public_key: "ee".repeat(32), name: "N1", device_role: 1, location: { latitude: -36.8, longitude: -73.0 }, last_seen_ts: now / 1000 }] };
+  const { nodes, links } = BR.mapSnapshot(j, now, 0);
+  const n = nodes["nodes/" + "ee".repeat(32)];
+  assert.equal(n.mode, "Companion");
+  assert.equal(Math.round(n.lat * 10), -368);
+  assert.equal(Object.keys(links).length, 0);
+});
+
 test("processMeshCorePacket: usa origin_id del payload como observador", () => {
   const pubkey = Buffer.from("ab".repeat(32), "hex");
   const app = mkAppData({ type: 2, lat: -30, lon: -71, name: "R2" });
