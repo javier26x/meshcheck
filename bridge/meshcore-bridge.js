@@ -110,8 +110,13 @@ function newCounters() { return { seen: 0, undecoded: 0, adverts: 0, obsLinks: 0
 const CODE_MODE = { 1: "Companion", 2: "Repeater", 3: "RoomServer" };
 function mapSnapshot(j, now, maxAgeMs) {
   const nodes = {}, links = {};
-  const devs = Array.isArray(j.devices) ? j.devices : Array.isArray(j.data) ? j.data : Array.isArray(j.nodes) ? j.nodes : [];
+  // /snapshot trae devices como DICT {id:{...}}; /api/nodes como lista en data[]
+  const devs = j.devices && typeof j.devices === "object" && !Array.isArray(j.devices) ? Object.values(j.devices)
+             : Array.isArray(j.devices) ? j.devices
+             : Array.isArray(j.data) ? j.data : Array.isArray(j.nodes) ? j.nodes : [];
   const known = new Set();
+  const byCoord = new Map();                                    // "lat,lon" (4 dec) → id
+  const ckey = (lat, lon) => lat.toFixed(4) + "," + lon.toFixed(4);
   for (const d of devs) {
     if (!d || typeof d !== "object") continue;
     const pub = String(d.public_key || d.device_id || d.id || "").toLowerCase();
@@ -129,11 +134,18 @@ function mapSnapshot(j, now, maxAgeMs) {
     if (mode) { n.mode = mode; if (MODE_ROLE[mode]) n.role = MODE_ROLE[mode]; }
     nodes[`nodes/${id}`] = n;
     known.add(id);
+    byCoord.set(ckey(lat, lon), id);
   }
+  // history_edges: a/b vienen como pares [lat,lon] (extremos = posiciones de
+  // nodos) → se resuelven por coordenadas; se tolera también a/b como id.
+  const endp = (v) => {
+    if (Array.isArray(v)) { const la = num(v[0]), lo = num(v[1]); return la != null && lo != null ? byCoord.get(ckey(la, lo)) : null; }
+    const id = nid(String(v || "")); return known.has(id) ? id : null;
+  };
   for (const e of Array.isArray(j.history_edges) ? j.history_edges : []) {
     if (!e || typeof e !== "object") continue;
-    const a = nid(e.a || ""), b = nid(e.b || "");
-    if (a === b || !known.has(a) || !known.has(b)) continue;   // solo entre nodos del censo
+    const a = endp(e.a), b = endp(e.b);
+    if (!a || !b || a === b) continue;
     const t = num(e.last_ts);
     const tMs = t ? Math.round(t * 1000) : now;
     if (maxAgeMs && now - tMs > maxAgeMs) continue;

@@ -129,19 +129,20 @@ test("extractPacket: formato real MeshChile {raw,SNR,origin_id} (strings)", () =
   assert.equal(u.snr, null);
 });
 
-test("mapSnapshot: /snapshot con devices + history_edges", () => {
+test("mapSnapshot: /snapshot real (devices dict, edges por coordenadas)", () => {
   const now = 1700000000000;
   const pubA = "aa".repeat(32), pubB = "bb".repeat(32);
   const j = {
-    devices: [
-      { public_key: pubA.toUpperCase(), name: "Repe LC", device_role: 2, lat: -33.4, lon: -70.55, last_seen_ts: now / 1000 - 60 },
-      { device_id: pubB, name: "Room X", role: "room", location: { latitude: -33.5, longitude: -70.6 }, ts: now / 1000 - 120 },
-      { public_key: "cc".repeat(32), name: "SinPos", lat: 0, lon: 0 },              // 0,0 → fuera
-      { public_key: "dd".repeat(32), name: "Viejo", lat: -30, lon: -70, last_seen_ts: now / 1000 - 90000 }, // > maxAge → fuera
-    ],
+    devices: {
+      [pubA]: { device_id: pubA.toUpperCase(), name: "Repe LC", role: "repeater", lat: -33.4123, lon: -70.5511, ts: now / 1000 - 300, last_seen_ts: now / 1000 - 60 },
+      [pubB]: { device_id: pubB, name: "Room X", device_role: 3, lat: -33.5001, lon: -70.6002, ts: now / 1000 - 120 },
+      ["cc".repeat(32)]: { device_id: "cc".repeat(32), name: "SinPos", lat: 0, lon: 0 },      // 0,0 → fuera
+      ["dd".repeat(32)]: { device_id: "dd".repeat(32), name: "Viejo", lat: -30, lon: -70, last_seen_ts: now / 1000 - 90000 }, // > maxAge → fuera
+    },
     history_edges: [
-      { a: pubA, b: pubB, count: 7, last_ts: now / 1000 - 30 },
-      { a: pubA, b: "dd".repeat(32), count: 1, last_ts: now / 1000 },              // b no está en el censo → fuera
+      { id: "e1", a: [-33.4123, -70.5511], b: [-33.5001, -70.6002], count: 7, last_ts: now / 1000 - 30 },
+      { id: "e2", a: [-33.4123, -70.5511], b: [-30, -70], count: 1, last_ts: now / 1000 },    // b (Viejo) fuera del censo → fuera
+      { id: "e3", a: [-11, -11], b: [-33.5001, -70.6002], count: 2, last_ts: now / 1000 },    // a no calza con nadie → fuera
     ],
   };
   const { nodes, links } = BR.mapSnapshot(j, now, 24 * 3600 * 1000);
@@ -151,7 +152,8 @@ test("mapSnapshot: /snapshot con devices + history_edges", () => {
   assert.equal(a.mode, "Repeater");
   assert.equal(a.role, "ROUTER");
   assert.equal(a.t, now - 60000);
-  assert.equal(nodes["nodes/" + pubB].mode, "Room");
+  assert.equal(nodes["nodes/" + pubB].mode, "RoomServer");
+  assert.equal(nodes["nodes/" + pubB].role, "ROUTER");
   assert.equal(Object.keys(links).length, 1);
   const l = links["links/" + pubA + "/nb/" + pubB];
   assert.equal(l.src, "ruta");
