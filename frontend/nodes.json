@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-22T01:47:34.042Z",
+  "generated": "2026-07-23T11:20:21.523Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 288,
+  "count": 289,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -879,11 +879,11 @@
     },
     "EDd1acxOq9nPXpOm6D1c": {
       "id": "EDd1acxOq9nPXpOm6D1c",
-      "name": "Zaphod BBX",
+      "name": "Neuromancer",
       "lat": -33.436237753646004,
       "lon": -70.65832602895578,
       "placeholder": false,
-      "alias": "ZBBX",
+      "alias": "Base",
       "role": "CLIENT",
       "meta": {
         "user": "Etore Modena",
@@ -1601,6 +1601,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Nodo 1"
+      }
+    },
+    "Nhw2c6aPI9YyDEejW0dM": {
+      "id": "Nhw2c6aPI9YyDEejW0dM",
+      "name": "Principal",
+      "lat": -40.566288738682374,
+      "lon": -73.18636594674372,
+      "placeholder": false,
+      "alias": "c15c",
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Fernando",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "¡Para pruebas en Osorno!"
       }
     },
     "O58E9RiPGi8CiwyT5Z3y": {
@@ -4318,8 +4334,8 @@
     "yZzcts4zZaWGsRXdnkDa": {
       "id": "yZzcts4zZaWGsRXdnkDa",
       "name": "MARIO VIÑA CE",
-      "lat": -33.007062,
-      "lon": -71.5056284,
+      "lat": -33.007069,
+      "lon": -71.5056224,
       "placeholder": false,
       "alias": "2MGP",
       "role": "CLIENT",
