@@ -745,7 +745,7 @@ function nodePopupHtml(id) {
     `<a class="sb" onclick="setPointFromNode('${esc(id)}','B');return false">Fijar B</a>` +
     `<a onclick="window.copyText('${coord}');return false">Copiar coord</a>` +
     (copyId ? `<a onclick="window.copyText('${esc(copyId)}');return false">Copiar ID</a>` : "") +
-    `<a href="https://www.google.com/maps?q=${n.lat},${n.lon}" target="_blank" rel="noopener">Google Maps ↗</a>` +
+    `<a href="https://www.google.com/maps?q=${n.lat},${n.lon}" target="_blank" rel="noopener" title="${n.estimated ? "Posición ESTIMADA por vecinos — no es el GPS real del nodo" : "Abrir la coordenada en Google Maps"}">Google Maps${n.estimated ? " (aprox)" : ""} ↗</a>` +
     `</div>`;
   return h;
 }

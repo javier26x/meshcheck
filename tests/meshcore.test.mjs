@@ -160,6 +160,40 @@ test("mapSnapshot: /snapshot real (devices dict, edges por coordenadas)", () => 
   assert.equal(l.t, now - 30000);
 });
 
+test("validLL: rechaza fuera de rango y la trampa del (0,0)", () => {
+  assert.ok(BR.validLL(-33.45, -70.66));
+  assert.ok(BR.validLL(-53.16, -70.91));           // Punta Arenas
+  assert.equal(BR.validLL(95, -70), false);         // lat fuera de rango
+  assert.equal(BR.validLL(-33, 200), false);        // lon fuera de rango
+  assert.equal(BR.validLL(0.001, -0.02), false);    // golfo de Guinea (basura GPS)
+  assert.equal(BR.validLL(NaN, -70), false);
+});
+
+test("processMeshCorePacket: advert con coordenadas basura ⇒ nodo SIN posición", () => {
+  const pubkey = Buffer.from("ab".repeat(32), "hex");
+  // lat=500.0 (int32 500e6): dentro del int32, fuera del planeta
+  const app = mkAppData({ type: 2, lat: 500, lon: -70, name: "Basura" });
+  const hex = mkAdvertPacket({ pubkey, sig: Buffer.alloc(64), app });
+  const buf = {}, counters = BR.newCounters();
+  BR.processMeshCorePacket("meshcore/SCL/" + "cd".repeat(32) + "/packets", Buffer.from(hex), buf, counters);
+  const node = buf["nodes/" + "ab".repeat(32)];
+  assert.ok(node, "el nodo existe (nombre/rol sirven)");
+  assert.equal(node.lat, undefined, "la posición basura NO se escribe");
+  assert.equal(counters.badPos, 1);
+});
+
+test("mapSnapshot: descarta censo con coords fuera de rango o ~(0,0)", () => {
+  const now = 1700000000000;
+  const j = { data: [
+    { public_key: "aa".repeat(32), name: "OK", lat: -33.4, lon: -70.6, last_seen_ts: now / 1000 },
+    { public_key: "bb".repeat(32), name: "Guinea", lat: 0.0001, lon: -0.003, last_seen_ts: now / 1000 },
+    { public_key: "cc".repeat(32), name: "Marte", lat: 120, lon: -70, last_seen_ts: now / 1000 },
+  ] };
+  const { nodes } = BR.mapSnapshot(j, now, 0);
+  assert.equal(Object.keys(nodes).length, 1);
+  assert.ok(nodes["nodes/" + "aa".repeat(32)]);
+});
+
 test("mapSnapshot: forma /api/nodes ({data:[...]})", () => {
   const now = 1700000000000;
   const j = { data: [{ public_key: "ee".repeat(32), name: "N1", device_role: 1, location: { latitude: -36.8, longitude: -73.0 }, last_seen_ts: now / 1000 }] };

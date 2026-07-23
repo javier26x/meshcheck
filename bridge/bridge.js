@@ -28,11 +28,14 @@ const safeKey = (s) => String(s).replace(/[.#$\[\]]/g, "_").replace(/\//g, "|").
 function newState() { return { nodeFields: {}, nodeSig: {}, linkSig: {}, sent: {} }; }
 
 /* --- Procesamiento de un paquete (JSON o descifrado) hacia buf --------------- */
+// Coordenada plausible: en rango y lejos del (0,0) (GPS basura reporta ~0,0).
+const validLL = (lat, lon) => isFinite(lat) && isFinite(lon) &&
+  Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !(Math.abs(lat) < 0.5 && Math.abs(lon) < 0.5);
 function extractLatLon(p) {
   if (!p) return null;
   const latI = p.latitude_i ?? p.lat_i, lonI = p.longitude_i ?? p.long_i;
-  if (typeof latI === "number" && typeof lonI === "number" && latI !== 0) return { lat: latI / 1e7, lon: lonI / 1e7 };
-  if (typeof p.latitude === "number" && typeof p.longitude === "number" && p.latitude !== 0) return { lat: p.latitude, lon: p.longitude };
+  if (typeof latI === "number" && typeof lonI === "number" && validLL(latI / 1e7, lonI / 1e7)) return { lat: latI / 1e7, lon: lonI / 1e7 };
+  if (typeof p.latitude === "number" && typeof p.longitude === "number" && validLL(p.latitude, p.longitude)) return { lat: p.latitude, lon: p.longitude };
   return null;
 }
 function nameOf(p) { const pl = p.payload || {}; return pl.longname || pl.long_name || pl.name || pl.shortname || pl.short_name || null; }
@@ -141,7 +144,7 @@ function planPurge(nodes, links, cutoff, st) {
   return { del, dn, dl };
 }
 
-module.exports = { planFlush, planPurge, processPacket, extractLatLon, nameOf, safeKey, newState, REFRESH_NODE_MS, REFRESH_LINK_MS };
+module.exports = { planFlush, planPurge, processPacket, extractLatLon, nameOf, safeKey, newState, validLL, REFRESH_NODE_MS, REFRESH_LINK_MS };
 
 /* ============================ RUNTIME (solo si se ejecuta directo) =========== */
 if (require.main === module) {

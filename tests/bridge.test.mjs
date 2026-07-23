@@ -89,3 +89,11 @@ test("planPurge: borra lo viejo, conserva lo fresco", () => {
   const keys = Object.keys(del);
   for (const a of keys) for (const b of keys) if (a !== b) assert.ok(!b.startsWith(a + "/"), `${a} ancestro de ${b}`);
 });
+
+test("extractLatLon: rechaza coords fuera de rango y ~(0,0)", () => {
+  assert.equal(B.extractLatLon({ latitude_i: 950000000, longitude_i: -700000000 }), null); // lat 95
+  assert.equal(B.extractLatLon({ latitude_i: 1000, longitude_i: -2000 }), null);           // ~0,0
+  assert.equal(B.extractLatLon({ latitude: -33.45, longitude: 200 }), null);               // lon 200
+  const ok = B.extractLatLon({ latitude_i: -334489000, longitude_i: -706693000 });
+  assert.equal(Math.round(ok.lat * 1e4), -334489);
+});

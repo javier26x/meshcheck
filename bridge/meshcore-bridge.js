@@ -33,6 +33,12 @@ const { planFlush, planPurge, newState, safeKey } = require("./bridge");
 
 const num = (x) => (typeof x === "number" && isFinite(x) ? x : typeof x === "string" && x.trim() !== "" && isFinite(+x) ? +x : null);
 
+// Coordenada plausible: dentro de rango Y lejos del (0,0) (los GPS basura y las
+// heurísticas de escala del mapa MSC aterrizan cerca del golfo de Guinea).
+const validLL = (lat, lon) =>
+  typeof lat === "number" && typeof lon === "number" && isFinite(lat) && isFinite(lon) &&
+  Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !(Math.abs(lat) < 0.5 && Math.abs(lon) < 0.5);
+
 // id de nodo = pubkey en minúsculas (hex). Único y estable entre observador
 // (viene del topic) y emisor (viene del advert): ambos son la misma pubkey.
 const nid = (pubHex) => safeKey(String(pubHex).toLowerCase());
@@ -80,7 +86,8 @@ function processMeshCorePacket(topic, raw, buf, counters) {
   const id = nid(a.pubkey);
   const now = Date.now();
   const f = { id, pub: a.pubkey };
-  if (typeof a.lat === "number" && typeof a.lon === "number" && a.lat !== 0) { f.lat = a.lat; f.lon = a.lon; }
+  if (validLL(a.lat, a.lon)) { f.lat = a.lat; f.lon = a.lon; }
+  else if (a.lat != null) counters.badPos = (counters.badPos || 0) + 1;
   if (a.name) f.name = a.name;
   if (a.mode) { f.mode = a.mode; if (MODE_ROLE[a.mode]) f.role = MODE_ROLE[a.mode]; }
   const k = `nodes/${id}`;
@@ -123,7 +130,7 @@ function mapSnapshot(j, now, maxAgeMs) {
     if (!/^[0-9a-f]{12,}$/.test(pub)) continue;
     const lat = num(d.lat != null ? d.lat : d.location && d.location.latitude);
     const lon = num(d.lon != null ? d.lon : d.location && d.location.longitude);
-    if (lat == null || lon == null || (lat === 0 && lon === 0)) continue;
+    if (lat == null || lon == null || !validLL(lat, lon)) continue;
     const seen = num(d.last_seen_ts != null ? d.last_seen_ts : d.ts != null ? d.ts : d.timestamp);
     const t = seen ? Math.round(seen * 1000) : now;
     if (maxAgeMs && now - t > maxAgeMs) continue;              // más viejo que la purga: ni lo escribas
@@ -154,7 +161,7 @@ function mapSnapshot(j, now, maxAgeMs) {
   return { nodes, links };
 }
 
-module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid, newCounters, mapSnapshot };
+module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid, newCounters, mapSnapshot, validLL };
 
 /* ============================ RUNTIME (solo si se ejecuta directo) =========== */
 if (require.main === module) {
