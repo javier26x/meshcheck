@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-23T11:20:21.523Z",
+  "generated": "2026-07-24T11:12:53.585Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 289,
   "nodes": {
@@ -1615,7 +1615,7 @@
         "user": "Fernando",
         "power": "medium",
         "antenna": "stock",
-        "locType": "residential",
+        "locType": "mobile",
         "desc": "¡Para pruebas en Osorno!"
       }
     },
