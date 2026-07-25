@@ -125,15 +125,28 @@ bajo `/mc/*`), así que ninguna pisa a la otra.
 
 A diferencia de Meshtastic, MeshCore **no publica JSON**: cada *observador* (un
 nodo con firmware MeshCore + puente MQTT) reenvía al broker los paquetes de RF
-que escucha, en `meshcore/{IATA}/{PUBKEY}/packets`. El bridge:
+que escucha, en `meshcore/{IATA}/{PUBKEY}/packets`. El bridge cosecha de **tres
+fuentes complementarias**:
 
-1. se autentica con un **JWT Ed25519 auto-soberano** (identidad de software, sin
-   hardware — `bridge/meshcore.js` genera la clave y firma el token que el broker
-   acepta),
-2. se suscribe a `meshcore/#`,
-3. decodifica los **ADVERT** (posición + nombre + modo del nodo emisor),
-4. modela *quién escuchó a quién*: el observador del topic oyó ese advert, así
-   que crea el enlace **observador ↔ nodo** (análogo al "gw" de Meshtastic).
+1. **WebSocket del mapa oficial** (`wss://mapa-msc.meshchile.cl/ws`) — la vía de
+   **tiempo real**: al conectar entrega un snapshot completo y luego eventos
+   `update` (nodo + estela), `route` y `stale`.
+2. **API HTTP del mapa** — respaldo y relleno: `/snapshot` (censo, enlaces de
+   ruta, calor) cada `MC_API_MIN` (5 min) y `/peers/<pub>` cada `MC_PEERS_MIN`
+   (10 min, ventana deslizante) para la adyacencia dirigida con volumen.
+3. **MQTT propio** (TCP `mqtt-msc.meshchile.cl:1883`) — se autentica con un
+   **JWT Ed25519 auto-soberano** (identidad de software, sin hardware) y se
+   suscribe a `meshcore/#`. **Advertencia medida en terreno:** el broker
+   *concede* la suscripción (SUBACK QoS 0) pero **filtra la entrega por ACL**, así
+   que hoy no llegan paquetes: `vistos 0`. El código está listo (decodifica
+   ADVERT, resuelve el `path` a enlaces multi-salto y lee el topic `/status`) y
+   empezará a aportar SNR por paquete en cuanto MeshChile autorice una cuenta
+   lectora. Por WSS ni siquiera eso: el broker acepta el CONNECT y luego
+   enmudece (ni SUBACK ni PINGRESP) — por eso el transporte es TCP 1883.
+
+Escribe `/mc/nodes`, `/mc/links`, `/mc/meta/stats` y las capas `/mc/routes`,
+`/mc/trails/<id>` y `/mc/heat` (todas con lectura pública en
+`database.rules.json`; si falta una regla, esa capa es invisible en el visor).
 
 ```bash
 cd bridge
@@ -146,12 +159,21 @@ pm2 logs meshcore-bridge --lines 30  # verifica "MeshCore MQTT ok" y "adverts N"
 ```
 
 El log imprime las primeras 3 muestras crudas por topic: si el broker envía otro
-formato de mensaje (no `{raw_hex,snr}`), `extractPacket` ya tolera hex pelado o
-bytes crudos, pero esas muestras confirman el esquema real. Escribe
-`/mc/nodes/<pubkey>`, `/mc/links/<obs>/nb/<nodo>` y `/mc/meta/stats`.
+formato de mensaje (no `{raw,SNR,origin_id}`), `extractPacket` ya tolera
+`raw_hex`, hex pelado o bytes crudos, pero esas muestras confirman el esquema.
 
-> Si el broker rechazara el JWT (cambió el esquema de auth), pon `MC_USER`/`MC_PASS`
-> en el config y el bridge usará esas credenciales fijas en vez del token.
+**Honestidad del dato.** `t` es la hora en que el bridge escribió; la antigüedad
+real va en **`seen`** (cuándo lo oyó la malla) y es la que usa el visor. Los
+enlaces llevan `src`: `obs`/`tr` son recepciones por RF (con SNR), mientras que
+`ruta` y `peers` son **adyacencia observada sin SNR** (el tráfico pasó por ahí,
+no sabemos con qué calidad) y el visor los dibuja violeta punteado en vez de
+teñirlos del color del peor SNR. Un `path` que no se resuelve entero **no**
+genera enlace del observador: preferimos un enlace de menos a uno inventado.
+
+> Variables útiles: `MC_TOKEN` (si el mapa exigiera token), `MC_WS="off"` para
+> desactivar el tiempo real, `MC_API="off"` para el censo, `MC_PEERS_MIN=0` para
+> `/peers`, `MC_WS_IDLE` (segundos de mudez antes de forzar reconexión).
+> Si el broker rechazara el JWT, `MC_USER`/`MC_PASS` fuerzan credenciales fijas.
 
 **Diagnóstico**: `node tools/diag.mjs` lee la RTDB pública y dicta un veredicto
 (versión del bridge, tráfico por topic, descifrado por canal, enlaces

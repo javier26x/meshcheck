@@ -32,14 +32,14 @@ function grab(name) {
   throw new Error("no se encontró en el script: " + name);
 }
 
-const NAMES = ["R", "haversine", "snrColor", "isRouter", "ekey", "isNominalNode", "P_NOMINAL", "BRIDGE_KM", "compact", "normName", "linkNeighbors", "buildGraph", "computeRoute", "visiblePredicate", "activeNodes", "ROLE_ENUM", "ROLE_STR", "roleLabel", "hexId"];
+const NAMES = ["R", "haversine", "snrColor", "isRouter", "ekey", "isNominalNode", "P_NOMINAL", "BRIDGE_KM", "compact", "normName", "seenAt", "linkNeighbors", "buildGraph", "computeRoute", "visiblePredicate", "activeNodes", "ROLE_ENUM", "ROLE_STR", "roleLabel", "hexId"];
 const GRABBED = NAMES.map(grab).join("\n");
 
 // crea un scope fresco con el estado dado y devuelve las funciones
 function scope(state) {
-  const st = Object.assign({ useLive: true, ttlHours: 2, rangeKm: 15, hopLimit: 7, pointA: null, pointB: null, filters: { live: false, routers: false, measured: false, hideDir: false }, liveLinks: {}, liveNodes: {}, embeddedNodes: {}, hypRepeaters: [] }, state);
+  const st = Object.assign({ proto: "mt", useLive: true, ttlHours: 2, rangeKm: 15, hopLimit: 7, pointA: null, pointB: null, filters: { live: false, routers: false, measured: false, hideDir: false }, liveLinks: {}, liveNodes: {}, embeddedNodes: {}, hypRepeaters: [] }, state);
   const decls = Object.keys(st).map((k) => `let ${k} = __s.${k};`).join("\n");
-  const body = decls + "\n" + GRABBED + "\n; return { haversine, snrColor, roleLabel, hexId, isNominalNode, linkNeighbors, buildGraph, computeRoute, visiblePredicate, activeNodes };";
+  const body = decls + "\n" + GRABBED + "\n; return { haversine, snrColor, roleLabel, hexId, isNominalNode, seenAt, linkNeighbors, buildGraph, computeRoute, visiblePredicate, activeNodes };";
   return new Function("__s", body)(st);
 }
 const ekey = (x, y) => (x < y ? x + "|" + y : y + "|" + x);
@@ -131,4 +131,34 @@ test("buildGraph: enlace > 100 km = puente internet (fuera del ruteo)", () => {
   assert.equal(bridges[0].b, "conce");
   assert.equal(realCount, 1);                                   // solo el enlace RF corto
   assert.equal((adj.get("stgo") || new Set()).has("conce"), false); // puente NO rutea
+});
+
+test("seenAt: prefiere `seen` (escucha real) sobre `t` (hora de escritura)", () => {
+  const { seenAt } = scope({});
+  assert.equal(seenAt({ seen: 111, t: 999 }), 111);
+  assert.equal(seenAt({ t: 999 }), 999);          // sin seen, cae a t
+  assert.equal(seenAt({}), null);
+  assert.equal(seenAt(null), null);
+});
+
+test("activeNodes: en MeshCore el nodo vencido se DEGRADA (stale), no desaparece", () => {
+  const now = Date.now();
+  const viejo = now - 5 * 3600 * 1000;            // 5 h > TTL de 2 h
+  const liveNodes = { n1: { id: "n1", name: "Viejo", lat: -33, lon: -70, t: now, seen: viejo } };
+  // MeshCore: se conserva marcado como stale (no hay directorio que lo reponga)
+  const mc = scope({ proto: "mc", ttlHours: 2, liveNodes }).activeNodes();
+  assert.ok(mc.nodes["n1"], "en MeshCore sigue dibujándose");
+  assert.equal(mc.nodes["n1"].stale, true);
+  assert.equal(mc.hasLive, false, "pero NO cuenta como vivo");
+  // Meshtastic: se descarta como antes
+  const mt = scope({ proto: "mt", ttlHours: 2, liveNodes }).activeNodes();
+  assert.equal(mt.nodes["n1"], undefined);
+});
+
+test("activeNodes: la edad se mide con `seen`, no con la hora de escritura", () => {
+  const now = Date.now();
+  // t recién escrito pero seen viejo: NO debe considerarse vivo
+  const liveNodes = { n1: { id: "n1", name: "X", lat: -33, lon: -70, t: now, seen: now - 10 * 3600 * 1000 } };
+  const r = scope({ proto: "mc", ttlHours: 2, liveNodes }).activeNodes();
+  assert.equal(r.nodes["n1"].stale, true, "t=ahora no puede disfrazar de vivo a un nodo callado hace 10 h");
 });

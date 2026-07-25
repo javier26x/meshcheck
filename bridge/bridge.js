@@ -116,7 +116,9 @@ function planFlush(batch, st, now) {
         body[`nodes/${id}/t`] = now; st.sent[k] = now;   // refresca solo el leaf t
       }
     } else { // links/<from>/nb/<vec> — el leaf ES el valor completo
-      const sig = (val.snr == null ? "x" : Math.round(val.snr)) + "|" + (val.src || "");
+      // `n` (volumen) entra en la firma: si no, pasar de 5 a 500 paquetes no se
+      // detecta y el grosor de la línea queda congelado hasta el refresco.
+      const sig = (val.snr == null ? "x" : Math.round(val.snr)) + "|" + (val.src || "") + "|" + (val.n || 0);
       if (sig !== st.linkSig[k]) { st.linkSig[k] = sig; body[k] = val; st.sent[k] = now; changed++; }
       else if (now - (st.sent[k] || 0) > REFRESH_LINK_MS) { body[k] = val; st.sent[k] = now; }
     }
@@ -126,9 +128,11 @@ function planFlush(batch, st, now) {
 
 /* --- PURGA: arma el cuerpo de borrado (nulls) de lo más viejo que cutoff ----- */
 // Devuelve { del, dn, dl }. Muta st para olvidar lo purgado.
-function planPurge(nodes, links, cutoff, st) {
+// planPurge(nodes, links, cutoff, st, trailKeys?) — trailKeys es el listado
+// shallow de /mc/trails (solo claves): las estelas viven mientras viva su nodo.
+function planPurge(nodes, links, cutoff, st, trailKeys) {
   const del = {};
-  let dn = 0, dl = 0;
+  let dn = 0, dl = 0, dt = 0;
   const forget = (path) => { delete st.linkSig[path]; delete st.sent[path]; };
   if (nodes) for (const id in nodes) {
     const t = nodes[id] && nodes[id].t;
@@ -141,7 +145,15 @@ function planPurge(nodes, links, cutoff, st) {
     if (!fresh) { del[`links/${from}`] = null; for (const k in nb) forget(`links/${from}/nb/${k}`); dl++; continue; }
     for (const k in nb) if (!nb[k].t || nb[k].t < cutoff) { del[`links/${from}/nb/${k}`] = null; forget(`links/${from}/nb/${k}`); dl++; }
   }
-  return { del, dn, dl };
+  // Estelas huérfanas. Solo se tocan si TENEMOS el censo de nodos: si el GET de
+  // /nodes falló (null) no borramos nada, o un 5xx pasajero se llevaría todas.
+  if (trailKeys && nodes && typeof nodes === "object") {
+    for (const id in trailKeys) {
+      if (nodes[id] && !(`nodes/${id}` in del)) continue;    // su nodo sigue vivo
+      del[`trails/${id}`] = null; forget(`trails/${id}`); dt++;
+    }
+  }
+  return { del, dn, dl, dt };
 }
 
 module.exports = { planFlush, planPurge, processPacket, extractLatLon, nameOf, safeKey, newState, validLL, REFRESH_NODE_MS, REFRESH_LINK_MS };

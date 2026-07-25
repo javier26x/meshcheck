@@ -4,9 +4,12 @@
     "links": { ".read": true, ".write": false },
     "meta":  { ".read": true, ".write": false },
     "mc": {
-      "nodes": { ".read": true, ".write": false },
-      "links": { ".read": true, ".write": false },
-      "meta":  { ".read": true, ".write": false }
+      "nodes":  { ".read": true, ".write": false },
+      "links":  { ".read": true, ".write": false },
+      "meta":   { ".read": true, ".write": false },
+      "routes": { ".read": true, ".write": false },
+      "trails": { ".read": true, ".write": false },
+      "heat":   { ".read": true, ".write": false }
     }
   }
 }

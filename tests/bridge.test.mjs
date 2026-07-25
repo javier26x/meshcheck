@@ -97,3 +97,33 @@ test("extractLatLon: rechaza coords fuera de rango y ~(0,0)", () => {
   const ok = B.extractLatLon({ latitude_i: -334489000, longitude_i: -706693000 });
   assert.equal(Math.round(ok.lat * 1e4), -334489);
 });
+
+test("planPurge: borra estelas de nodos muertos y respeta las vivas", () => {
+  const st = B.newState();
+  const now = Date.now();
+  const nodes = { vivo: { t: now }, muerto: { t: now - 99 * 3600 * 1000 } };
+  const trailKeys = { vivo: true, muerto: true, huerfana: true };
+  const { del, dn, dt } = B.planPurge(nodes, null, now - 24 * 3600 * 1000, st, trailKeys);
+  assert.equal(dn, 1);
+  assert.equal(del["nodes/muerto"], null);
+  assert.equal(del["trails/vivo"], undefined, "la estela del nodo vivo se conserva");
+  assert.equal(del["trails/muerto"], null, "la estela del nodo purgado se borra");
+  assert.equal(del["trails/huerfana"], null, "la estela sin nodo se borra");
+  assert.equal(dt, 2);
+});
+
+test("planPurge: si el GET de nodes falló (null) NO borra ninguna estela", () => {
+  const st = B.newState();
+  const { del, dt } = B.planPurge(null, null, Date.now(), st, { a: true, b: true });
+  assert.equal(Object.keys(del).length, 0);
+  assert.equal(dt, 0);
+});
+
+test("planFlush: el volumen `n` de un enlace entra en la firma de dedupe", () => {
+  const st = B.newState();
+  let now = 1000;
+  const w = (n) => B.planFlush({ "links/a/nb/b": { snr: null, t: now, src: "peers", n } }, st, (now += 5000));
+  assert.equal(w(5).changed, 1);
+  assert.equal(w(5).changed, 0, "sin cambios no reescribe");
+  assert.equal(w(500).changed, 1, "cambiar el volumen SÍ se detecta");
+});

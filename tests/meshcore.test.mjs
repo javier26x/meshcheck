@@ -21,12 +21,13 @@ function mkAppData({ type = 2, lat, lon, name }) {
   const nameBuf = name != null ? Buffer.from(name, "utf8") : Buffer.alloc(0);
   return Buffer.concat([head, ...parts, nameBuf]);
 }
-function mkAdvertPacket({ pubkey, advTime = 1700000000, sig, app, routeType = ROUTE.FLOOD, path = Buffer.alloc(0) }) {
+function mkAdvertPacket({ pubkey, advTime = 1700000000, sig, app, routeType = ROUTE.FLOOD, path = Buffer.alloc(0), pathLenByte }) {
   const payload = Buffer.concat([pubkey, u32le(advTime), sig, app]);
   const header = Buffer.from([mkHeader(routeType, MC.PT_ADVERT)]);
   const transport = (routeType === ROUTE.TRANSPORT_FLOOD || routeType === ROUTE.TRANSPORT_DIRECT) ? Buffer.alloc(4) : Buffer.alloc(0);
-  // path_len byte: bph=1 (2 bits altos = 0), hop = path.length
-  const pathLen = Buffer.from([path.length & 0x3f]);
+  // path_len byte: bits 7:6 = (bytes por hash - 1), bits 5:0 = nº de saltos.
+  // Por defecto bph=1, así que el nº de saltos es el largo del buffer.
+  const pathLen = Buffer.from([pathLenByte != null ? pathLenByte : path.length & 0x3f]);
   return Buffer.concat([header, transport, pathLen, path, payload]).toString("hex");
 }
 const u32le = (n) => { const b = Buffer.alloc(4); b.writeUInt32LE(n >>> 0, 0); return b; };
@@ -155,10 +156,49 @@ test("mapSnapshot: /snapshot real (devices dict, edges por coordenadas)", () => 
   assert.equal(a.t, now - 60000);
   assert.equal(nodes["nodes/" + pubB].mode, "RoomServer");
   assert.equal(nodes["nodes/" + pubB].role, "ROUTER");
-  assert.equal(Object.keys(links).length, 1);
+  // history_edges NO conserva dirección (el backend ordena a/b por coordenada)
+  // → se escribe simétrico, nunca una dirección inventada
+  assert.equal(Object.keys(links).length, 2);
   const l = links["links/" + pubA + "/nb/" + pubB];
+  const back = links["links/" + pubB + "/nb/" + pubA];
   assert.equal(l.src, "ruta");
   assert.equal(l.t, now - 30000);
+  assert.ok(back, "debe existir el enlace inverso");
+  assert.equal(back.t, now - 30000);
+  assert.notEqual(l, back, "deben ser objetos distintos (no aliasar)");
+  // `seen` guarda la frescura REAL (planFlush pisa `t` con la hora de escritura)
+  assert.equal(a.seen, now - 60000);
+});
+
+test("mapSnapshot: extremos ambiguos (nodos colocalizados) ⇒ ningún enlace", () => {
+  const now = 1700000000000;
+  const p1 = "aa".repeat(32), p2 = "bb".repeat(32), p3 = "cc".repeat(32);
+  const j = {
+    devices: {
+      [p1]: { device_id: p1, name: "A", lat: -33.400000, lon: -70.600000, last_seen_ts: now / 1000 },
+      [p2]: { device_id: p2, name: "B", lat: -33.400020, lon: -70.600000, last_seen_ts: now / 1000 },  // ~2 m de A
+      [p3]: { device_id: p3, name: "C", lat: -33.500000, lon: -70.700000, last_seen_ts: now / 1000 },
+    },
+    history_edges: [{ a: [-33.4, -70.6], b: [-33.5, -70.7], count: 3, last_ts: now / 1000 }],
+  };
+  const { links } = BR.mapSnapshot(j, now, 0);
+  assert.equal(Object.keys(links).length, 0, "A y B caen dentro de la tolerancia → extremo ambiguo → sin enlace");
+});
+
+test("mapSnapshot: la estela permite resolver el extremo de un nodo que se movió", () => {
+  const now = 1700000000000;
+  const movil = "aa".repeat(32), fijo = "bb".repeat(32);
+  const j = {
+    devices: {
+      [movil]: { device_id: movil, name: "Móvil", lat: -33.402, lon: -70.6, last_seen_ts: now / 1000 },  // ya se movió ~220 m
+      [fijo]: { device_id: fijo, name: "Fijo", lat: -33.5, lon: -70.7, last_seen_ts: now / 1000 },
+    },
+    // el enlace se congeló en la posición ANTERIOR del móvil
+    history_edges: [{ a: [-33.4, -70.6], b: [-33.5, -70.7], count: 4, last_ts: now / 1000 }],
+    trails: { [movil]: [[-33.4, -70.6, now / 1000 - 600], [-33.402, -70.6, now / 1000]] },
+  };
+  const { links } = BR.mapSnapshot(j, now, 0);
+  assert.ok(links["links/" + movil + "/nb/" + fijo], "la posición histórica de la estela resuelve el extremo");
 });
 
 test("validLL: rechaza fuera de rango y la trampa del (0,0)", () => {
@@ -195,15 +235,74 @@ test("mapSnapshot: descarta censo con coords fuera de rango o ~(0,0)", () => {
   assert.ok(nodes["nodes/" + "aa".repeat(32)]);
 });
 
-test("registro hash→pubkey: resuelve y marca ambiguos", () => {
+test("registro hash→pubkey: indexa 1, 2 y 3 bytes y marca ambiguos por ancho", () => {
   const reg = BR.newRegistry();
   const p1 = "aa" + "11".repeat(31), p2 = "bb" + "22".repeat(31), p3 = "aa" + "33".repeat(31);
   BR.regAdd(reg, p1); BR.regAdd(reg, p2);
-  assert.equal(reg.h2p["aa"], p1);
-  assert.equal(reg.h2p["bb"], p2);
-  BR.regAdd(reg, p3);                       // mismo primer byte que p1 → ambiguo
-  assert.equal(reg.h2p["aa"], undefined);
-  assert.ok(reg.amb["aa"]);
+  assert.equal(reg.h2p[2]["aa"], p1);
+  assert.equal(reg.h2p[4][p1.slice(0, 4)], p1);        // hash de 2 bytes
+  assert.equal(reg.h2p[6][p1.slice(0, 6)], p1);        // hash de 3 bytes
+  assert.equal(reg.h2p[2]["bb"], p2);
+  BR.regAdd(reg, p3);                                   // mismo PRIMER byte que p1
+  assert.equal(reg.h2p[2]["aa"], undefined, "1 byte queda ambiguo");
+  assert.ok(reg.amb[2]["aa"]);
+  // …pero con 2 y 3 bytes siguen siendo distinguibles
+  assert.equal(reg.h2p[4][p1.slice(0, 4)], p1);
+  assert.equal(reg.h2p[4][p3.slice(0, 4)], p3);
+});
+
+test("path con hash de 2 bytes: se resuelve (antes se truncaba siempre)", () => {
+  const origin = "ee".repeat(32), rep = "a1b2" + "00".repeat(30), obs = "cd".repeat(32);
+  const reg = BR.newRegistry();
+  for (const p of [origin, rep, obs]) BR.regAdd(reg, p);
+  const app = mkAppData({ type: 2, lat: -33.4, lon: -70.6, name: "O" });
+  // bph=2 → el byte de longitud lleva el selector (1<<6) y 1 hop
+  const path = Buffer.from([0xa1, 0xb2]);
+  const hex = mkAdvertPacket({ pubkey: Buffer.from(origin, "hex"), sig: Buffer.alloc(64), app, path, pathLenByte: (1 << 6) | 1 });
+  const buf = {}, counters = BR.newCounters();
+  BR.processMeshCorePacket("meshcore/SCL/x/packets", Buffer.from(JSON.stringify({ raw: hex, SNR: "2", origin_id: obs })), buf, counters, reg);
+  assert.ok(buf["links/" + rep + "/nb/" + origin], "el repetidor de hash 2 bytes oyó al origen");
+  assert.ok(buf["links/" + obs + "/nb/" + rep], "el observador oyó al repetidor");
+  assert.equal(counters.truncPath, 0);
+});
+
+test("path truncado (hash desconocido) ⇒ NO se inventa el enlace del observador", () => {
+  const origin = "ee".repeat(32), obs = "cd".repeat(32);
+  const reg = BR.newRegistry();
+  BR.regAdd(reg, origin); BR.regAdd(reg, obs);
+  const app = mkAppData({ type: 2, lat: -33.4, lon: -70.6, name: "O" });
+  const hex = mkAdvertPacket({ pubkey: Buffer.from(origin, "hex"), sig: Buffer.alloc(64), app, path: Buffer.from([0x77]) }); // 0x77 desconocido
+  const buf = {}, counters = BR.newCounters();
+  BR.processMeshCorePacket("meshcore/SCL/x/packets", Buffer.from(JSON.stringify({ raw: hex, SNR: "9", origin_id: obs })), buf, counters, reg);
+  assert.equal(buf["links/" + obs + "/nb/" + origin], undefined, "el observador NO oyó al origen: hubo un salto intermedio");
+  assert.equal(counters.truncPath, 1);
+  assert.ok(buf["nodes/" + origin], "el nodo sí se posiciona igual");
+});
+
+test("putLink: una medición con SNR no la pisa una adyacencia sin SNR", () => {
+  const buf = {}, k = "links/a/nb/b";
+  const t0 = 1700000000000;
+  BR.putLink(buf, k, { snr: 7, t: t0, src: "obs" });          // medición RF
+  BR.putLink(buf, k, { snr: null, t: t0 + 1000, src: "ruta", n: 12 });  // histórico sin SNR
+  assert.equal(buf[k].snr, 7, "conserva el SNR medido");
+  assert.equal(buf[k].src, "obs");
+  assert.equal(buf[k].n, 12, "pero incorpora el volumen que aporta la otra fuente");
+  assert.equal(buf[k].t, t0 + 1000, "y la frescura");
+  // al revés: una medición nueva SÍ manda sobre el histórico
+  const buf2 = {};
+  BR.putLink(buf2, k, { snr: null, t: t0, src: "ruta" });
+  BR.putLink(buf2, k, { snr: 3, t: t0 + 1000, src: "obs" });
+  assert.equal(buf2[k].snr, 3);
+  assert.equal(buf2[k].src, "obs");
+});
+
+test("onlineFromStatus: tolera claves y mayúsculas; sin dato no afirma nada", () => {
+  assert.equal(BR.onlineFromStatus({ status: "online" }), true);
+  assert.equal(BR.onlineFromStatus({ status: "ONLINE" }), true);
+  assert.equal(BR.onlineFromStatus({ state: "Offline" }), false);
+  assert.equal(BR.onlineFromStatus({ connection: "disconnected" }), false);
+  assert.equal(BR.onlineFromStatus({ online: true }), true);
+  assert.equal(BR.onlineFromStatus({ otra: "cosa" }), undefined, "sin clave conocida no se afirma");
 });
 
 test("processMeshCorePacket: path resuelto ⇒ enlaces multi-salto reales", () => {

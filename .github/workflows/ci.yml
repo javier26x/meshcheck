@@ -27,7 +27,22 @@ jobs:
         run: |
           node --check bridge/bridge.js
           node --check bridge/meshtastic.js
+          node --check bridge/meshcore.js
+          node --check bridge/meshcore-bridge.js
+          node --check bridge/ecosystem.config.js
           node --check tools/fetch_nodes.mjs
           node --check tools/diag.mjs
+      - name: Reglas de la RTDB (JSON válido + toda rama escrita es legible)
+        run: |
+          node -e '
+            const fs=require("fs");
+            const r=JSON.parse(fs.readFileSync("database.rules.json","utf8")).rules;
+            const need=[["nodes"],["links"],["meta"],["mc","nodes"],["mc","links"],["mc","meta"],["mc","routes"],["mc","trails"],["mc","heat"]];
+            for (const p of need) {
+              let n=r; for (const k of p) n=n&&n[k];
+              if (!n || n[".read"]!==true) { console.error("sin lectura pública:", p.join("/")); process.exit(1); }
+            }
+            console.log("reglas RTDB OK");
+          '
       - name: Tests
         run: npm test
