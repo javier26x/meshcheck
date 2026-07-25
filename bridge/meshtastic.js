@@ -80,11 +80,26 @@ function decrypt(key, fromNode, packetId, ciphertext) {
 /* --- PortNum → payload normalizado (misma forma que el JSON del broker) ----- */
 const PORT = { 1: "text", 3: "position", 4: "nodeinfo", 67: "telemetry", 70: "traceroute", 71: "neighborinfo", 73: "mapreport" };
 
-function readRoute(rd) {
+// RouteDiscovery: route=1 (fixed32), snr_towards=2 (int32), route_back=3,
+// snr_back=4. Los repeated llegan empaquetados (wire 2) o sueltos.
+function readFixed32List(f) {
   const out = [];
-  for (const item of (rd[1] || [])) {
+  for (const item of f || []) {
     if (item.b32) out.push(item.b32.readUInt32LE(0));
     else if (item.bytes) for (let o = 0; o + 4 <= item.bytes.length; o += 4) out.push(item.bytes.readUInt32LE(o));
+  }
+  return out;
+}
+const readRoute = (rd) => readFixed32List(rd[1]);
+// SNR por salto: viene en dB×4 como int32; INT8_MIN (-128) = desconocido → null.
+// Un int32 negativo se codifica como varint de 10 bytes (complemento a 2), por
+// eso hay que reinterpretarlo con asIntN antes de dividir.
+function readSnrList(f) {
+  const out = [];
+  const push = (n) => { const v = Number(BigInt.asIntN(32, BigInt(n))); out.push(v === -128 ? null : v / 4); };
+  for (const item of f || []) {
+    if (item.varint !== undefined) push(item.varint);
+    else if (item.bytes) { let i = 0; while (i < item.bytes.length) { let v; [v, i] = readVarint(item.bytes, i); push(v); } }
   }
   return out;
 }
@@ -117,7 +132,10 @@ function decodePayload(portnum, buf) {
       return { type, payload: { neighbors } };
     }
     if (type === "traceroute") {
-      return { type, payload: { route: readRoute(p) } };
+      return { type, payload: {
+        route: readRoute(p), snr_towards: readSnrList(p[2]),
+        route_back: readFixed32List(p[3]), snr_back: readSnrList(p[4]),
+      } };
     }
     if (type === "mapreport") {
       const lat = vI32(p[9]) / 1e7, lon = vI32(p[10]) / 1e7;
@@ -164,4 +182,4 @@ function decodeEnvelope(buf, key) {
 }
 
 module.exports = { decodeKey, decodeEnvelope, decodePayload, parse, decrypt, DEFAULT_KEY,
-  _helpers: { vNum, vS32, vI32, vU32, vF32, vStr, vBytes } };
+  _helpers: { vNum, vS32, vI32, vU32, vF32, vStr, vBytes, readSnrList, readFixed32List } };

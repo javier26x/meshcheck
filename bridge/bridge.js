@@ -82,9 +82,29 @@ function processPacket(p, buf, counters) {
     if (type === "neighborinfo" && Array.isArray(pl.neighbors)) {
       for (const n of pl.neighbors) { const nid = n.node_id ?? n.nodeId ?? n.id; if (nid == null) continue; buf[`links/${p.from}/nb/${nid}`] = { snr: n.snr ?? null, t: Date.now(), src: "ni" }; }
     }
-    if (type === "traceroute" && Array.isArray(pl.route)) {
-      const chain = [p.from, ...pl.route.map(Number), p.to].filter((x) => Number.isFinite(x) && x !== BCAST && x > 0);
-      for (let i = 0; i < chain.length - 1; i++) { const a = chain[i], b = chain[i + 1]; if (a === b) continue; buf[`links/${a}/nb/${b}`] = { snr: null, t: Date.now(), src: "tr" }; }
+    // Traceroute: cada nodo que recibe el paquete añade su ID al `route` Y el SNR
+    // con el que LO RECIBIÓ (snr_towards, en dB×4). Por eso snr[i] es la calidad
+    // del salto chain[i] → chain[i+1]: es una medición de radio real, no una
+    // estimación. (Firmware: TraceRouteModule::appendMyIDandSNR.)
+    if (type === "traceroute") {
+      const trLinks = (route, snrs, from, to) => {
+        if (!Array.isArray(route)) return;
+        const raw = [from, ...route.map(Number), to];
+        // el filtro de nodos inválidos debe arrastrar el índice del SNR
+        const chain = [], idx = [];
+        raw.forEach((x, i) => { if (Number.isFinite(x) && x !== BCAST && x > 0) { chain.push(x); idx.push(i); } });
+        for (let i = 0; i < chain.length - 1; i++) {
+          const a = chain[i], b = chain[i + 1];
+          if (a === b) continue;
+          // solo se atribuye SNR si el tramo es contiguo en la cadena original
+          const contiguo = idx[i + 1] === idx[i] + 1;
+          const s = contiguo && Array.isArray(snrs) && snrs[idx[i]] != null ? snrs[idx[i]] : null;
+          if (s != null) counters.trSnr = (counters.trSnr || 0) + 1;
+          buf[`links/${a}/nb/${b}`] = { snr: s, t: Date.now(), src: "tr" };
+        }
+      };
+      trLinks(pl.route, pl.snr_towards, p.from, p.to);          // ida
+      trLinks(pl.route_back, pl.snr_back, p.to, p.from);        // vuelta (respuesta)
     }
     const direct = p.hops_away === 0 || (p.hops_away == null && p.hop_start != null && p.hop_limit != null && p.hop_start === p.hop_limit);
     if (direct) counters.fieldCounts.direct++;
@@ -178,7 +198,7 @@ if (require.main === module) {
 
   const st = newState();
   let buf = {};
-  const counters = { seenTypes: {}, fieldCounts: { sender: 0, hops_away: 0, hop_start: 0, direct: 0, enc: 0, encOk: 0, encFail: 0 }, gwLinks: 0 };
+  const counters = { seenTypes: {}, fieldCounts: { sender: 0, hops_away: 0, hop_start: 0, direct: 0, enc: 0, encOk: 0, encFail: 0 }, gwLinks: 0, trSnr: 0 };
   const topicCounts = {}, chanStats = {};
   let sampled = 0;
 
@@ -209,10 +229,10 @@ if (require.main === module) {
     const now = Date.now();
     const batch = buf; buf = {};
     const { body, changed } = planFlush(batch, st, now);
-    body["meta/stats"] = { types: counters.seenTypes, topics: topicCounts, fields: counters.fieldCounts, chan: chanStats, gwLinks: counters.gwLinks, t: now };
+    body["meta/stats"] = { types: counters.seenTypes, topics: topicCounts, fields: counters.fieldCounts, chan: chanStats, gwLinks: counters.gwLinks, trSnr: counters.trSnr || 0, t: now };
     await pushMulti(body);
     const mix = Object.entries(counters.seenTypes).sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t}:${n}`).join(" ");
-    console.log(`flush: ${changed} cambios de ${Object.keys(batch).length} | descifrados ${counters.fieldCounts.encOk}/${counters.fieldCounts.enc} | gw-links ${counters.gwLinks} | ${mix || "sin tráfico"}`);
+    console.log(`flush: ${changed} cambios de ${Object.keys(batch).length} | descifrados ${counters.fieldCounts.encOk}/${counters.fieldCounts.enc} | gw-links ${counters.gwLinks} | tr-snr ${counters.trSnr || 0} | ${mix || "sin tráfico"}`);
   }, 5000);
 
   setInterval(async () => {

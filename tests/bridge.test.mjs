@@ -4,7 +4,8 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const B = require("../bridge/bridge.js");
 
-const mkCounters = () => ({ seenTypes: {}, fieldCounts: { sender: 0, hops_away: 0, hop_start: 0, direct: 0, enc: 0, encOk: 0, encFail: 0 }, gwLinks: 0 });
+// misma forma que el objeto counters del runtime (bridge.js)
+const mkCounters = () => ({ seenTypes: {}, fieldCounts: { sender: 0, hops_away: 0, hop_start: 0, direct: 0, enc: 0, encOk: 0, encFail: 0 }, gwLinks: 0, trSnr: 0 });
 
 test("processPacket: position → nodo con lat/lon/alt/name", () => {
   const buf = {}, c = mkCounters();
@@ -126,4 +127,38 @@ test("planFlush: el volumen `n` de un enlace entra en la firma de dedupe", () =>
   assert.equal(w(5).changed, 1);
   assert.equal(w(5).changed, 0, "sin cambios no reescribe");
   assert.equal(w(500).changed, 1, "cambiar el volumen SÍ se detecta");
+});
+
+test("traceroute: cada SNR se atribuye a SU salto (medición de radio real)", () => {
+  const buf = {}, c = mkCounters();
+  // A(10) → r1(111) → r2(222) → B(20); el SNR i es con el que chain[i+1] recibió
+  B.processPacket({ type: "traceroute", from: 10, to: 20, payload: {
+    route: [111, 222], snr_towards: [6, -2, 4.5],
+  } }, buf, c);
+  assert.equal(buf["links/10/nb/111"].snr, 6, "el salto A→r1 lleva el primer SNR");
+  assert.equal(buf["links/111/nb/222"].snr, -2);
+  assert.equal(buf["links/222/nb/20"].snr, 4.5);
+  assert.equal(buf["links/10/nb/111"].src, "tr");
+  assert.equal(c.trSnr, 3);
+});
+
+test("traceroute: SNR desconocido (null) no inventa valor; la vuelta también cuenta", () => {
+  const buf = {}, c = mkCounters();
+  B.processPacket({ type: "traceroute", from: 10, to: 20, payload: {
+    route: [111], snr_towards: [null, 3],
+    route_back: [111], snr_back: [7, 1],
+  } }, buf, c);
+  assert.equal(buf["links/10/nb/111"].snr, null, "sin dato ⇒ null, no 0");
+  assert.equal(buf["links/111/nb/20"].snr, 3);
+  // la respuesta viaja B → r1 → A
+  assert.equal(buf["links/20/nb/111"].snr, 7);
+  assert.equal(buf["links/111/nb/10"].snr, 1);
+});
+
+test("traceroute sin campos de SNR (firmware viejo) sigue funcionando", () => {
+  const buf = {}, c = mkCounters();
+  B.processPacket({ type: "traceroute", from: 10, to: 20, payload: { route: [111] } }, buf, c);
+  assert.equal(buf["links/10/nb/111"].snr, null);
+  assert.equal(buf["links/111/nb/20"].snr, null);
+  assert.equal(c.trSnr, 0);
 });

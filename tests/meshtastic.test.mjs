@@ -80,3 +80,21 @@ test("decodeKey: PSK de 1 byte → default; base64 de 16 bytes → tal cual", ()
   const k16 = Buffer.alloc(16, 7);
   assert.ok(M.decodeKey(k16.toString("base64")).equals(k16));
 });
+
+test("traceroute: extrae snr_towards / snr_back (dB×4) y route_back", () => {
+  // RouteDiscovery: route=1 fixed32, snr_towards=2 int32, route_back=3, snr_back=4
+  const f32list = (f, nums) => { const b = Buffer.alloc(nums.length * 4); nums.forEach((n, i) => b.writeUInt32LE(n >>> 0, i * 4)); return fLen(f, b); };
+  const i32list = (f, nums) => fLen(f, Buffer.concat(nums.map((n) => vEnc(n))));
+  const rd = Buffer.concat([
+    f32list(1, [111, 222]),          // route: dos repetidores
+    i32list(2, [24, -8, -128]),      // snr_towards: 6 dB, -2 dB, desconocido
+    f32list(3, [222]),
+    i32list(4, [16]),                // snr_back: 4 dB
+  ]);
+  const r = M.decodePayload(70, rd);
+  assert.equal(r.type, "traceroute");
+  assert.deepEqual(r.payload.route, [111, 222]);
+  assert.deepEqual(r.payload.snr_towards, [6, -2, null]);   // -128 = desconocido → null
+  assert.deepEqual(r.payload.route_back, [222]);
+  assert.deepEqual(r.payload.snr_back, [4]);
+});

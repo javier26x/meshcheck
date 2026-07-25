@@ -907,6 +907,22 @@ function redraw() {
   //   RF medido (color=SNR) · puente internet (cyan) · modelado (gris punteado)
   const nm = (id) => esc((nodes[id] && nodes[id].name) || id);
   const srcTxt = (s) => s === "ni" ? "NeighborInfo" : s === "tr" ? (proto === "mc" ? "camino de paquete" : "traceroute") : s === "obs" ? "recepción directa" : s === "ruta" ? "ruta histórica" : s === "peers" ? "tráfico entre pares" : "gateway";
+  // Cómo sabemos que el enlace es por RADIO (y no por internet):
+  //  ni  → el propio nodo lista a sus vecinos de radio con el SNR que midió
+  //  gw  → un gateway lo recibió con hops_away=0, o sea SIN repetidores de por medio
+  //  tr  → cada salto del traceroute lo añadió un nodo que recibió por su radio
+  //  obs → un observador MeshCore oyó ese paquete por su radio
+  // El SNR es la prueba más fuerte: solo existe si una radio lo midió. Sin SNR,
+  // sabemos que el tráfico pasó por ahí pero no que fuera por aire.
+  const rfWhy = (s, hasSnr) => {
+    const base = s === "ni" ? "el nodo declara este vecino de radio" :
+      s === "gw" ? "un gateway lo recibió directo (0 saltos)" :
+      s === "tr" ? "salto declarado por el nodo que lo recibió" :
+      s === "obs" ? "un observador lo oyó por radio" :
+      s === "ruta" ? "el tráfico pasó por aquí (historial del mapa)" :
+      s === "peers" ? "tráfico contabilizado entre estos dos nodos" : "recepción por gateway";
+    return base + (hasSnr ? " · SNR medido ⇒ enlace por AIRE confirmado" : " · sin SNR: no podemos confirmar que sea RF");
+  };
   let drawn = 0;
   for (const e of edges) {
     if (e.bridge && !showBridges) continue;
@@ -938,7 +954,7 @@ function redraw() {
       const dkm = haversine(a, b);
       const win = liveMeta && liveMeta.winSec ? Math.round(liveMeta.winSec / 3600) : 24;
       tip = e.live
-        ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · ${sinSnr ? `<span style="color:#8f7ad6">adyacencia real, SNR no medido</span>` : `SNR <span class="v">${e.snr} dB</span>`} · ${srcTxt(e.src)}${e.n > 1 ? ` · <span class="v">${e.n}</span> paq/${win} h` : ""}${e.w === 1 ? ` · <span style="color:var(--router)">resolución ambigua (hash 1 byte)</span>` : ""}${estGeom ? " · geom. estimada" : ""}`
+        ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · ${sinSnr ? `<span style="color:#8f7ad6">adyacencia real, SNR no reportado</span>` : `SNR <span class="v">${e.snr} dB</span>`} · ${srcTxt(e.src)}${e.n > 1 ? ` · <span class="v">${e.n}</span> paq/${win} h` : ""}${e.w === 1 ? ` · <span style="color:var(--router)">resolución ambigua (hash 1 byte)</span>` : ""}${estGeom ? " · geom. estimada" : ""}<br><span style="color:var(--muted);font-size:11px">${rfWhy(e.src, !sinSnr)}</span>`
         : `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · enlace modelado (≤ ${rangeKm} km, supuesto)`;
     }
     poly.bindTooltip(tip, { sticky: true, className: "linktip", opacity: 1 });
