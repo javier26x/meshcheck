@@ -124,8 +124,20 @@ function planFlush(batch, st, now) {
     const val = batch[k];
     if (k.startsWith("nodes/")) {
       const id = k.slice(6);
+      // null = BAJA del nodo entero (p.ej. el evento 'stale' del mapa MeshCore).
+      // Sin esta rama el destructuring de abajo lanza y, al estar dentro de un
+      // setInterval async, tumbaba el proceso.
+      if (val === null) {
+        body[k] = null;
+        delete st.nodeFields[id]; delete st.nodeSig[id]; delete st.sent[k];
+        changed++; continue;
+      }
       const { t, ...f } = val;
       const merged = Object.assign({}, st.nodeFields[id], f);
+      // null en un campo = RETRACTACIÓN: st.nodeFields solo acumulaba, así que
+      // la telemetría vieja (velocidad, rumbo, SNR) quedaba congelada para
+      // siempre mientras `t` se refrescaba y la hacía parecer actual.
+      for (const key in f) if (f[key] === null) delete merged[key];
       const sig = JSON.stringify(merged);
       if (sig !== st.nodeSig[id]) {
         // cambió → escribe el OBJETO COMPLETO (el multi-PATCH reemplaza esa ruta,
@@ -136,6 +148,9 @@ function planFlush(batch, st, now) {
         body[`nodes/${id}/t`] = now; st.sent[k] = now;   // refresca solo el leaf t
       }
     } else { // links/<from>/nb/<vec> — el leaf ES el valor completo
+      if (val === null) {   // baja del enlace (history_edges_remove)
+        body[k] = null; delete st.linkSig[k]; delete st.sent[k]; changed++; continue;
+      }
       // `n` (volumen) entra en la firma: si no, pasar de 5 a 500 paquetes no se
       // detecta y el grosor de la línea queda congelado hasta el refresco.
       const sig = (val.snr == null ? "x" : Math.round(val.snr)) + "|" + (val.src || "") + "|" + (val.n || 0);

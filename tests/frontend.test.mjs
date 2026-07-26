@@ -162,3 +162,39 @@ test("activeNodes: la edad se mide con `seen`, no con la hora de escritura", () 
   const r = scope({ proto: "mc", ttlHours: 2, liveNodes }).activeNodes();
   assert.equal(r.nodes["n1"].stale, true, "t=ahora no puede disfrazar de vivo a un nodo callado hace 10 h");
 });
+
+test("computeRoute: 'medida' exige SNR en TODOS los saltos, no solo enlaces vivos", () => {
+  const now = Date.now();
+  const FAR = { lat: 9, lon: 9 };
+  const s = { useLive: true, rangeKm: 5, hopLimit: 10, pointA: { lat: 0, lon: 0 }, pointB: { lat: 1, lon: 1 } };
+  const nodes = { L0: { id: "L0", lat: 0.02, lon: 0, t: now }, E: { id: "E", lat: 1.001, lon: 1, t: now }, P: { id: "P", ...FAR, t: now } };
+  // todos los saltos vivos pero SIN SNR (caso MeshCore: adyacencia del historial)
+  let g = build(nodes, [["L0", "P", { live: true, snr: null }], ["P", "E", { live: true, snr: null }]]);
+  let r = scope({ ...s }).computeRoute(nodes, g.adj, g.et);
+  assert.equal(r.tier, "adyacencia", "sin SNR NO puede llamarse 'medida'");
+  assert.equal(r.snrHops, 0);
+  assert.equal(r.realHops, 2);
+  // mixto: un salto con SNR y otro sin → sigue sin ser 'medida'
+  g = build(nodes, [["L0", "P", { live: true, snr: 5 }], ["P", "E", { live: true, snr: null }]]);
+  r = scope({ ...s }).computeRoute(nodes, g.adj, g.et);
+  assert.equal(r.tier, "adyacencia");
+  assert.equal(r.snrHops, 1);
+  // todos con SNR → sí es medida
+  g = build(nodes, [["L0", "P", { live: true, snr: 5 }], ["P", "E", { live: true, snr: 4 }]]);
+  r = scope({ ...s }).computeRoute(nodes, g.adj, g.et);
+  assert.equal(r.tier, "medida");
+  assert.equal(r.snrHops, 2);
+});
+
+test("buildGraph: la arista inversa sin SNR no borra la medición de la directa", () => {
+  const now = Date.now();
+  const nodes = { a: { id: "a", lat: -33.4, lon: -70.6, t: now }, b: { id: "b", lat: -33.45, lon: -70.65, t: now } };
+  // a→b medido con SNR 7; b→a sin SNR (lo escribe otra fuente)
+  const liveLinks = {
+    a: { from: "a", t: now, nb: { b: { snr: 7, t: now, src: "tr" } } },
+    b: { from: "b", t: now, nb: { a: { snr: null, t: now, src: "ruta" } } },
+  };
+  const { etype } = scope({ useLive: true, liveLinks }).buildGraph(nodes);
+  const k = "a|b";
+  assert.equal(etype.get(k).snr, 7, "el SNR medido debe sobrevivir a la arista inversa sin dato");
+});

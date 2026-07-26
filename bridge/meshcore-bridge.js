@@ -72,6 +72,10 @@ function extractPacket(raw) {
 }
 
 const MODE_ROLE = { Repeater: "ROUTER", RoomServer: "ROUTER", Companion: "CLIENT", Sensor: "SENSOR" };
+const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+// El mapa dice "room"; el decoder oficial y los adverts dicen "RoomServer".
+// Es el mismo aparato: infraestructura fija, igual que un repetidor.
+const ROLE_ALIAS = { room: "RoomServer", roomserver: "RoomServer", "room server": "RoomServer", repeater: "Repeater", companion: "Companion", sensor: "Sensor" };
 
 /* --- Fusión de enlaces por prioridad de fuente ------------------------------
  * Tres fuentes escriben la misma hoja links/<a>/nb/<b>. Una medición por RF
@@ -257,24 +261,39 @@ function mapSnapshot(j, now, maxAgeMs) {
     const t = lastSeen ? Math.round(lastSeen * 1000) : now;
     if (maxAgeMs && now - t > maxAgeMs) continue;              // más viejo que la purga: ni lo escribas
     const id = nid(pub);
-    // `seen` = cuándo lo oyó la malla DE VERDAD (planFlush reescribe `t` con la
-    // hora de escritura, así que `t` no sirve para medir frescura del censo).
-    const n = { id, pub, lat, lon, t, seen: t, src: "map" };
+    const n = { id, pub, lat, lon, t, src: "map" };
     if (d.name) n.name = String(d.name);
-    const mode = typeof d.role === "string" && d.role.trim() ? d.role.trim().replace(/^./, (c) => c.toUpperCase()) : CODE_MODE[num(d.device_role)];
-    if (mode) { n.mode = mode; if (MODE_ROLE[mode]) n.role = MODE_ROLE[mode]; }
-    // presencia MQTT (nodo conectado por internet): el timestamp más reciente
-    // de cualquier señal MQTT; el status "offline" explícito no cuenta.
-    const mq = Math.max(
-      num(d.mqtt_seen_ts) || 0, num(d.mqtt_internal_ts) || 0, num(d.mqtt_packets_ts) || 0,
-      d.mqtt_status_value === "online" ? num(d.mqtt_status_ts) || 0 : 0,
-    );
-    if (mq > 0) { n.mqtt = Math.round(mq * 1000); if (d.mqtt_online_source) n.mqttSrc = String(d.mqtt_online_source); }
-    // última calidad RF vista y movilidad (nodos móviles reportan rumbo/velocidad)
-    if (num(d.rssi) != null) n.rssi = num(d.rssi);
-    if (num(d.snr) != null) n.snr = num(d.snr);
-    if (num(d.heading) != null) n.heading = num(d.heading);
-    if (num(d.speed) != null && num(d.speed) > 0) n.speed = num(d.speed);
+    // El mapa normaliza el rol a {repeater, companion, room}; nuestra tabla habla
+    // el dialecto de los adverts por RF ("RoomServer"). Sin este alias, un
+    // RoomServer se quedaba sin `role` y dejaba de contar como infraestructura.
+    const rawRole = typeof d.role === "string" ? d.role.trim() : "";
+    const rk = rawRole.toLowerCase();
+    const mode = (has(ROLE_ALIAS, rk) ? ROLE_ALIAS[rk] : null) ||
+      (rawRole ? rawRole.replace(/^./, (c) => c.toUpperCase()) : CODE_MODE[num(d.device_role)]);
+    if (mode) { n.mode = mode; if (has(MODE_ROLE, mode)) n.role = MODE_ROLE[mode]; }
+    // Presencia MQTT: el veredicto lo da el mapa en mqtt_seen_ts, que él purga a
+    // los 300 s. mqtt_internal_ts/mqtt_packets_ts NO son veredicto (el mapa nunca
+    // los borra), así que tomarlos por el máximo resucitaba nodos ya caídos.
+    // Se escribe 0/null explícito al caer: omitir la clave no limpia (planFlush
+    // fusiona campos acumulados).
+    const mq = num(d.mqtt_seen_ts) || 0;
+    n.mqtt = mq > 0 ? Math.round(mq * 1000) : null;
+    n.mqttSrc = mq > 0 && d.mqtt_online_source ? String(d.mqtt_online_source) : null;
+    // `seen` = cuándo lo oyó la malla POR RADIO. Ojo: para los observadores,
+    // last_seen_ts se reestampa con su latido MQTT aunque su antena esté muda,
+    // así que un timestamp pegado a una señal MQTT NO prueba recepción por RF.
+    const mqMs = mq > 0 ? Math.round(mq * 1000) : 0;
+    const rfMs = num(d.ts) ? Math.round(num(d.ts) * 1000) : 0;
+    const okRf = (x) => x > 0 && (!mqMs || x > mqMs + 60000);
+    n.seen = Math.max(okRf(rfMs) ? rfMs : 0, okRf(t) ? t : 0) || null;
+    // última calidad RF vista y movilidad. `null` = retractación explícita: sin
+    // esto la velocidad de un móvil detenido quedaba congelada para siempre.
+    const hasK = (k) => Object.prototype.hasOwnProperty.call(d, k);
+    const retract = (k, v) => { if (v != null) n[k] = v; else if (hasK(k)) n[k] = null; };
+    retract("rssi", num(d.rssi));
+    retract("snr", num(d.snr));
+    retract("heading", num(d.heading));
+    retract("speed", num(d.speed) > 0 ? num(d.speed) : null);
     nodes[`nodes/${id}`] = n;
     known.add(id);
     gridAdd(lat, lon, id);
@@ -354,6 +373,53 @@ function mapSnapshot(j, now, maxAgeMs) {
 }
 const compactObj = (o) => { const r = {}; for (const k in o) if (o[k] !== undefined) r[k] = o[k]; return r; };
 
+/* --- Rutas del mapa → adyacencia por IDENTIDAD (y SNR real si viene) --------
+ * El evento 'route' del WS trae `point_ids` (pubkeys de cada salto, ya resueltas
+ * por el backend con desambiguación) y, en los paquetes TRACE (payload_type 9),
+ * `snr_values`: el SNR EN dB que midió cada repetidor al recibir el salto
+ * anterior. Es la ÚNICA medición de señal que MeshCore nos entrega hoy, porque
+ * el broker MQTT nos filtra la entrega.
+ *
+ * Alineación (verificada contra decoder.py y el decoder oficial):
+ *   point_ids = [origen, salto1, …, saltoN]   ·   hashes = [salto1 … saltoN]
+ *   snr_values[i] = SNR con que point_ids[i+1] recibió de point_ids[i]
+ * Solo se atribuye SNR si TODO calza; ante cualquier duda se escribe la
+ * adyacencia sin SNR (mejor sin dato que con un dato mal asignado). */
+const SNR_MIN = -32, SNR_MAX = 31.75;                 // rango de un int8/4
+const isPrefixOf = (h, id) => !!h && !!id && String(id).toLowerCase().startsWith(String(h).toLowerCase());
+function mapRouteLinks(r, now) {
+  const links = {};
+  if (!r || typeof r !== "object") return links;
+  const ids = Array.isArray(r.point_ids) ? r.point_ids : null;
+  const hashes = Array.isArray(r.hashes) ? r.hashes : [];
+  if (!ids || ids.length < 2 || !hashes.length) return links;      // sin hashes ⇒ el backend no resolvió el path
+  if (r.route_mode && r.route_mode !== "path") return links;       // 'direct'/'fanout' = relleno [origen,receptor]
+  const t = num(r.ts) ? Math.round(num(r.ts) * 1000) : now;
+  // ancho de hash: si TODOS eran de 1 byte, la resolución es ambigua
+  const widths = new Set(hashes.map((h) => { const s = String(h == null ? "" : h).trim().replace(/^0x/i, ""); return s.length === 2 || s.length === 4 || s.length === 6 ? s.length / 2 : 0; }));
+  const amb = widths.size === 1 && widths.has(1);
+  // ¿podemos confiar en el SNR? (TRACE + arrays alineados + sin inversión)
+  const snr = Array.isArray(r.snr_values) ? r.snr_values : null;
+  const snrOk = !!snr && r.payload_type === 9 &&
+    snr.length === hashes.length && ids.length === hashes.length + 1 &&
+    !ids.some((x) => !x) && String(ids[0] || "").toLowerCase() === String(r.origin_id || "").toLowerCase() &&
+    snr.every((v) => typeof v === "number" && isFinite(v) && v >= SNR_MIN && v <= SNR_MAX) &&
+    !isPrefixOf(hashes[hashes.length - 1], r.receiver_id) && !isPrefixOf(hashes[0], r.origin_id);
+  for (let i = 0; i < ids.length - 1; i++) {
+    const a = ids[i] ? nid(String(ids[i]).toLowerCase()) : null;
+    const b = ids[i + 1] ? nid(String(ids[i + 1]).toLowerCase()) : null;
+    if (!a || !b || a === b) continue;
+    if (!/^[0-9a-f]{12,}$/.test(a) || !/^[0-9a-f]{12,}$/.test(b)) continue;
+    const s = snrOk ? snr[i] : null;
+    // b midió el SNR al recibir de a → "b oye a a". Sin SNR se escribe simétrico
+    // (la adyacencia es real pero el sentido no aporta nada extra).
+    const l = compactObj({ snr: s, t, src: s != null ? "tr" : "ruta", w: amb ? 1 : undefined });
+    links[`links/${b}/nb/${a}`] = l;
+    if (s == null) links[`links/${a}/nb/${b}`] = Object.assign({}, l);
+  }
+  return links;
+}
+
 /* --- /peers/{id}: adyacencia dirigida con volumen (bajo demanda del API) ----
  * outgoing = a quiénes les llegó tráfico DESDE id; incoming = de quiénes recibió.
  * Modelo "quién oye a quién": incoming[x] ⇒ id oyó a x; outgoing[y] ⇒ y oyó a id. */
@@ -374,7 +440,7 @@ function mapPeers(id, j, now) {
   return links;
 }
 
-module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid, newCounters, mapSnapshot, mapPeers, validLL, newRegistry, regAdd, putLink, putLinks, putNodes, onlineFromStatus, LINK_PRIO };
+module.exports = { processMeshCorePacket, extractPacket, observerFromTopic, nid, newCounters, mapSnapshot, mapPeers, mapRouteLinks, validLL, newRegistry, regAdd, putLink, putLinks, putNodes, onlineFromStatus, LINK_PRIO };
 
 /* ============================ RUNTIME (solo si se ejecuta directo) =========== */
 if (require.main === module) {
@@ -568,6 +634,9 @@ if (require.main === module) {
       try { WSImpl = require("ws"); } catch (e) { console.log("módulo 'ws' no disponible — sigo solo con polling"); }
       if (WSImpl) {
         let recentRoutes = [];
+        // caché de la última entrada del censo: los eventos incrementales
+        // (history_edges) necesitan las posiciones para resolver los extremos
+        let lastDevs = {}, lastTrails = {};
         const WS_IDLE = Math.max(0, +(process.env.MC_WS_IDLE || 600)) * 1000;   // 0 = watchdog off
         const WS_MIN = 15000, WS_MAX = 5 * 60 * 1000;
         let wsBackoff = WS_MIN, wsFails = 0;
@@ -599,16 +668,37 @@ if (require.main === module) {
               // ordena por fecha ANTES de recortar: si no, un mapa con >40 rutas
               // vivas nos dejaría con las más viejas
               if (Array.isArray(j.routes)) recentRoutes = j.routes.slice().sort((x, y) => (num(y.ts) || 0) - (num(x.ts) || 0)).slice(0, 40);
+              lastDevs = {};
+              const dv = j.devices && !Array.isArray(j.devices) ? Object.values(j.devices) : Array.isArray(j.devices) ? j.devices : [];
+              for (const d of dv) { const k = String((d && (d.device_id || d.public_key)) || "").toLowerCase(); if (k) lastDevs[k] = d; }
+              lastTrails = j.trails && typeof j.trails === "object" ? j.trails : {};
               ingest(j, "snapshot");
+              // el snapshot también trae rutas con point_ids/snr_values
+              for (const r of recentRoutes) { const rl = mapRouteLinks(r, Date.now()); if (Object.keys(rl).length) putLinks(buf, rl, lastLink); }
             } else if (j.type === "update" && j.device) {
               const mini = { devices: [j.device] };
               const devId = String(j.device.device_id || j.device.public_key || "").toLowerCase();
-              if (devId && Array.isArray(j.trail) && j.trail.length >= 2) mini.trails = { [devId]: j.trail };
+              if (devId) lastDevs[devId] = j.device;
+              if (devId && Array.isArray(j.trail) && j.trail.length >= 2) { mini.trails = { [devId]: j.trail }; lastTrails[devId] = j.trail; }
               ingest(mini, "update");
             } else if (j.type === "route" && j.route) {
               recentRoutes.unshift(j.route);
               recentRoutes = recentRoutes.slice(0, 40);
               pushRoutes();
+              // adyacencia por identidad + SNR real de los TRACE
+              const rl = mapRouteLinks(j.route, Date.now());
+              const withSnr = Object.values(rl).filter((x) => x.snr != null).length;
+              if (Object.keys(rl).length) {
+                putLinks(buf, rl, lastLink);
+                counters.pathLinks = (counters.pathLinks || 0) + Object.keys(rl).length;
+                if (withSnr) counters.snrLinks = (counters.snrLinks || 0) + withSnr;
+              }
+            } else if (j.type === "history_edges" && Array.isArray(j.edges)) {
+              // el mapa empuja cada arista al registrarla: no esperamos los 5 min
+              const { links } = mapSnapshot({ devices: Object.values(lastDevs), trails: lastTrails, history_edges: j.edges }, Date.now(), PURGE_MS);
+              putLinks(buf, links, lastLink);
+            } else if (j.type === "history_edges_remove" && Array.isArray(j.edge_ids)) {
+              counters.edgeRemove = (counters.edgeRemove || 0) + j.edge_ids.length;
             } else if (j.type === "stale" && Array.isArray(j.device_ids)) {
               // el mapa retiró esos nodos: bórralos también acá (si no, quedan
               // fantasmas hasta que los alcance la purga de 24 h)

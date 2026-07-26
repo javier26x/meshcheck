@@ -163,12 +163,25 @@ formato de mensaje (no `{raw,SNR,origin_id}`), `extractPacket` ya tolera
 `raw_hex`, hex pelado o bytes crudos, pero esas muestras confirman el esquema.
 
 **Honestidad del dato.** `t` es la hora en que el bridge escribió; la antigüedad
-real va en **`seen`** (cuándo lo oyó la malla) y es la que usa el visor. Los
-enlaces llevan `src`: `obs`/`tr` son recepciones por RF (con SNR), mientras que
-`ruta` y `peers` son **adyacencia observada sin SNR** (el tráfico pasó por ahí,
-no sabemos con qué calidad) y el visor los dibuja violeta punteado en vez de
-teñirlos del color del peor SNR. Un `path` que no se resuelve entero **no**
+real va en **`seen`** (cuándo lo oyó la malla **por radio**) y es la que usa el
+visor. Ojo: para los observadores, el mapa reestampa `last_seen` con su latido
+MQTT aunque su antena esté muda, así que un timestamp pegado a una señal MQTT no
+cuenta como recepción RF. Los enlaces llevan `src`: `obs`/`tr` son recepciones
+por RF **con SNR medido**, mientras que `ruta` y `peers` son **adyacencia
+observada sin SNR** (el tráfico pasó por ahí, no sabemos con qué calidad) y el
+visor los dibuja violeta punteado en vez de teñirlos del color del peor SNR. La
+ruta A→B solo se rotula **"100% medida"** si TODOS sus saltos tienen SNR; si no,
+dice "por adyacencia (sin SNR)". Un `path` que no se resuelve entero **no**
 genera enlace del observador: preferimos un enlace de menos a uno inventado.
+
+**De dónde sale el SNR en MeshCore.** Los paquetes **TRACE** llevan un byte de
+SNR por salto, y el mapa los publica en `snr_values` del evento `route` del
+WebSocket, alineados con `point_ids`. `mapRouteLinks()` los convierte en enlaces
+dirigidos con SNR real (`src: "tr"`) — es la **única** medición de señal que
+MeshCore nos entrega hoy, porque el broker MQTT nos filtra la entrega. Cuando el
+SNR no calza (arrays desalineados, fuera de rango físico, `route_mode` distinto
+de `path`), se escribe la adyacencia **sin** SNR en vez de arriesgar un valor mal
+asignado.
 
 > Variables útiles: `MC_TOKEN` (si el mapa exigiera token), `MC_WS="off"` para
 > desactivar el tiempo real, `MC_API="off"` para el censo, `MC_PEERS_MIN=0` para

@@ -359,7 +359,9 @@ test("mapSnapshot: presencia MQTT, telemetría RF, volumen y capas extra", () =>
   assert.equal(a.mqttSrc, "packets");
   assert.equal(a.rssi, -95); assert.equal(a.snr, 6.5);
   assert.equal(a.heading, 270); assert.equal(a.speed, 42);
-  assert.equal(nodes["nodes/" + pubB].mqtt, undefined, "status offline NO cuenta como presencia");
+  // null explícito (no undefined): omitir la clave NO limpia, porque planFlush
+  // fusiona campos acumulados y el valor viejo quedaría pegado
+  assert.equal(nodes["nodes/" + pubB].mqtt, null, "sin mqtt_seen_ts no hay presencia");
   assert.equal(links["links/" + pubA + "/nb/" + pubB].n, 12);
   assert.equal(extra["routes/all"].length, 1, "solo la ruta reciente (la vieja queda fuera)");
   assert.deepEqual(extra["routes/all"][0].p[0], [-33.41, -70.55]);
@@ -449,4 +451,97 @@ test("processMeshCorePacket: advert ⇒ nodo posicionado + enlace observador→n
   assert.ok(buf["nodes/" + obs], "el observador se registra como nodo (sin pos aún)");
   assert.equal(counters.adverts, 1);
   assert.equal(counters.obsLinks, 1);
+});
+
+test("mapSnapshot: el latido MQTT del observador NO cuenta como recepción por RF", () => {
+  const now = 1700000000000;
+  const obs = "aa".repeat(32), rf = "bb".repeat(32);
+  const j = { devices: {
+    // observador: su last_seen se reestampa con el heartbeat MQTT (mismo instante)
+    [obs]: { device_id: obs, name: "Observador", lat: -33.4, lon: -70.6,
+             last_seen_ts: now / 1000, ts: now / 1000, mqtt_seen_ts: now / 1000 },
+    // nodo oído por radio 10 min DESPUÉS de su última señal MQTT
+    [rf]: { device_id: rf, name: "Por radio", lat: -33.5, lon: -70.7,
+            last_seen_ts: now / 1000, ts: now / 1000, mqtt_seen_ts: now / 1000 - 600 },
+  } };
+  const { nodes } = BR.mapSnapshot(j, now, 0);
+  assert.equal(nodes["nodes/" + obs].seen, null, "un ts pegado al latido MQTT no prueba RF");
+  assert.equal(nodes["nodes/" + obs].mqtt, now, "…pero sí queda su presencia MQTT");
+  assert.equal(nodes["nodes/" + rf].seen, now, "con la señal MQTT vieja, el ts SÍ es recepción por radio");
+});
+
+test("mapSnapshot: presencia MQTT solo desde mqtt_seen_ts (el mapa ya la purga a los 5 min)", () => {
+  const now = 1700000000000;
+  const p = "cc".repeat(32);
+  // internal/packets viejos que el mapa NUNCA borra: no deben resucitar al nodo
+  const j = { devices: { [p]: { device_id: p, lat: -33, lon: -70, last_seen_ts: now / 1000,
+    mqtt_internal_ts: now / 1000 - 10, mqtt_packets_ts: now / 1000 - 20 } } };
+  const { nodes } = BR.mapSnapshot(j, now, 0);
+  assert.equal(nodes["nodes/" + p].mqtt, null, "sin mqtt_seen_ts el mapa lo dio por caído");
+});
+
+test("mapSnapshot: RoomServer conserva el rol de infraestructura", () => {
+  const now = 1700000000000;
+  const p = "dd".repeat(32);
+  const { nodes } = BR.mapSnapshot({ devices: { [p]: { device_id: p, role: "room", lat: -33, lon: -70, last_seen_ts: now / 1000 } } }, now, 0);
+  assert.equal(nodes["nodes/" + p].mode, "RoomServer");
+  assert.equal(nodes["nodes/" + p].role, "ROUTER", "un RoomServer es infraestructura, como el repetidor");
+});
+
+test("mapSnapshot: telemetría que desaparece se RETRACTA con null", () => {
+  const now = 1700000000000;
+  const p = "ee".repeat(32);
+  const base = { device_id: p, lat: -33, lon: -70, last_seen_ts: now / 1000 };
+  // el móvil se detuvo: speed llega en 0 → baja explícita
+  let r = BR.mapSnapshot({ devices: { [p]: { ...base, speed: 0, heading: 90 } } }, now, 0);
+  assert.equal(r.nodes["nodes/" + p].speed, null, "0 km/h = detenido = se borra el campo");
+  assert.equal(r.nodes["nodes/" + p].heading, 90);
+  // si la fuente ya ni menciona la clave, no se inventa una retractación
+  r = BR.mapSnapshot({ devices: { [p]: { ...base } } }, now, 0);
+  assert.equal(r.nodes["nodes/" + p].speed, undefined, "clave ausente ⇒ no se toca");
+});
+
+test("mapRouteLinks: SNR REAL por salto desde un paquete TRACE", () => {
+  const now = 1700000000000;
+  const A = "aa".repeat(32), B = "bb".repeat(32), C = "cc".repeat(32);
+  const r = {
+    payload_type: 9, route_mode: "path", ts: now / 1000,
+    origin_id: A, receiver_id: "ff".repeat(32),
+    point_ids: [A, B, C],
+    hashes: ["bbbb", "cccc"],          // 2 bytes c/u
+    snr_values: [6.25, -3.5],
+  };
+  const links = BR.mapRouteLinks(r, now);
+  // snr_values[i] = SNR con que point_ids[i+1] recibió de point_ids[i]
+  assert.equal(links["links/" + B + "/nb/" + A].snr, 6.25);
+  assert.equal(links["links/" + B + "/nb/" + A].src, "tr", "con SNR es medición RF, no adyacencia");
+  assert.equal(links["links/" + C + "/nb/" + B].snr, -3.5);
+  assert.equal(links["links/" + A + "/nb/" + B], undefined, "con SNR el enlace es dirigido (quién midió a quién)");
+});
+
+test("mapRouteLinks: sin SNR usable ⇒ adyacencia simétrica sin inventar señal", () => {
+  const now = 1700000000000;
+  const A = "aa".repeat(32), B = "bb".repeat(32);
+  const base = { route_mode: "path", ts: now / 1000, origin_id: A, receiver_id: "ff".repeat(32), point_ids: [A, B], hashes: ["bb"] };
+  // payload_type != 9 (no es TRACE): los bytes del path son hashes, no SNR
+  let links = BR.mapRouteLinks({ ...base, payload_type: 4, snr_values: [9] }, now);
+  assert.equal(links["links/" + B + "/nb/" + A].snr, null);
+  assert.equal(links["links/" + B + "/nb/" + A].src, "ruta");
+  assert.ok(links["links/" + A + "/nb/" + B], "sin SNR se escribe simétrico");
+  assert.equal(links["links/" + B + "/nb/" + A].w, 1, "hash de 1 byte ⇒ resolución ambigua");
+  // SNR fuera de rango físico ⇒ no se usa
+  links = BR.mapRouteLinks({ ...base, payload_type: 9, snr_values: [999] }, now);
+  assert.equal(links["links/" + B + "/nb/" + A].snr, null);
+  // arrays desalineados ⇒ no se usa
+  links = BR.mapRouteLinks({ ...base, payload_type: 9, snr_values: [1, 2, 3] }, now);
+  assert.equal(links["links/" + B + "/nb/" + A].snr, null);
+});
+
+test("mapRouteLinks: route_mode 'direct' (path sin resolver) ⇒ ningún enlace", () => {
+  const now = 1700000000000;
+  const A = "aa".repeat(32), Z = "ff".repeat(32);
+  // el backend rellenó [origen, receptor] porque no pudo resolver los saltos:
+  // afirmar adyacencia sería inventar que se oyen directo
+  const links = BR.mapRouteLinks({ payload_type: 9, route_mode: "direct", ts: now / 1000, origin_id: A, receiver_id: Z, point_ids: [A, Z], hashes: [] }, now);
+  assert.equal(Object.keys(links).length, 0);
 });
