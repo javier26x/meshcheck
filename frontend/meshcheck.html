@@ -482,9 +482,9 @@ let hypRepeaters = [], repeaterArmed = false, repIdSeq = 1;
 let pointA = null, pointB = null, armPoint = null;
 let showModelFill = false, showEstimated = true, focusDim = true, showLabels = false, showBridges = true;
 let filters = { live: false, routers: false, measured: false, hideDir: false };
-let selectedId = null, openPopupId = null, basemapIdx = 0;
+let selectedId = null, selectedEdge = null, openPopupId = null, basemapIdx = 0;
 let lastNodes = {}, markerById = {}, prevLiveIds = new Set();
-let lastUpdate = 0, userLocMarker = null, redrawing = false;
+let lastUpdate = 0, userLocMarker = null, redrawing = false, edgePopupPending = false, bannerIsIsolate = false;
 const MAX_DRAW_EDGES = 5000;
 // Un enlace "medido" más largo que esto es físicamente imposible por radio en
 // terreno comunitario → casi seguro es un PUENTE por internet (MQTT bridging),
@@ -947,27 +947,34 @@ function redraw() {
       s === "peers" ? "tráfico contabilizado entre estos dos nodos" : "recepción por gateway";
     return base + (hasSnr ? " · SNR medido ⇒ enlace por AIRE confirmado" : " · sin SNR: no podemos confirmar que sea RF");
   };
-  let drawn = 0, drewSnr = 0, drewNoSnr = 0, drewBridge = 0, drewModel = 0;
-  for (const e of edges) {
+  let drawn = 0, drewSnr = 0, drewNoSnr = 0, drewBridge = 0, drewModel = 0, selPoly = null;
+  // Si hay un enlace seleccionado, el par se aísla: sus DOS sentidos quedan
+  // dibujados y todo lo demás se desvanece. El par medido (con SNR) se dibuja
+  // al final para que la línea sin SNR no lo tape.
+  const isSelEdge = (e) => !!selectedEdge && ((e.a === selectedEdge.a && e.b === selectedEdge.b) || (e.a === selectedEdge.b && e.b === selectedEdge.a));
+  const drawList = edges.slice().sort((x, y) =>
+    (isSelEdge(x) ? 1 : 0) - (isSelEdge(y) ? 1 : 0) || (x.snr == null ? 0 : 1) - (y.snr == null ? 0 : 1));
+  for (const e of drawList) {
     if (e.bridge && !showBridges) continue;
     if (e.model && useLive && !showModelFill) continue;
     if (e.model && drawn >= MAX_DRAW_EDGES) continue;
     const a = nodes[e.a], b = nodes[e.b];
     if (!a || !b || !isVis(e.a) || !isVis(e.b)) continue;
-    const focus = selectedId && focusDim;
-    const incident = !focus || e.a === selectedId || e.b === selectedId;
+    const isSel = isSelEdge(e);
+    const focus = selectedEdge ? true : selectedId && focusDim;
+    const incident = selectedEdge ? isSel : !focus || e.a === selectedId || e.b === selectedId;
     let poly, tip;
     if (e.bridge) {
       // puente por internet: cyan tipo "cable de datos"
-      const opa = incident ? 0.85 : 0.16;
-      poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { color: "#22d3ee", weight: incident ? 2.2 : 1.4, opacity: opa, dashArray: "10,7" });
+      const opa = incident ? 0.85 : selectedEdge ? 0.05 : 0.16;
+      poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { color: "#22d3ee", weight: (incident ? 2.2 : 1.4) + (isSel ? 1.6 : 0), opacity: opa, dashArray: "10,7" });
       tip = e.dudoso
         ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v" style="color:#22d3ee">${fmtKm(e.km)}</span> · ⚠️ enlace DUDOSO<br><span style="color:var(--muted)">el mapa MeshCore ya descarta saltos > 100 km, así que esta distancia apunta a una colisión al resolver el camino${e.w === 1 ? " (hash de 1 byte)" : ""}, no a un puente real</span>`
         : `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v" style="color:#22d3ee">${fmtKm(e.km)}</span> · 🌐 puente por INTERNET (probable)<br><span style="color:var(--muted)">demasiado lejos para radio directa (> ${BRIDGE_KM} km) — regiones unidas por MQTT, no por RF</span>`;
     } else {
       const estGeom = a.estimated || b.estimated;
       let opa = e.live ? (estGeom ? 0.6 : 0.9) : 0.32;
-      if (focus && !incident) opa *= 0.14;
+      if (focus && !incident) opa *= selectedEdge ? 0.06 : 0.14;   // aislar es más fuerte que enfocar
       // grosor por volumen de tráfico (campo n de rutas históricas / peers)
       const volW = e.n > 1 ? Math.min(2.2, Math.log10(e.n) * 0.9) : 0;
       // Un enlace SIN SNR no es un enlace con SNR pésimo: se pinta violeta neutro
@@ -975,8 +982,8 @@ function redraw() {
       // SNR posible, que es lo que hacía el fallback ?? -20.
       const sinSnr = e.live && e.snr == null;
       poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], e.live
-        ? { color: sinSnr ? "#8f7ad6" : snrColor(e.snr), weight: (incident ? 2.4 : 1.6) + volW, opacity: opa, dashArray: estGeom ? "4,6" : sinSnr ? "6,4" : null }
-        : { color: "#3a4250", weight: 1, opacity: opa, dashArray: "3,5" });
+        ? { color: sinSnr ? "#8f7ad6" : snrColor(e.snr), weight: (incident ? 2.4 : 1.6) + volW + (isSel ? 1.8 : 0), opacity: opa, dashArray: estGeom ? "4,6" : sinSnr ? "6,4" : null }
+        : { color: "#3a4250", weight: (isSel ? 2.8 : 1), opacity: opa, dashArray: "3,5" });
       const dkm = haversine(a, b);
       const win = liveMeta && liveMeta.winSec ? Math.round(liveMeta.winSec / 3600) : 24;
       tip = e.live
@@ -985,11 +992,29 @@ function redraw() {
       if (e.live) { if (sinSnr) drewNoSnr++; else drewSnr++; } else drewModel++;
     }
     if (e.bridge) drewBridge++;
-    poly.bindTooltip(tip, { sticky: true, className: "linktip", opacity: 1 });
-    poly.bindPopup(tip);   // tap en móvil
+    poly.bindTooltip(tip + `<br><span style="color:var(--muted);font-size:11px">${isSel ? "clic para volver a ver toda la malla" : "clic para aislar este enlace"}</span>`, { sticky: true, className: "linktip", opacity: 1 });
+    poly.bindPopup(tip);                       // tap en móvil (no hay hover)
+    // clic en la línea: aísla el par (sus dos sentidos) y desvanece el resto.
+    // Volver a clickearlo deshace el aislamiento.
+    poly.on("click", (ev) => {
+      L.DomEvent.stop(ev);                     // que no lo tome el clic del mapa
+      const same = isSel;
+      selectedEdge = same ? null : { a: e.a, b: e.b };
+      edgePopupPending = !same;
+      selectedId = null; openPopupId = null;
+      redraw();
+    });
+    if (isSel) selPoly = poly;
     poly.addTo(linkLayer);
     drawn++;
   }
+  // el popup se reabre una sola vez al aislar (en móvil el tooltip no aparece)
+  if (selPoly && edgePopupPending) { try { selPoly.openPopup(); } catch (err) {} edgePopupPending = false; }
+  if (selectedEdge) {
+    const plain = (id) => (nodes[id] && nodes[id].name) || id;
+    banner(`🔗 Enlace aislado: ${plain(selectedEdge.a)} ↔ ${plain(selectedEdge.b)} — clic en el mapa o Esc para volver`);
+  } else if (bannerIsIsolate) banner("");
+  bannerIsIsolate = !!selectedEdge;
   // La leyenda describe lo que SE ACABA DE DIBUJAR, no lo que el protocolo
   // podría dibujar: si no hay ni un enlace con SNR, la escala de color sobra y
   // el violeta (que sería la mayoría) tiene que aparecer.
@@ -1028,26 +1053,32 @@ function redraw() {
   // nodos
   const markers = [];
   const liveIdsNow = new Set();
+  // con un enlace aislado, solo sus dos extremos quedan nítidos
+  const edgeEnds = selectedEdge ? new Set([selectedEdge.a, selectedEdge.b]) : null;
   for (const id in nodes) {
     const n = nodes[id];
     if (typeof n.lat !== "number" || !visible(n)) continue;
     if (n.t && !n.estimated) liveIdsNow.add(id);
     const sel = id === selectedId;
+    const onEdge = edgeEnds ? edgeEnds.has(id) : true;
+    const dim = edgeEnds && !onEdge ? 0.12 : 1;    // el resto se desvanece
     let m;
     if (n.estimated) {
-      m = L.circleMarker([n.lat, n.lon], { radius: sel ? 8 : 6, color: "#b57aff", weight: 2, dashArray: "2,3", fillColor: "#b57aff", fillOpacity: 0.25 });
+      m = L.circleMarker([n.lat, n.lon], { radius: sel ? 8 : 6, color: "#b57aff", weight: 2, dashArray: "2,3", fillColor: "#b57aff", fillOpacity: 0.25 * dim, opacity: dim });
     } else {
       const alive = !!n.t, router = isRouter(n);
       let fill = alive ? "#3ad07a" : "#7a8391";
       if (n.role === "repeater") fill = "#ff7a1a";
+      const hi = sel || (edgeEnds && onEdge);
       m = L.circleMarker([n.lat, n.lon], {
-        radius: (router ? 7 : 5) + (sel ? 3 : 0),
-        color: sel ? "#fff" : (router ? "#ffd23f" : "#0d0f12"),
-        weight: sel ? 3 : (router ? 2 : 1), fillColor: fill, fillOpacity: alive ? 0.95 : 0.55 });
+        radius: (router ? 7 : 5) + (hi ? 3 : 0),
+        color: hi ? "#fff" : (router ? "#ffd23f" : "#0d0f12"),
+        weight: hi ? 3 : (router ? 2 : 1), fillColor: fill,
+        fillOpacity: (alive ? 0.95 : 0.55) * dim, opacity: dim });
     }
     m._nodeId = id; m._live = !!n.t && !n.estimated;
     m.bindPopup(() => nodePopupHtml(id), { autoPan: true, maxWidth: 300, minWidth: 258, maxHeight: 360 });
-    m.on("click", () => { selectedId = id; openPopupId = id; redraw(); });
+    m.on("click", () => { selectedId = id; selectedEdge = null; openPopupId = id; redraw(); });
     if (showLabels && (n.name || n.alias)) m.bindTooltip(esc(String(n.alias || n.name)), { permanent: true, direction: "right", className: "nlabel", offset: [6, 0] });
     markers.push(m); markerById[id] = m;
   }
@@ -1467,7 +1498,12 @@ $("foot-help").addEventListener("click", (e) => { e.preventDefault(); $("intro")
 map.on("click", (e) => {
   if (repeaterArmed) { const id = "rep-" + (repIdSeq++); hypRepeaters.push({ id, name: "Repetidor " + (hypRepeaters.length + 1), lat: e.latlng.lat, lon: e.latlng.lng, role: "repeater" }); repeaterArmed = false; $("btn-repeater").classList.remove("armed"); $("btn-repeater").textContent = "＋ Repetidor hipotético"; redraw(); return; }
   if (armPoint) { const pt = { lat: e.latlng.lat, lon: e.latlng.lng, label: `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}` }; $(armPoint === "A" ? "addr-a" : "addr-b").value = pt.label; if (armPoint === "A") pointA = pt; else pointB = pt; armPoint = null; syncPinButtons(); saveState(); redraw(); return; }
-  if (selectedId) { selectedId = null; redraw(); }
+  if (selectedId || selectedEdge) { selectedId = null; selectedEdge = null; redraw(); }
+});
+// Esc también deshace el aislamiento / la selección
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || (selectedId == null && selectedEdge == null)) return;
+  selectedId = null; selectedEdge = null; redraw();
 });
 map.on("popupopen", (e) => { const s = e.popup._source; if (s && s._nodeId) openPopupId = s._nodeId; });
 map.on("popupclose", () => { if (!redrawing) openPopupId = null; });   // no borrar durante el redraw
@@ -1541,7 +1577,7 @@ function switchProto(p) {
   embeddedNodes = proto === "mc" ? {} : mtDirectory;   // MeshCore no tiene directorio nominal
   // la malla anterior no debe dejar restos: selección, búsqueda, autocompletado
   // ni repetidores hipotéticos colocados sobre nodos que ya no existen
-  selectedId = null; openPopupId = null;
+  selectedId = null; selectedEdge = null; openPopupId = null;
   hypRepeaters = []; repeaterArmed = false;
   try {
     $("search").value = ""; $("results").innerHTML = ""; $("results").classList.remove("open");
