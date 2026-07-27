@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-26T10:53:49.199Z",
+  "generated": "2026-07-27T12:36:55.383Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 289,
+  "count": 291,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -1048,6 +1048,21 @@
         "locType": "residential"
       }
     },
+    "G8HhXRi7v6OoIdxm3MXg": {
+      "id": "G8HhXRi7v6OoIdxm3MXg",
+      "name": "Primer nodo ce6phg",
+      "lat": 39.28,
+      "lon": 72.23,
+      "placeholder": false,
+      "alias": "phg1",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Walter Manríquez Gebert",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential"
+      }
+    },
     "GumxPF6uhFHOyXcIod1K": {
       "id": "GumxPF6uhFHOyXcIod1K",
       "name": "CE4NBE mOVIL 2",
@@ -1259,6 +1274,21 @@
       "role": "CLIENT",
       "meta": {
         "user": "Bruno Daniel",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
+    "JcnUo1IB0SbWss56046T": {
+      "id": "JcnUo1IB0SbWss56046T",
+      "name": "Meshtastic_CE3ANW",
+      "lat": -33.43506,
+      "lon": -70.628222,
+      "placeholder": false,
+      "alias": "644a",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Andrés García A.",
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
