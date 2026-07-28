@@ -142,6 +142,12 @@
   .leaflet-popup-content .pt { font-weight: 700; margin-bottom: 3px; font-size: 13px; padding-right: 14px; }
   .leaflet-popup-content .nb { margin-top: 6px; font-size: 11px; }
   .leaflet-popup-content .nb b { color: var(--accent); }
+  /* filas de vecinos clickeables (panel "Mi nodo") */
+  .nb-row { margin: 2px 0; padding: 4px 6px; border-radius: 5px; cursor: pointer; font-size: 12px;
+    border: 1px solid transparent; transition: background .12s, border-color .12s; }
+  .nb-row:hover { background: var(--panel2); border-color: var(--line); }
+  .nb-row.off { cursor: default; opacity: .55; }
+  .nb-row.off:hover { background: transparent; border-color: transparent; }
   .pop-sec { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--line); }
   .pop-sec .h { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--accent); font-weight: 700; margin-bottom: 5px; }
   .pop-kv { display: flex; justify-content: space-between; gap: 14px; font-size: 11px; margin: 3px 0; align-items: baseline; }
@@ -1289,7 +1295,11 @@ function renderMine() {
   const snrs = [...hears, ...heardBy].map((x) => x.snr).filter((v) => v != null);
   const deg = new Set([...hears.map((x) => x.id), ...heardBy.map((x) => x.id)]).size;
   const nm = (x) => esc((lastNodes[x] && lastNodes[x].name) || x);
-  const line = (x) => `<div style="margin:2px 0">${nm(x.id)}<span style="color:var(--muted);font-family:'JetBrains Mono',monospace"> (${x.snr != null ? x.snr + " dB" : "sin SNR"}${x.t ? " · " + fmtAge(x.t) : ""})</span></div>`;
+  // cada vecino es clickeable: lleva al mapa y aísla ese enlace
+  const line = (x) => {
+    const sinPos = !lastNodes[x.id] || typeof lastNodes[x.id].lat !== "number";
+    return `<div class="nb-row${sinPos ? " off" : ""}" ${sinPos ? "" : `onclick="window.focusEdge('${esc(myNodeId)}','${esc(x.id)}')"`} title="${sinPos ? "Sin posición conocida: no se puede dibujar el enlace" : "Ver este enlace en el mapa"}">${nm(x.id)}<span class="mono" style="color:var(--muted)"> (${x.snr != null ? x.snr + " dB" : "sin SNR"}${x.t ? " · " + fmtAge(x.t) : ""})</span>${sinPos ? "" : `<span style="color:var(--accent);float:right">↗</span>`}</div>`;
+  };
 
   let h = "";
   h += `<div class="sec"><h2 style="margin-bottom:6px">${esc(n.name || myNodeId)}</h2>`;
@@ -1316,7 +1326,7 @@ function renderMine() {
   } else h += `<p class="note">Sin posición. Si no tiene GPS, fíjala con <code>--setlat/--setlon</code>.</p>`;
   h += `</div>`;
 
-  h += `<div class="sec"><h2>Cobertura medida</h2>`;
+  h += `<div class="sec"><h2>Cobertura medida <span class="hint" title="Toca un vecino para ver ese enlace aislado en el mapa.">?</span></h2>`;
   h += kvRow("Vecinos únicos", deg) + (snrs.length ? kvRow("SNR mejor / prom", `${Math.max(...snrs)} / ${(snrs.reduce((a, b) => a + b, 0) / snrs.length).toFixed(1)} dB`) : "");
   if (hears.length) h += `<div class="nb"><b>📡 Ve a ${hears.length}:</b>${hears.sort((a, b) => (b.snr ?? -99) - (a.snr ?? -99)).slice(0, 10).map(line).join("")}</div>`;
   if (heardBy.length) h += `<div class="nb"><b>📡 Lo escuchan ${heardBy.length}:</b>${heardBy.sort((a, b) => (b.snr ?? -99) - (a.snr ?? -99)).slice(0, 10).map(line).join("")}</div>`;
@@ -1364,6 +1374,20 @@ function runSearch(q) {
   }).join("") || `<div class="r" style="color:var(--muted)">sin resultados</div>`;
   box.classList.add("open");
 }
+// focusEdge(a,b): lleva el mapa al enlace y lo AÍSLA (mismo efecto que clickear
+// la línea). Se usa desde la lista de vecinos de "Mi nodo".
+window.focusEdge = (a, b) => {
+  const na = lastNodes[a], nb = lastNodes[b];
+  if (!na || !nb) { banner("Ese vecino ya no está en los datos actuales."); return; }
+  if (typeof na.lat !== "number" || typeof nb.lat !== "number") {
+    banner(`Sin posición conocida de ${(typeof na.lat !== "number" ? na.name : nb.name) || "ese nodo"}: el enlace no se puede dibujar.`);
+    return;
+  }
+  selectedId = null; selectedEdge = { a, b }; edgePopupPending = true; openPopupId = null;
+  if (window.matchMedia("(max-width:820px)").matches) $("panel").classList.remove("open");
+  try { map.fitBounds(L.latLngBounds([[na.lat, na.lon], [nb.lat, nb.lon]]), { padding: [70, 70], maxZoom: 15 }); } catch (e) {}
+  redraw();
+};
 window.focusNode = (id) => focusNode(id);
 function focusNode(id) {
   const n = lastNodes[id]; if (!n) return;
