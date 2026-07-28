@@ -276,6 +276,7 @@
     <div class="tabs">
       <button data-tab="ruta" class="active">Ruta</button>
       <button data-tab="mio">Mi nodo</button>
+      <button data-tab="rf">RF</button>
       <button data-tab="lista">Lista</button>
       <button data-tab="capas">Capas</button>
       <button data-tab="red">Red</button>
@@ -324,6 +325,16 @@
           <div class="ac-box" id="mine-box"></div>
         </div>
         <div id="mine-card"></div>
+      </div>
+
+      <!-- ===== RF (capturas) ===== -->
+      <div class="pane" data-pane="rf">
+        <div class="sec">
+          <h2>Foto de la red <span class="hint" title="Capturas grabadas con bridge/rfcapture.js. Durante un apagón de MQTT, lo único que sigue propagando es la radio: todo lo observado en esa ventana es alcance RF real.">?</span></h2>
+          <select id="rf-sel"><option value="">— elige una captura —</option></select>
+          <label class="chk" style="margin-top:8px"><input type="checkbox" id="rf-map" checked /> dibujar la captura en el mapa</label>
+        </div>
+        <div id="rf-card"></div>
       </div>
 
       <div class="pane" data-pane="lista">
@@ -547,6 +558,7 @@ const nodeLayer = clusterOK
 nodeLayer.addTo(map);
 const linkLayer = L.layerGroup().addTo(map);
 const mcLayer = L.layerGroup().addTo(map);   // rutas de paquetes + estelas (MeshCore)
+const rfLayer = L.layerGroup().addTo(map);   // foto RF capturada (pestaña RF)
 let heatLayer = null;                        // L.heatLayer (leaflet.heat)
 const pathLayer = L.layerGroup().addTo(map);
 const pinLayer  = L.layerGroup().addTo(map);
@@ -935,7 +947,7 @@ function draggablePin(pt, letter, color, which) {
 
 function redraw() {
   redrawing = true;   // evita que el clearLayers cierre el popup abierto (ver popupclose)
-  linkLayer.clearLayers(); nodeLayer.clearLayers(); pathLayer.clearLayers(); pinLayer.clearLayers(); mcLayer.clearLayers();
+  linkLayer.clearLayers(); nodeLayer.clearLayers(); pathLayer.clearLayers(); pinLayer.clearLayers(); mcLayer.clearLayers(); rfLayer.clearLayers();
   if (heatLayer) { try { map.removeLayer(heatLayer); } catch (e) {} heatLayer = null; }
   markerById = {};
   const { nodes, unlocated, hasLive } = activeNodes();
@@ -1079,6 +1091,28 @@ function redraw() {
       heatLayer = L.heatLayer(mcHeat.map((h) => [h[0], h[1], h[2] || 0.7]), { radius: 22, blur: 18, maxZoom: 13 }).addTo(map);
     }
   } else { $("routes-count").textContent = ""; }
+
+  // foto RF capturada: se dibuja con las posiciones GUARDADAS en la captura, no
+  // con las actuales, para que la foto siga siendo fiel aunque la red cambie
+  if (rfShowMap && rfData && rfData.links) {
+    const rn = rfData.nodes || {};
+    const pos = (id) => { const n = rn[safeIdKey(id)]; return n && typeof n.lat === "number" ? [n.lat, n.lon] : null; };
+    for (const k in rfData.links) {
+      const l = rfData.links[k];
+      const pa = pos(l.a), pb = pos(l.b);
+      if (!pa || !pb) continue;
+      const col = l.snr != null ? snrColor(l.snr) : "#8f7ad6";
+      L.polyline([pa, pb], { color: col, weight: 3, opacity: 0.55, dashArray: l.snr != null ? null : "6,4" })
+        .bindTooltip(`<b>${esc((rn[safeIdKey(l.a)] || {}).name || l.a)} ↔ ${esc((rn[safeIdKey(l.b)] || {}).name || l.b)}</b><br><span class="v">${l.km != null ? fmtKm(l.km) : "?"}</span> · ${l.snr != null ? `SNR <span class="v">${l.snr} dB</span>` : "sin SNR"} · 📸 captura`, { sticky: true, className: "linktip" })
+        .addTo(rfLayer);
+    }
+    for (const id in rn) {
+      const n = rn[id];
+      if (typeof n.lat !== "number") continue;
+      L.circleMarker([n.lat, n.lon], { radius: 4, color: "#ffd23f", weight: 2, fillColor: "#ffd23f", fillOpacity: 0.5 })
+        .bindTooltip(esc(n.name || id), { className: "nlabel" }).addTo(rfLayer);
+    }
+  }
 
   // nodos
   const markers = [];
@@ -1355,6 +1389,114 @@ function renderMine() {
   host.innerHTML = h;
 }
 
+/* ---- 10d. Capturas RF ----------------------------------------------------- *
+ * Lee /rf/<sesión> por REST (shallow para listar, sin listeners permanentes).
+ * La captura es AUTOCONTENIDA: guarda las posiciones de los nodos tal como
+ * estaban, así la foto sigue siendo legible meses después. Si la sesión está en
+ * curso (sin `end`), se refresca sola cada 20 s. */
+let rfSessions = [], rfSel = null, rfData = null, rfShowMap = true, rfTimer = null;
+const rfBase = () => String(FIREBASE_CONFIG.databaseURL || "").replace(/\/$/, "");
+const rfGet = (p) => fetch(`${rfBase()}/${p}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
+async function rfLoadList() {
+  const keys = await rfGet("rf.json?shallow=true");
+  if (!keys) { rfSessions = []; return; }
+  const ids = Object.keys(keys).sort().reverse();          // más recientes primero
+  const metas = await Promise.all(ids.map((id) => rfGet(`rf/${encodeURIComponent(id)}/meta.json`)));
+  rfSessions = ids.map((id, i) => ({ id, meta: metas[i] || {} })).filter((s) => s.meta && s.meta.start);
+  const sel = $("rf-sel");
+  sel.innerHTML = `<option value="">${rfSessions.length ? "— elige una captura —" : "— no hay capturas todavía —"}</option>` +
+    rfSessions.map((s) => {
+      const d = new Date(s.meta.start);
+      const viva = !s.meta.end ? " · EN CURSO" : "";
+      return `<option value="${esc(s.id)}">${d.toLocaleString()} · ${esc(s.meta.label || s.id)}${viva}</option>`;
+    }).join("");
+  if (rfSel) sel.value = rfSel;
+}
+
+async function rfLoadSession(id) {
+  if (!id) { rfSel = null; rfData = null; rfStopPoll(); renderRf(); redraw(); return; }
+  rfSel = id;
+  const d = await rfGet(`rf/${encodeURIComponent(id)}.json`);
+  rfData = d || null;
+  renderRf(); redraw();
+  // si sigue grabando, refrescar solo
+  rfStopPoll();
+  if (rfData && rfData.meta && !rfData.meta.end) rfTimer = setInterval(() => { if (activeTab === "rf") rfLoadSession(rfSel); }, 20000);
+}
+function rfStopPoll() { if (rfTimer) { clearInterval(rfTimer); rfTimer = null; } }
+
+// gráfico de la línea de tiempo en SVG (sin librerías): nodos y enlaces vivos
+// muestra a muestra. Es donde se VE el corte del MQTT.
+function rfChart(tl) {
+  const pts = (Array.isArray(tl) ? tl : []).filter((p) => p && typeof p.t === "number");
+  if (pts.length < 2) return `<p class="note">Aún no hay suficientes muestras para el gráfico.</p>`;
+  const W = 268, H = 90, PAD = 4;
+  const t0 = pts[0].t, t1 = pts[pts.length - 1].t, dt = Math.max(1, t1 - t0);
+  const maxV = Math.max(1, ...pts.map((p) => Math.max(p.nodes || 0, p.links || 0)));
+  const x = (p) => PAD + ((p.t - t0) / dt) * (W - 2 * PAD);
+  const y = (v) => H - PAD - (v / maxV) * (H - 2 * PAD);
+  const path = (k) => pts.map((p, i) => `${i ? "L" : "M"}${x(p).toFixed(1)},${y(p[k] || 0).toFixed(1)}`).join(" ");
+  const hhmm = (t) => { const d = new Date(t); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:6px">
+    <path d="${path("links")}" fill="none" stroke="#ff7a1a" stroke-width="1.8"/>
+    <path d="${path("nodes")}" fill="none" stroke="#3ad07a" stroke-width="1.8"/>
+    <path d="${path("snr")}" fill="none" stroke="#3b6ed6" stroke-width="1.2" stroke-dasharray="3,3"/>
+  </svg>
+  <div class="snr-lbl"><span>${hhmm(t0)}</span><span>máx ${maxV}</span><span>${hhmm(t1)}</span></div>
+  <div class="note" style="margin-top:4px">
+    <span style="color:#ff7a1a">━</span> enlaces vivos ·
+    <span style="color:#3ad07a">━</span> nodos vivos ·
+    <span style="color:#3b6ed6">┅</span> enlaces con SNR
+  </div>`;
+}
+
+function renderRf() {
+  const host = $("rf-card");
+  if (!host) return;
+  if (!rfSel || !rfData) {
+    host.innerHTML = `<div class="sec"><p class="note">Una captura graba <b>qué nodos y enlaces siguen vivos</b> minuto a minuto.<br><br>Su uso natural es un <b>apagón de MQTT</b>: cuando se cae el puente por internet, lo único que sigue propagando es la <b>radio</b>, así que todo lo que quede en pie es alcance RF real.<br><br>Se graba desde el VPS con:<br><code>node rfcapture.js --min 90 --label "apagon"</code></p></div>`;
+    return;
+  }
+  const m = rfData.meta || {};
+  const links = Object.values(rfData.links || {});
+  const nodes = rfData.nodes || {};
+  const dur = ((m.end || m.updated || Date.now()) - m.start) / 60000;
+  const conSnr = links.filter((l) => l.snr != null);
+  const nm = (id) => esc((nodes[safeIdKey(id)] || {}).name || id);
+
+  let h = `<div class="sec"><h2 style="margin-bottom:6px">${esc(m.label || rfSel)}</h2>`;
+  h += `<div style="margin-bottom:8px">${m.end ? `<span class="badge" style="background:rgba(122,131,145,.2);color:#8b93a1">cerrada</span>` : `<span class="badge ok">grabando…</span>`} <span class="badge" style="background:rgba(255,122,26,.15);color:var(--accent)">${Math.round(dur)} min</span></div>`;
+  h += `<div class="stat-grid">
+    <div class="stat"><div class="n">${Object.keys(nodes).length}</div><div class="l">Nodos vistos</div></div>
+    <div class="stat"><div class="n">${links.length}</div><div class="l">Enlaces vistos</div></div>
+    <div class="stat"><div class="n">${conSnr.length}</div><div class="l">Con SNR</div></div>
+    <div class="stat"><div class="n">${m.maxKm != null ? fmtKm(m.maxKm) : "—"}</div><div class="l">Enlace más largo</div></div>
+  </div></div>`;
+
+  h += `<div class="sec"><h2>Evolución</h2>${rfChart(rfData.tl)}</div>`;
+
+  // el dato que responde "hasta dónde llega el RF"
+  const largos = links.filter((l) => typeof l.km === "number").sort((a, b) => b.km - a.km).slice(0, 12);
+  h += `<div class="sec"><h2>Enlaces más largos <span class="hint" title="Toca uno para verlo aislado en el mapa. Son distancias entre las posiciones conocidas de cada extremo.">?</span></h2>`;
+  if (!largos.length) h += `<p class="note">Ningún enlace tiene ambos extremos con posición conocida.</p>`;
+  else h += largos.map((l) => {
+    const hay = lastNodes[l.a] && lastNodes[l.b];
+    return `<div class="nb-row${hay ? "" : " off"}" ${hay ? `onclick="window.focusEdge('${esc(String(l.a))}','${esc(String(l.b))}')"` : ""} title="${hay ? "Ver en el mapa" : "Alguno de los extremos ya no está en los datos actuales"}">
+      <b style="color:var(--accent)">${fmtKm(l.km)}</b> ${nm(l.a)} ↔ ${nm(l.b)}
+      <span class="mono" style="color:var(--muted)">${l.snr != null ? " · " + l.snr + " dB" : " · sin SNR"}</span></div>`;
+  }).join("");
+  h += `</div>`;
+
+  if (m.maxPair) {
+    h += `<div class="sec"><h2>Récord de la sesión</h2><p class="note"><b style="color:var(--accent)">${fmtKm(m.maxKm)}</b> entre <b>${esc(m.maxPair.an || m.maxPair.a)}</b> y <b>${esc(m.maxPair.bn || m.maxPair.b)}</b>${m.maxPair.snr != null ? ` con <b>${m.maxPair.snr} dB</b>` : " (sin SNR reportado)"}.</p></div>`;
+  }
+  h += `<div class="sec"><p class="note">Mediana de distancia: <b>${m.medKm != null ? fmtKm(m.medKm) : "—"}</b> · ${m.polls || 0} muestras · frescura ${m.freshMin || "?"} min.<br><br>Se cuenta como "vivo" lo reportado en los últimos ${m.freshMin || "?"} minutos, así que un corte total del MQTT aparece como caída a cero: significa que <b>dejamos de tener visibilidad</b>, no necesariamente que la malla muriera.</p></div>`;
+  host.innerHTML = h;
+}
+// las claves de /rf/nodes vienen saneadas igual que en el bridge
+const safeIdKey = (s) => String(s).replace(/[.#$\[\]]/g, "_").replace(/\//g, "|").slice(0, 100) || "_";
+
 /* ---- 11. Estado / status -------------------------------------------------- */
 function syncToggle() {
   $("btn-live").classList.toggle("active", useLive);
@@ -1581,6 +1723,7 @@ document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("cli
   activeTab = b.dataset.tab;
   if (activeTab === "lista") renderList();
   if (activeTab === "mio") renderMine();
+  if (activeTab === "rf") { rfLoadList(); renderRf(); } else rfStopPoll();
 }));
 document.querySelectorAll(".ntable th[data-sort]").forEach((th) => th.addEventListener("click", () => {
   const k = th.dataset.sort;
@@ -1592,6 +1735,9 @@ $("list-body").addEventListener("click", (e) => { const tr = e.target.closest("t
 // modo, controles
 $("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b || b.disabled) return; useLive = b.dataset.mode === "live"; saveState(); syncToggle(); redraw(); });
 $("proto-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; switchProto(b.dataset.proto); });
+// Capturas RF
+$("rf-sel").addEventListener("change", (e) => rfLoadSession(e.target.value));
+$("rf-map").addEventListener("change", (e) => { rfShowMap = e.target.checked; redraw(); });
 // Mi nodo: elegir/olvidar
 $("mine-q").addEventListener("input", (e) => mineSuggest(e.target.value));
 $("mine-box").addEventListener("click", (e) => {
