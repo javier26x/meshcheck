@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-27T12:36:55.383Z",
+  "generated": "2026-07-28T11:27:51.877Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 291,
+  "count": 295,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -82,6 +82,22 @@
         "desc": "Heltec Mesh Node T114"
       }
     },
+    "0JvN2cQphjBnR6zoDLVL": {
+      "id": "0JvN2cQphjBnR6zoDLVL",
+      "name": "Lemon - Nodo movil",
+      "lat": -33.4290716,
+      "lon": -70.6035737,
+      "placeholder": false,
+      "alias": "LM0N",
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "LEMON",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo xiao & wio"
+      }
+    },
     "0MsoBy5Wi7IvcMfftqGK": {
       "id": "0MsoBy5Wi7IvcMfftqGK",
       "name": "Juancho módulo 1",
@@ -158,6 +174,21 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Wisblock RAK4631, con la finalidad de mantener una malla permanente y alternativa en caso de emergencias. Por el momento en modo Prueba."
+      }
+    },
+    "1Re2acnPaVlvcexiOYD4": {
+      "id": "1Re2acnPaVlvcexiOYD4",
+      "name": "Mi modo GRIE",
+      "lat": -33.4955061,
+      "lon": -70.594593,
+      "placeholder": false,
+      "alias": "Grie",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Ricardo Aviles",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
       }
     },
     "1WSE4nIMnHMHjinU4MXN": {
@@ -766,6 +797,21 @@
         "desc": "cardputer corriendo meshclient"
       }
     },
+    "BbFrkjbFhiodcXlrUjeJ": {
+      "id": "BbFrkjbFhiodcXlrUjeJ",
+      "name": "Nodo Ce6phg 1",
+      "lat": -39.27934971801397,
+      "lon": -72.23750726434464,
+      "placeholder": false,
+      "alias": "6phg",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Walter Manríquez Gebert",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential"
+      }
+    },
     "Cu7DFdsXS3zuHC8gPy6M": {
       "id": "Cu7DFdsXS3zuHC8gPy6M",
       "name": "HXC_TTY",
@@ -1033,6 +1079,21 @@
         "locType": "residential"
       }
     },
+    "FZMsNvWKfUzI2uejkyav": {
+      "id": "FZMsNvWKfUzI2uejkyav",
+      "name": "Mesh Principal 90d8",
+      "lat": -34.17047,
+      "lon": -70.76577,
+      "placeholder": false,
+      "alias": "90d8",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Hidalgo",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
     "FnBBrARPvosR73xVtXfw": {
       "id": "FnBBrARPvosR73xVtXfw",
       "name": "CE1HLS",
@@ -1045,21 +1106,6 @@
         "user": "Hugo Luis Cortes Cerda",
         "power": "medium",
         "antenna": "stock",
-        "locType": "residential"
-      }
-    },
-    "G8HhXRi7v6OoIdxm3MXg": {
-      "id": "G8HhXRi7v6OoIdxm3MXg",
-      "name": "Primer nodo ce6phg",
-      "lat": 39.28,
-      "lon": 72.23,
-      "placeholder": false,
-      "alias": "phg1",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Walter Manríquez Gebert",
-        "power": "high",
-        "antenna": "external",
         "locType": "residential"
       }
     },
@@ -3195,6 +3241,22 @@
         "desc": "Nodo Parque Nicolás Tirado\nPropiedad CE1RLP"
       }
     },
+    "kT5MgYsMyvzi4ZeMHZ8W": {
+      "id": "kT5MgYsMyvzi4ZeMHZ8W",
+      "name": "Cd4ABI  BASE",
+      "lat": -35.4246,
+      "lon": -71.65586,
+      "placeholder": false,
+      "alias": "Base",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alejandro Iribarren Gonzalez",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "7 oriente B 1380  talca"
+      }
+    },
     "kW7LosMBHEMj6g3ZM3er": {
       "id": "kW7LosMBHEMj6g3ZM3er",
       "name": "CD6RRH-LA",
@@ -3601,8 +3663,8 @@
     "ph5OPGftntSeoJVGQc5g": {
       "id": "ph5OPGftntSeoJVGQc5g",
       "name": "Heltec V3 FSM",
-      "lat": -33.026895459951625,
-      "lon": -71.5439682690155,
+      "lat": -33.0409546,
+      "lon": -71.6512306164,
       "placeholder": false,
       "alias": "FSM",
       "role": "CLIENT",
