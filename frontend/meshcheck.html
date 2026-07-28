@@ -172,6 +172,7 @@
   .nlabel { background: rgba(13,15,18,.7); border: 0; color: #cfd6e0; font-size: 10px; font-weight: 600;
     padding: 1px 4px; box-shadow: none; }
   .nlabel::before { display: none; }
+  .nlabel.sel { background: var(--accent); color: #1a1005; font-weight: 700; }
 
   /* clusters */
   .cluster { background: transparent; }
@@ -766,7 +767,7 @@ function nodePopupHtml(id) {
 
   // telemetría
   const tele = [];
-  if (n.batt != null) { const col = n.batt > 50 ? "#3ad07a" : n.batt > 20 ? "#ffd23f" : "#ff4d4d"; tele.push(kv("Batería", n.batt + "%") + `<div class="batt"><i style="width:${Math.max(2, Math.min(100, n.batt))}%;background:${col}"></i></div>`); }
+  if (n.batt != null) tele.push(battHtml(n.batt, kv));
   if (n.volt != null) tele.push(kv("Voltaje", n.volt + " V"));
   if (n.temp != null) tele.push(kv("Temperatura", n.temp + " °C"));
   if (n.chUtil != null) tele.push(kv("Uso de canal", n.chUtil + "%"));
@@ -839,6 +840,15 @@ window.setPointFromNode = (id, which) => {
  * En modo Modelo (sin enlaces medidos) se comporta como distancia pura.        */
 const P_NOMINAL = 1e6, P_MODEL = 1e3;
 const isNominalNode = (n) => !n.t && !n.estimated && n.role !== "repeater";
+// Meshtastic usa battery_level > 100 (típicamente 101) para decir "alimentado
+// por fuente externa, sin batería". Mostrar "101%" era confuso y falso.
+function battHtml(batt, kvFn) {
+  if (batt == null) return "";
+  if (batt > 100) return kvFn("Alimentación", "🔌 red eléctrica (sin batería)");
+  const col = batt > 50 ? "#3ad07a" : batt > 20 ? "#ffd23f" : "#ff4d4d";
+  return kvFn("Batería", batt + "%") + `<div class="batt"><i style="width:${Math.max(2, Math.min(100, batt))}%;background:${col}"></i></div>`;
+}
+const battTxt = (b) => (b == null ? "—" : b > 100 ? "🔌" : b + "%");
 function computeRoute(nodes, adj, etype) {
   if (!pointA || !pointB) return null;
   const entries = [], exits = new Map();
@@ -1097,9 +1107,19 @@ function redraw() {
         fillOpacity: (alive ? 0.95 : 0.55) * dim, opacity: dim });
     }
     m._nodeId = id; m._live = !!n.t && !n.estimated;
-    m.bindPopup(() => nodePopupHtml(id), { autoPan: true, maxWidth: 300, minWidth: 258, maxHeight: 360 });
+    // alto adaptado a la ventana: con 360 fijo la ficha salía cortada con scroll
+    // interno incluso en pantallas altas. autoPanPadding evita que quede pegada
+    // al borde (antes se metía bajo la barra de búsqueda).
+    m.bindPopup(() => nodePopupHtml(id), { autoPan: true, autoPanPadding: [24, 90], keepInView: true,
+      maxWidth: Math.min(340, window.innerWidth - 40), minWidth: 258,
+      maxHeight: Math.max(300, window.innerHeight - 200) });
     m.on("click", () => { selectedId = id; selectedEdge = null; openPopupId = id; redraw(); });
-    if (showLabels && (n.name || n.alias)) m.bindTooltip(esc(String(n.alias || n.name)), { permanent: true, direction: "right", className: "nlabel", offset: [6, 0] });
+    // Etiquetas: a poco zoom se amontonan y tapan el mapa. Se muestran todas a
+    // partir de z13; por debajo, solo la infraestructura (routers) y el nodo
+    // seleccionado, que es lo que de verdad orienta.
+    const zNow = map.getZoom();
+    const labelIt = showLabels && (n.name || n.alias) && (zNow >= 13 || isRouter(n) || sel || (edgeEnds && onEdge));
+    if (labelIt) m.bindTooltip(esc(String(n.alias || n.name)), { permanent: true, direction: "right", className: "nlabel" + (sel || (edgeEnds && onEdge) ? " sel" : ""), offset: [6, 0] });
     markers.push(m); markerById[id] = m;
   }
   if (nodeLayer.addLayers) nodeLayer.addLayers(markers); else markers.forEach((m) => m.addTo(nodeLayer));
@@ -1230,7 +1250,7 @@ function renderList() {
   $("list-count").textContent = rows.length;
   body.innerHTML = rows.slice(0, 600).map((r) => {
     const c = r.live === 1 ? "#b57aff" : r.live === 2 ? "#3ad07a" : "#7a8391";
-    return `<tr data-id="${esc(r.id)}"><td><span class="d" style="background:${c}"></span>${esc(r.name)}</td><td>${esc(r.role)}</td><td>${r.batt != null ? r.batt + "%" : "—"}</td><td>${r.t ? fmtAge(r.t) : "—"}</td><td>${r.deg || "—"}</td><td>${r.snr != null ? r.snr + " dB" : "—"}</td></tr>`;
+    return `<tr data-id="${esc(r.id)}"><td><span class="d" style="background:${c}"></span>${esc(r.name)}</td><td>${esc(r.role)}</td><td>${battTxt(r.batt)}</td><td>${r.t ? fmtAge(r.t) : "—"}</td><td>${r.deg || "—"}</td><td>${r.snr != null ? r.snr + " dB" : "—"}</td></tr>`;
   }).join("") || `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px">Sin nodos (revisa los filtros)</td></tr>`;
 }
 
@@ -1281,7 +1301,7 @@ function renderMine() {
   const alerts = [];
   if (ageMs == null) alerts.push(["no está reportando", "Nunca lo hemos oído publicar."]);
   else if (ageMs > 60 * 60 * 1000) alerts.push([`sin señal hace ${fmtAge(s)}`, "Revisa alimentación, antena o conexión MQTT."]);
-  if (n.batt != null && n.batt <= 20 && n.batt > 0) alerts.push([`batería ${n.batt}%`, "Queda poca carga."]);
+  if (n.batt != null && n.batt <= 20 && n.batt > 0) alerts.push([`batería ${n.batt}%`, "Queda poca carga."]);   // >100 = alimentado, no es alerta
   if (n.chUtil != null && n.chUtil >= 40) alerts.push([`canal al ${n.chUtil}%`, "El aire está congestionado; considera bajar intervalos."]);
   // vecinos medidos
   const hears = linkNeighbors(liveLinks[myNodeId]);
@@ -1313,7 +1333,7 @@ function renderMine() {
     kvRow("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kvRow("Hardware", esc(hwLabel(n.hw))) : "") + `</div>`;
 
   const tele = [];
-  if (n.batt != null) { const col = n.batt > 50 ? "#3ad07a" : n.batt > 20 ? "#ffd23f" : "#ff4d4d"; tele.push(kvRow("Batería", n.batt + "%", `<div class="batt"><i style="width:${Math.max(2, Math.min(100, n.batt))}%;background:${col}"></i></div>`)); }
+  if (n.batt != null) tele.push(battHtml(n.batt, (k, v) => kvRow(k, v)));
   if (n.volt != null) tele.push(kvRow("Voltaje", n.volt + " V"));
   if (n.temp != null) tele.push(kvRow("Temperatura", n.temp + " °C"));
   if (n.chUtil != null) tele.push(kvRow("Uso de canal", n.chUtil + "%"));
@@ -1640,7 +1660,11 @@ $("mb-base").addEventListener("click", () => { setBasemap(basemapIdx + 1); saveS
 $("mb-share").addEventListener("click", async () => { const u = shareUrl(); try { await navigator.clipboard.writeText(u); banner("Enlace copiado al portapapeles"); setTimeout(() => banner(""), 1800); } catch (e) { prompt("Copia el enlace:", u); } });
 $("mb-full").addEventListener("click", () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); });
 // leyenda colapsable
-$("legend-h").addEventListener("click", () => { $("legend").classList.toggle("open"); $("legend-cx").textContent = $("legend").classList.contains("open") ? "▾" : "▸"; });
+$("legend-h").addEventListener("click", () => {
+  const open = $("legend").classList.toggle("open");
+  $("legend-cx").textContent = open ? "▾" : "▸";
+  try { localStorage.setItem("meshcheck.legend", open ? "1" : "0"); } catch (e) {}   // recordar la decisión
+});
 // móvil: brand como handle del bottom-sheet
 $("brand").addEventListener("click", () => { if (window.matchMedia("(max-width:820px)").matches) $("panel").classList.toggle("open"); });
 // onboarding
@@ -1660,6 +1684,13 @@ document.addEventListener("keydown", (e) => {
 map.on("popupopen", (e) => { const s = e.popup._source; if (s && s._nodeId) openPopupId = s._nodeId; });
 map.on("popupclose", () => { if (!redrawing) openPopupId = null; });   // no borrar durante el redraw
 map.on("moveend", saveState);
+// las etiquetas cambian de criterio al cruzar z13: repintar solo entonces
+let lastZoomBand = null;
+map.on("zoomend", () => {
+  const band = map.getZoom() >= 13;
+  if (lastZoomBand === null) { lastZoomBand = band; return; }
+  if (band !== lastZoomBand) { lastZoomBand = band; if (showLabels) redraw(); }
+});
 
 /* ---- 17. Carga inicial ---------------------------------------------------- */
 async function loadEmbedded() {
@@ -1771,6 +1802,14 @@ function initFirebase() {
   syncControls();
   syncProto();
   loadMine();
+  // leyenda: respeta lo que el usuario eligió la última vez; en pantallas bajas
+  // arranca cerrada para no comerse el mapa
+  try {
+    const pref = localStorage.getItem("meshcheck.legend");
+    const open = pref === null ? window.innerHeight >= 700 : pref === "1";
+    $("legend").classList.toggle("open", open);
+    $("legend-cx").textContent = open ? "▾" : "▸";
+  } catch (e) {}
   await loadEmbedded();
   applyDeepLinks();
   redraw();
