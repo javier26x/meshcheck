@@ -3,6 +3,7 @@
     "nodes": { ".read": true, ".write": false },
     "links": { ".read": true, ".write": false },
     "meta":  { ".read": true, ".write": false },
+    "rf":    { ".read": true, ".write": false },
     "mc": {
       "nodes":  { ".read": true, ".write": false },
       "links":  { ".read": true, ".write": false },
