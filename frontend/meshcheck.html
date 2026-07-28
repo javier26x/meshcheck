@@ -268,6 +268,7 @@
 
     <div class="tabs">
       <button data-tab="ruta" class="active">Ruta</button>
+      <button data-tab="mio">Mi nodo</button>
       <button data-tab="lista">Lista</button>
       <button data-tab="capas">Capas</button>
       <button data-tab="red">Red</button>
@@ -305,6 +306,19 @@
       </div>
 
       <!-- ===== LISTA ===== -->
+      <!-- ===== MI NODO ===== -->
+      <div class="pane" data-pane="mio">
+        <div class="sec">
+          <h2>Mi nodo <span class="hint" title="Elige tu nodo una vez y queda guardado en este navegador. Los datos vienen del MQTT de MeshChile: si tu equipo no publica, no aparecerá.">?</span></h2>
+          <div class="addr-row">
+            <input type="text" id="mine-q" placeholder="Busca tu nodo por nombre o ID…" autocomplete="off" />
+            <button class="mini" id="mine-clear" title="Olvidar mi nodo">✕</button>
+          </div>
+          <div class="ac-box" id="mine-box"></div>
+        </div>
+        <div id="mine-card"></div>
+      </div>
+
       <div class="pane" data-pane="lista">
         <div class="sec" style="padding-bottom:8px">
           <h2>Nodos <span id="list-count" class="mono" style="color:var(--muted)">0</span> <span class="hint" title="Toca un encabezado para ordenar. Toca una fila para centrar el nodo en el mapa. Respeta los filtros/chips activos.">?</span></h2>
@@ -1123,6 +1137,7 @@ function redraw() {
     try { markerById[openPopupId].openPopup(); } catch (e) {}
   }
   if (activeTab === "lista") renderList();
+  if (activeTab === "mio") renderMine();
   redrawing = false;
 }
 
@@ -1213,6 +1228,103 @@ function renderList() {
   }).join("") || `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px">Sin nodos (revisa los filtros)</td></tr>`;
 }
 
+/* ---- 10c. Mi nodo --------------------------------------------------------- *
+ * Vista dedicada al equipo propio. NO consulta al dispositivo: muestra lo que
+ * el nodo publica al MQTT de MeshChile y el bridge deja en la RTDB. Si el nodo
+ * deja de publicar, el panel lo dice en vez de mostrar datos viejos como si
+ * fueran actuales. La elección se guarda por protocolo (mt/mc). */
+const MINE_LS = "meshcheck.mine";
+let myNodeId = null;
+function loadMine() { try { const j = JSON.parse(localStorage.getItem(MINE_LS) || "{}"); myNodeId = j[proto] || null; } catch (e) { myNodeId = null; } }
+function saveMine() {
+  try { const j = JSON.parse(localStorage.getItem(MINE_LS) || "{}"); if (myNodeId) j[proto] = myNodeId; else delete j[proto]; localStorage.setItem(MINE_LS, JSON.stringify(j)); } catch (e) {}
+}
+function mineSuggest(q) {
+  const box = $("mine-box");
+  q = String(q || "").trim().toLowerCase();
+  if (q.length < 2) { box.classList.remove("open"); box.innerHTML = ""; return; }
+  const hits = [];
+  for (const id in lastNodes) {
+    const n = lastNodes[id];
+    const hx = hexId(id) || "";
+    if (String(n.name || "").toLowerCase().includes(q) || String(n.alias || "").toLowerCase().includes(q) || id.toLowerCase().includes(q) || hx.includes(q)) hits.push({ id, n });
+    if (hits.length >= 8) break;
+  }
+  if (!hits.length) { box.classList.remove("open"); box.innerHTML = ""; return; }
+  box.innerHTML = hits.map(({ id, n }) => {
+    const c = n.estimated ? "#b57aff" : seenAt(n) ? "#3ad07a" : "#7a8391";
+    return `<div class="r" data-id="${esc(id)}"><span class="d" style="background:${c}"></span>${esc(n.name || id)}<span class="sn">${esc(hexId(id) || id)}</span></div>`;
+  }).join("");
+  box.classList.add("open");
+}
+const kvRow = (k, v, extra) => `<div class="pop-kv"><span class="k">${k}</span><span class="v">${v}</span></div>${extra || ""}`;
+function renderMine() {
+  const host = $("mine-card");
+  if (!host) return;
+  if (!myNodeId) {
+    host.innerHTML = `<div class="sec"><p class="note">Elige tu nodo arriba para ver su estado.<br><br>Los datos salen del <b>MQTT de MeshChile</b>: tu equipo tiene que tener <code>mqtt.enabled</code> y el <code>uplink</code> del canal activados. Si acabas de configurarlo, puede tardar unos minutos en aparecer.</p></div>`;
+    return;
+  }
+  const n = lastNodes[myNodeId];
+  if (!n) {
+    host.innerHTML = `<div class="sec"><div class="badge no">sin datos</div><p class="note" style="margin-top:8px">Tu nodo <code>${esc(myNodeId)}</code> no está en los datos actuales.<br><br>Puede ser que no esté publicando al MQTT, que lleve más tiempo callado que el <b>TTL</b> que elegiste en Capas, o que los filtros lo escondan.</p></div>`;
+    return;
+  }
+  const now = Date.now(), s = seenAt(n);
+  const ageMs = s ? now - s : null;
+  const alerts = [];
+  if (ageMs == null) alerts.push(["no está reportando", "Nunca lo hemos oído publicar."]);
+  else if (ageMs > 60 * 60 * 1000) alerts.push([`sin señal hace ${fmtAge(s)}`, "Revisa alimentación, antena o conexión MQTT."]);
+  if (n.batt != null && n.batt <= 20 && n.batt > 0) alerts.push([`batería ${n.batt}%`, "Queda poca carga."]);
+  if (n.chUtil != null && n.chUtil >= 40) alerts.push([`canal al ${n.chUtil}%`, "El aire está congestionado; considera bajar intervalos."]);
+  // vecinos medidos
+  const hears = linkNeighbors(liveLinks[myNodeId]);
+  const heardBy = [];
+  for (const lid in liveLinks) {
+    const ll = liveLinks[lid]; if (!ll) continue;
+    const from = String(ll.from != null ? ll.from : lid);
+    if (from === myNodeId) continue;
+    for (const nb of linkNeighbors(ll)) if (nb.id === myNodeId) heardBy.push({ id: from, snr: nb.snr, t: nb.t, src: nb.src });
+  }
+  const snrs = [...hears, ...heardBy].map((x) => x.snr).filter((v) => v != null);
+  const deg = new Set([...hears.map((x) => x.id), ...heardBy.map((x) => x.id)]).size;
+  const nm = (x) => esc((lastNodes[x] && lastNodes[x].name) || x);
+  const line = (x) => `<div style="margin:2px 0">${nm(x.id)}<span style="color:var(--muted);font-family:'JetBrains Mono',monospace"> (${x.snr != null ? x.snr + " dB" : "sin SNR"}${x.t ? " · " + fmtAge(x.t) : ""})</span></div>`;
+
+  let h = "";
+  h += `<div class="sec"><h2 style="margin-bottom:6px">${esc(n.name || myNodeId)}</h2>`;
+  h += `<div style="margin-bottom:8px">${ageMs != null && ageMs < 2 * 60 * 60 * 1000 ? `<span class="badge ok">reportando · ${fmtAge(s)}</span>` : `<span class="badge no">sin reportar</span>`}` +
+    (isRouter(n) ? ` <span class="badge" style="background:rgba(255,210,63,.18);color:var(--router)">router</span>` : "") + `</div>`;
+  if (alerts.length) h += alerts.map(([t, d]) => `<div class="note" style="border-left:3px solid var(--router);padding-left:8px;margin:6px 0"><b>⚠️ ${esc(t)}</b><br>${esc(d)}</div>`).join("");
+  h += `</div>`;
+
+  h += `<div class="sec"><h2>Identidad</h2>` +
+    kvRow("ID", esc(myNodeId)) + (hexId(myNodeId) ? kvRow("Node ID", hexId(myNodeId)) : "") +
+    kvRow("Rol", esc(roleLabel(n.role))) + (n.hw != null ? kvRow("Hardware", esc(hwLabel(n.hw))) : "") + `</div>`;
+
+  const tele = [];
+  if (n.batt != null) { const col = n.batt > 50 ? "#3ad07a" : n.batt > 20 ? "#ffd23f" : "#ff4d4d"; tele.push(kvRow("Batería", n.batt + "%", `<div class="batt"><i style="width:${Math.max(2, Math.min(100, n.batt))}%;background:${col}"></i></div>`)); }
+  if (n.volt != null) tele.push(kvRow("Voltaje", n.volt + " V"));
+  if (n.temp != null) tele.push(kvRow("Temperatura", n.temp + " °C"));
+  if (n.chUtil != null) tele.push(kvRow("Uso de canal", n.chUtil + "%"));
+  h += `<div class="sec"><h2>Telemetría</h2>${tele.length ? tele.join("") : `<p class="note">Sin telemetría. Actívala con <code>telemetry.device_update_interval</code>.</p>`}</div>`;
+
+  h += `<div class="sec"><h2>Ubicación</h2>`;
+  if (typeof n.lat === "number") {
+    h += kvRow("Coord", `${n.lat.toFixed(5)}, ${n.lon.toFixed(5)}`) + (n.alt != null ? kvRow("Altitud", n.alt + " m") : "") +
+      `<div class="pop-act" style="margin-top:8px"><a onclick="window.focusNode('${esc(myNodeId)}');return false">Ver en el mapa</a><a href="https://www.google.com/maps?q=${n.lat},${n.lon}" target="_blank" rel="noopener">Google Maps ↗</a></div>`;
+  } else h += `<p class="note">Sin posición. Si no tiene GPS, fíjala con <code>--setlat/--setlon</code>.</p>`;
+  h += `</div>`;
+
+  h += `<div class="sec"><h2>Cobertura medida</h2>`;
+  h += kvRow("Vecinos únicos", deg) + (snrs.length ? kvRow("SNR mejor / prom", `${Math.max(...snrs)} / ${(snrs.reduce((a, b) => a + b, 0) / snrs.length).toFixed(1)} dB`) : "");
+  if (hears.length) h += `<div class="nb"><b>📡 Ve a ${hears.length}:</b>${hears.sort((a, b) => (b.snr ?? -99) - (a.snr ?? -99)).slice(0, 10).map(line).join("")}</div>`;
+  if (heardBy.length) h += `<div class="nb"><b>📡 Lo escuchan ${heardBy.length}:</b>${heardBy.sort((a, b) => (b.snr ?? -99) - (a.snr ?? -99)).slice(0, 10).map(line).join("")}</div>`;
+  if (!deg) h += `<p class="note">Nadie lo ha oído todavía por radio (o su NeighborInfo está apagado).</p>`;
+  h += `</div>`;
+  host.innerHTML = h;
+}
+
 /* ---- 11. Estado / status -------------------------------------------------- */
 function syncToggle() {
   $("btn-live").classList.toggle("active", useLive);
@@ -1252,9 +1364,10 @@ function runSearch(q) {
   }).join("") || `<div class="r" style="color:var(--muted)">sin resultados</div>`;
   box.classList.add("open");
 }
+window.focusNode = (id) => focusNode(id);
 function focusNode(id) {
   const n = lastNodes[id]; if (!n) return;
-  selectedId = id;
+  selectedId = id; selectedEdge = null;
   $("results").classList.remove("open"); $("search").value = n.name || id;
   const go = () => { const m = markerById[id]; if (m) m.openPopup(); };
   map.setView([n.lat, n.lon], Math.max(map.getZoom(), 14));
@@ -1423,6 +1536,7 @@ document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("cli
   document.querySelectorAll(".pane").forEach((p) => p.classList.toggle("active", p.dataset.pane === b.dataset.tab));
   activeTab = b.dataset.tab;
   if (activeTab === "lista") renderList();
+  if (activeTab === "mio") renderMine();
 }));
 document.querySelectorAll(".ntable th[data-sort]").forEach((th) => th.addEventListener("click", () => {
   const k = th.dataset.sort;
@@ -1434,6 +1548,20 @@ $("list-body").addEventListener("click", (e) => { const tr = e.target.closest("t
 // modo, controles
 $("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b || b.disabled) return; useLive = b.dataset.mode === "live"; saveState(); syncToggle(); redraw(); });
 $("proto-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; switchProto(b.dataset.proto); });
+// Mi nodo: elegir/olvidar
+$("mine-q").addEventListener("input", (e) => mineSuggest(e.target.value));
+$("mine-box").addEventListener("click", (e) => {
+  const r = e.target.closest(".r[data-id]"); if (!r) return;
+  myNodeId = r.dataset.id; saveMine();
+  $("mine-box").classList.remove("open"); $("mine-box").innerHTML = "";
+  $("mine-q").value = (lastNodes[myNodeId] && lastNodes[myNodeId].name) || myNodeId;
+  renderMine();
+});
+$("mine-clear").addEventListener("click", () => {
+  myNodeId = null; saveMine(); $("mine-q").value = "";
+  $("mine-box").classList.remove("open"); $("mine-box").innerHTML = "";
+  renderMine();
+});
 $("show-routes").addEventListener("change", (e) => { showRoutes = e.target.checked; saveState(); redraw(); });
 $("show-heat").addEventListener("change", (e) => { showHeat = e.target.checked; saveState(); redraw(); });
 $("range").addEventListener("input", (e) => { rangeKm = +e.target.value; $("range-val").textContent = rangeKm + " km"; redraw(); });
@@ -1585,7 +1713,10 @@ function switchProto(p) {
   } catch (e) {}
   detachProto();
   subscribeProto();
+  loadMine();                      // "mi nodo" se guarda por malla
+  try { $("mine-q").value = ""; $("mine-box").innerHTML = ""; $("mine-box").classList.remove("open"); } catch (e) {}
   saveState(); syncProto(); updateDiag(); redraw();
+  if (activeTab === "mio") renderMine();
 }
 function syncProto() {
   document.querySelectorAll("#proto-toggle button").forEach((b) => b.classList.toggle("active", b.dataset.proto === proto));
@@ -1615,6 +1746,7 @@ function initFirebase() {
   if (saved && saved.view) map.setView(saved.view.c, saved.view.z);
   syncControls();
   syncProto();
+  loadMine();
   await loadEmbedded();
   applyDeepLinks();
   redraw();
