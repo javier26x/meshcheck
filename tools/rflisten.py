@@ -81,25 +81,58 @@ def touch_node(nid, name=None, lat=None, lon=None, role=None):
 
 
 def snapshot_nodedb(iface):
-    """El nodo mantiene su propia base de vecinos: nombres y posiciones salen de
-    ahí, no de internet."""
+    """El nodo mantiene su propia base de vecinos. De ahí salen nombres,
+    posiciones y —lo más importante— `hopsAway`: cuántos saltos lo separan de
+    cada nodo, contado por el propio firmware. hopsAway == 0 es un VECINO
+    DIRECTO, y eso no hay que inferirlo de los paquetes: la radio ya lo sabe.
+    Es más fiable que hopStart-hopLimit, que muchos paquetes ni siquiera traen.
+    Nada de esto pasa por internet."""
+    global directos
     try:
         db = getattr(iface, "nodes", None) or {}
     except Exception:
         return
+    dir_now = 0
     for _, info in db.items():
         try:
             num = info.get("num")
             if num is None:
                 continue
+            nid = str(num)
             user = info.get("user") or {}
             pos = info.get("position") or {}
             lat, lon = pos.get("latitude"), pos.get("longitude")
             if lat in (0, None) or lon in (0, None):
                 lat = lon = None
-            touch_node(str(num), user.get("longName") or user.get("shortName"), lat, lon, user.get("role"))
+            n = touch_node(nid, user.get("longName") or user.get("shortName"), lat, lon, user.get("role"))
+            ha = info.get("hopsAway")
+            if ha is not None:
+                n["hopsAway"] = ha
+            if info.get("snr") is not None:
+                n["snr"] = info.get("snr")
+            if info.get("lastHeard"):
+                n["lastHeard"] = info.get("lastHeard")
+            # vecino directo según el firmware → enlace RF medido
+            if ha == 0 and nid != my_id:
+                dir_now += 1
+                add_link(my_id, nid, info.get("snr"), "rf")
         except Exception:
             continue
+    if dir_now:
+        directos = max(directos, dir_now)
+    return dir_now
+
+
+def resumen_vecinos():
+    """Reparto de la base de vecinos por distancia en saltos: la foto de hasta
+    dónde llega esta radio."""
+    por_salto = {}
+    for n in nodes.values():
+        ha = n.get("hopsAway")
+        if ha is None:
+            continue
+        por_salto[ha] = por_salto.get(ha, 0) + 1
+    return por_salto
 
 
 def add_link(a, b, snr, src):
@@ -195,7 +228,7 @@ def on_receive(packet, interface=None):
             elif hops:
                 indirectos += 1
 
-        marca = " ← DIRECTO" if hops == 0 else (f"  ({hops} saltos)" if hops else "")
+        marca = " ← DIRECTO" if hops == 0 else (f"  ({hops} saltos)" if hops else "  (saltos: no informado)")
         print(f"{time.strftime('%H:%M:%S')}  {packet.get('fromId') or src_id}  SNR {snr}  RSSI {rssi}  {dec.get('portnum')}{marca}", flush=True)
     except Exception as e:
         print("  (paquete ignorado:", e, ")", file=sys.stderr, flush=True)
@@ -287,11 +320,16 @@ def uploader():
         with LOCK:
             timeline.append({"t": int(time.time() * 1000), "nodes": len(nodes),
                              "links": len(links), "snr": sum(1 for l in links.values() if l.get("snr") is not None)})
-        snapshot_nodedb(IFACE)
+        with LOCK:
+            snapshot_nodedb(IFACE)
+            rep = resumen_vecinos()
+            reparto = " ".join(f"{k}s:{v}" for k, v in sorted(rep.items())) or "sin datos"
+            ok_txt = ""
         ok = push()
         with LOCK:
-            print(f"  · {seen} paquetes ({directos} directos, {indirectos} rebotados) · "
-                  f"{len(links)} enlaces medidos{'' if ok is None else ' · subido' if ok else ' · SIN SUBIR'}", flush=True)
+            ok_txt = "" if ok is None else (" · subido" if ok else " · SIN SUBIR")
+            print(f"  · {seen} paquetes · vecinos por saltos [{reparto}] · "
+                  f"{len(links)} enlaces medidos{ok_txt}", flush=True)
 
 
 # -------------------------------------------------------------------- main ---
@@ -341,6 +379,12 @@ finally:
         IFACE.close()
     except Exception:
         pass
-    print(f"LISTO · {seen} paquetes · {directos} DIRECTOS · {len(links)} enlaces medidos por radio")
+    rep = resumen_vecinos()
+    print(f"LISTO · {seen} paquetes · {len(nodes)} nodos conocidos · {len(links)} enlaces medidos por radio")
+    if rep:
+        print("       vecinos por distancia:", " ".join(f"{k} salto(s): {v}" for k, v in sorted(rep.items())))
+        d0 = rep.get(0, 0)
+        print(f"       {d0} nodo(s) al alcance DIRECTO de tu antena" if d0 else
+              "       ningún nodo al alcance directo: todo lo que oyes viene repetido")
     if args.rtdb:
         print(f"       míralo en la pestaña RF: sesión {sid}")
