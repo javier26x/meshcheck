@@ -34,6 +34,11 @@ ap.add_argument("--rtdb", help="URL de la Realtime Database (para que aparezca e
 ap.add_argument("--secret", help="database secret, necesario junto con --rtdb")
 ap.add_argument("--label", default="captura por radio", help="nombre de la sesión")
 ap.add_argument("--every", type=int, default=20, help="segundos entre subidas")
+ap.add_argument("--traceroute", action="store_true",
+                help="ADEMÁS de escuchar, sondea la malla con traceroute para mapear caminos multi-salto")
+ap.add_argument("--tr-every", type=int, default=60, help="segundos entre traceroutes (default 60; no bajar sin razón)")
+ap.add_argument("--tr-max", type=int, default=12, help="cuántos destinos sondear como máximo")
+ap.add_argument("--tr-hops", type=int, default=5, help="hop limit de los traceroute")
 args = ap.parse_args()
 
 import meshtastic
@@ -97,10 +102,64 @@ def snapshot_nodedb(iface):
             continue
 
 
+def add_link(a, b, snr, src):
+    """Registra un enlace RF entre dos nodos (clave simétrica, SNR máximo)."""
+    if not a or not b or a == b:
+        return
+    x, y = (a, b) if a < b else (b, a)
+    k = f"{x}|{y}"
+    prev = links.get(k)
+    best = snr if prev is None or prev.get("snr") is None else (
+        snr if snr is not None and snr > prev["snr"] else prev["snr"])
+    links[k] = {"a": x, "b": y, "snr": best, "src": src,
+                "first": prev["first"] if prev else time.time(), "last": time.time()}
+
+
+def on_traceroute(packet, dec):
+    """Un traceroute devuelve el camino COMPLETO con el SNR de cada salto: cada
+    tramo es una medición de radio ajena que de otro modo no veríamos desde
+    aquí. snr_towards[i] es la calidad con que el salto i+1 recibió del i."""
+    tr = dec.get("traceroute") or {}
+    if hasattr(tr, "get"):
+        route = list(tr.get("route") or [])
+        snrs = list(tr.get("snrTowards") or tr.get("snr_towards") or [])
+        route_back = list(tr.get("routeBack") or tr.get("route_back") or [])
+        snrs_back = list(tr.get("snrBack") or tr.get("snr_back") or [])
+    else:  # objeto protobuf
+        route = list(getattr(tr, "route", []) or [])
+        snrs = list(getattr(tr, "snr_towards", []) or [])
+        route_back = list(getattr(tr, "route_back", []) or [])
+        snrs_back = list(getattr(tr, "snr_back", []) or [])
+
+    def chain(seq, sn, a, b):
+        ids = [str(a)] + [str(x) for x in seq] + [str(b)]
+        n = 0
+        for i in range(len(ids) - 1):
+            s = sn[i] / 4.0 if i < len(sn) and sn[i] is not None and sn[i] != -128 else None
+            # el firmware entrega dB*4; -128 = desconocido
+            if s is not None and abs(s) > 40:      # ya venía en dB
+                s = sn[i]
+            add_link(ids[i], ids[i + 1], s, "tr")
+            n += 1
+        return n
+
+    dst = str(packet.get("from"))
+    hechos = chain(route, snrs, my_id, dst)
+    if route_back:
+        hechos += chain(route_back, snrs_back, dst, my_id)
+    print(f"    ↳ traceroute: {hechos} tramos mapeados hacia {dst}", flush=True)
+
+
 def on_receive(packet, interface=None):
     global seen, directos, indirectos
     try:
         dec = packet.get("decoded") or {}
+        if (dec.get("portnum") == "TRACEROUTE_APP" or dec.get("traceroute")):
+            with LOCK:
+                try:
+                    on_traceroute(packet, dec)
+                except Exception as e:
+                    print("  (traceroute ilegible:", e, ")", file=sys.stderr, flush=True)
         hs, hl = packet.get("hopStart"), packet.get("hopLimit")
         hops = (hs - hl) if isinstance(hs, int) and isinstance(hl, int) else None
         src = packet.get("from")
@@ -126,16 +185,13 @@ def on_receive(packet, interface=None):
                 u = dec.get("user") or {}
                 if u.get("longName"):
                     touch_node(src_id, name=u.get("longName"))
-            # SOLO los directos son un enlace medido con mi antena
+            # SOLO los directos prueban un enlace CON MI ANTENA: con saltos, el
+            # emisor del paquete no es quien transmitió lo que oí (fue algún
+            # repetidor que el protocolo no identifica), así que afirmar ese
+            # enlace sería inventarlo.
             if hops == 0 and src_id and my_id and src_id != my_id:
                 directos += 1
-                a, b = (my_id, src_id) if my_id < src_id else (src_id, my_id)
-                k = f"{a}|{b}"
-                prev = links.get(k)
-                best = snr if prev is None or prev.get("snr") is None else (
-                    snr if snr is not None and snr > prev["snr"] else prev["snr"])
-                links[k] = {"a": a, "b": b, "snr": best, "rssi": rssi, "src": "rf",
-                            "first": prev["first"] if prev else time.time(), "last": time.time()}
+                add_link(my_id, src_id, snr, "rf")
             elif hops:
                 indirectos += 1
 
@@ -195,6 +251,36 @@ def push(done=False):
         return False
 
 
+def tracer():
+    """Sondea la malla con traceroute, MUY espaciado. Cada traceroute ocupa
+    tiempo de aire de todos, así que se prioriza infraestructura (routers) y se
+    limita el número de destinos: mapear no debe degradar la malla."""
+    time.sleep(15)                      # deja que se pueble la base de vecinos
+    hechos = set()
+    while True:
+        try:
+            with LOCK:
+                cands = [nid for nid, n in nodes.items()
+                         if nid != my_id and nid not in hechos and n.get("lat") is not None]
+                # primero la infraestructura: es la que define la topología
+                cands.sort(key=lambda nid: (0 if str(nodes[nid].get("role") or "").upper().startswith("ROUTER") else 1,
+                                            nodes[nid].get("name") or nid))
+            if not cands or len(hechos) >= args.tr_max:
+                time.sleep(args.tr_every)
+                continue
+            dst = cands[0]
+            hechos.add(dst)
+            nm = (nodes.get(dst) or {}).get("name") or dst
+            print(f"  → traceroute {len(hechos)}/{args.tr_max} hacia {nm} …", flush=True)
+            try:
+                IFACE.sendTraceRoute(int(dst), args.tr_hops)
+            except Exception as e:
+                print("    (no se pudo enviar:", e, ")", file=sys.stderr, flush=True)
+        except Exception as e:
+            print("  (tracer:", e, ")", file=sys.stderr, flush=True)
+        time.sleep(args.tr_every)
+
+
 def uploader():
     while True:
         time.sleep(args.every)
@@ -230,6 +316,10 @@ except Exception as e:
     print("no pude leer mi propio nodo:", e, file=sys.stderr, flush=True)
 
 snapshot_nodedb(IFACE)
+if args.traceroute:
+    print(f"traceroute ACTIVO: hasta {args.tr_max} destinos, uno cada {args.tr_every}s "
+          f"(ocupa tiempo de aire de toda la malla — no lo dejes corriendo de más)", flush=True)
+    threading.Thread(target=tracer, daemon=True).start()
 if args.rtdb and args.secret:
     print(f"subiendo a {args.rtdb.rstrip('/')}/rf/{sid} cada {args.every}s", flush=True)
     threading.Thread(target=uploader, daemon=True).start()
