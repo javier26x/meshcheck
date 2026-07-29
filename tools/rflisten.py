@@ -52,7 +52,7 @@ timeline = []
 start = time.time()
 sid = time.strftime("%Y%m%d-%H%M") + "-radio"
 my_id = None
-seen = directos = indirectos = 0
+seen = directos = indirectos = via_mqtt = sin_info = 0
 out = open(args.out, "a", encoding="utf-8")
 
 
@@ -112,10 +112,14 @@ def snapshot_nodedb(iface):
                 n["snr"] = info.get("snr")
             if info.get("lastHeard"):
                 n["lastHeard"] = info.get("lastHeard")
-            # vecino directo según el firmware → enlace RF medido
-            if ha == 0 and nid != my_id:
+            # Vecino directo según el firmware. OJO: si el nodo tiene MQTT
+            # habilitado, aprende cientos de nodos por internet y el firmware
+            # les pone hopsAway = 0 (le llegaron sin saltos de radio). Por eso
+            # se exige además un SNR real: sin demodulación no hubo radio.
+            snr_db = info.get("snr")
+            if ha == 0 and nid != my_id and snr_db not in (None, 0):
                 dir_now += 1
-                add_link(my_id, nid, info.get("snr"), "rf")
+                add_link(my_id, nid, snr_db, "rf")
         except Exception:
             continue
     if dir_now:
@@ -184,7 +188,7 @@ def on_traceroute(packet, dec):
 
 
 def on_receive(packet, interface=None):
-    global seen, directos, indirectos
+    global seen, directos, indirectos, via_mqtt, sin_info
     try:
         dec = packet.get("decoded") or {}
         if (dec.get("portnum") == "TRACEROUTE_APP" or dec.get("traceroute")):
@@ -218,17 +222,31 @@ def on_receive(packet, interface=None):
                 u = dec.get("user") or {}
                 if u.get("longName"):
                     touch_node(src_id, name=u.get("longName"))
+            # El SNR es lo que separa RADIO de INTERNET: solo existe si el
+            # receptor demoduló la señal. Un paquete sin SNR llegó por MQTT, y
+            # si el nodo tiene MQTT habilitado, la API mezcla ambas fuentes.
+            if snr is None:
+                via_mqtt += 1
             # SOLO los directos prueban un enlace CON MI ANTENA: con saltos, el
             # emisor del paquete no es quien transmitió lo que oí (fue algún
             # repetidor que el protocolo no identifica), así que afirmar ese
             # enlace sería inventarlo.
-            if hops == 0 and src_id and my_id and src_id != my_id:
+            elif hops == 0 and src_id and my_id and src_id != my_id:
                 directos += 1
                 add_link(my_id, src_id, snr, "rf")
             elif hops:
                 indirectos += 1
+            else:
+                sin_info += 1
 
-        marca = " ← DIRECTO" if hops == 0 else (f"  ({hops} saltos)" if hops else "  (saltos: no informado)")
+        if snr is None:
+            marca = "  ← por INTERNET (sin SNR: no lo oyó la antena)"
+        elif hops == 0:
+            marca = " ← DIRECTO por radio"
+        elif hops:
+            marca = f"  ({hops} saltos por radio)"
+        else:
+            marca = "  (radio, saltos no informados)"
         print(f"{time.strftime('%H:%M:%S')}  {packet.get('fromId') or src_id}  SNR {snr}  RSSI {rssi}  {dec.get('portnum')}{marca}", flush=True)
     except Exception as e:
         print("  (paquete ignorado:", e, ")", file=sys.stderr, flush=True)
@@ -379,12 +397,14 @@ finally:
         IFACE.close()
     except Exception:
         pass
-    rep = resumen_vecinos()
-    print(f"LISTO · {seen} paquetes · {len(nodes)} nodos conocidos · {len(links)} enlaces medidos por radio")
-    if rep:
-        print("       vecinos por distancia:", " ".join(f"{k} salto(s): {v}" for k, v in sorted(rep.items())))
-        d0 = rep.get(0, 0)
-        print(f"       {d0} nodo(s) al alcance DIRECTO de tu antena" if d0 else
-              "       ningún nodo al alcance directo: todo lo que oyes viene repetido")
+    porRadio = seen - via_mqtt
+    print(f"\nLISTO · {seen} paquetes recibidos por la API")
+    print(f"       {porRadio} por RADIO (con SNR) · {via_mqtt} por INTERNET (sin SNR, vía MQTT del nodo)")
+    print(f"       {directos} directos · {indirectos} repetidos · {sin_info} sin dato de saltos")
+    print(f"       {len(links)} enlaces medidos por radio · {len(nodes)} nodos conocidos")
+    if via_mqtt:
+        print(f"\n       OJO: tu nodo tiene MQTT habilitado, así que la API mezcla radio e internet.")
+        print(f"       Solo los {porRadio} con SNR son medición de radio. Para una prueba RF")
+        print(f"       limpia, desactiva el MQTT del nodo durante el ensayo.")
     if args.rtdb:
         print(f"       míralo en la pestaña RF: sesión {sid}")
