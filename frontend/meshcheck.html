@@ -332,6 +332,8 @@
         <div class="sec">
           <h2>Foto de la red <span class="hint" title="Capturas grabadas con bridge/rfcapture.js. Durante un apagón de MQTT, lo único que sigue propagando es la radio: todo lo observado en esa ventana es alcance RF real.">?</span></h2>
           <select id="rf-sel"><option value="">— elige una captura —</option></select>
+          <div class="row" style="margin-top:8px"><label>comparar con</label></div>
+          <select id="rf-cmp"><option value="">— ninguna —</option></select>
           <label class="chk" style="margin-top:8px"><input type="checkbox" id="rf-map" checked /> dibujar la captura en el mapa</label>
         </div>
         <div id="rf-card"></div>
@@ -1395,6 +1397,7 @@ function renderMine() {
  * estaban, así la foto sigue siendo legible meses después. Si la sesión está en
  * curso (sin `end`), se refresca sola cada 20 s. */
 let rfSessions = [], rfSel = null, rfData = null, rfShowMap = true, rfTimer = null;
+let rfCmp = null, rfDataB = null;
 const rfBase = () => String(FIREBASE_CONFIG.databaseURL || "").replace(/\/$/, "");
 const rfGet = (p) => fetch(`${rfBase()}/${p}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 
@@ -1404,14 +1407,18 @@ async function rfLoadList() {
   const ids = Object.keys(keys).sort().reverse();          // más recientes primero
   const metas = await Promise.all(ids.map((id) => rfGet(`rf/${encodeURIComponent(id)}/meta.json`)));
   rfSessions = ids.map((id, i) => ({ id, meta: metas[i] || {} })).filter((s) => s.meta && s.meta.start);
+  const opts = rfSessions.map((s) => {
+    const d = new Date(s.meta.start);
+    const viva = !s.meta.end ? " · EN CURSO" : "";
+    const via = s.meta.root === "radio" ? "📻" : "🌐";
+    return `<option value="${esc(s.id)}">${via} ${d.toLocaleString()} · ${esc(s.meta.label || s.id)}${viva}</option>`;
+  }).join("");
   const sel = $("rf-sel");
-  sel.innerHTML = `<option value="">${rfSessions.length ? "— elige una captura —" : "— no hay capturas todavía —"}</option>` +
-    rfSessions.map((s) => {
-      const d = new Date(s.meta.start);
-      const viva = !s.meta.end ? " · EN CURSO" : "";
-      return `<option value="${esc(s.id)}">${d.toLocaleString()} · ${esc(s.meta.label || s.id)}${viva}</option>`;
-    }).join("");
+  sel.innerHTML = `<option value="">${rfSessions.length ? "— elige una captura —" : "— no hay capturas todavía —"}</option>` + opts;
   if (rfSel) sel.value = rfSel;
+  const cmp = $("rf-cmp");
+  cmp.innerHTML = `<option value="">— ninguna —</option>` + opts;
+  if (rfCmp) cmp.value = rfCmp;
 }
 
 async function rfLoadSession(id) {
@@ -1425,30 +1432,53 @@ async function rfLoadSession(id) {
   if (rfData && rfData.meta && !rfData.meta.end) rfTimer = setInterval(() => { if (activeTab === "rf") rfLoadSession(rfSel); }, 20000);
 }
 function rfStopPoll() { if (rfTimer) { clearInterval(rfTimer); rfTimer = null; } }
+async function rfLoadCompare(id) {
+  rfCmp = id || null;
+  rfDataB = id ? await rfGet(`rf/${encodeURIComponent(id)}.json`) : null;
+  renderRf();
+}
 
-// gráfico de la línea de tiempo en SVG (sin librerías): nodos y enlaces vivos
-// muestra a muestra. Es donde se VE el corte del MQTT.
-function rfChart(tl) {
-  const pts = (Array.isArray(tl) ? tl : []).filter((p) => p && typeof p.t === "number");
-  if (pts.length < 2) return `<p class="note">Aún no hay suficientes muestras para el gráfico.</p>`;
-  const W = 268, H = 90, PAD = 4;
-  const t0 = pts[0].t, t1 = pts[pts.length - 1].t, dt = Math.max(1, t1 - t0);
-  const maxV = Math.max(1, ...pts.map((p) => Math.max(p.nodes || 0, p.links || 0)));
+// Gráfico SVG (sin librerías) de la línea de tiempo. Acepta VARIAS series con
+// un eje temporal COMÚN: así, al comparar la captura del MQTT con la de radio,
+// se ve que la ceguera de una coincide con actividad de la otra — que es
+// exactamente la conclusión del ejercicio.
+const hhmm = (t) => { const d = new Date(t); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
+function rfChart(series) {
+  const ss = series.filter((s) => Array.isArray(s.tl) && s.tl.filter((p) => p && typeof p.t === "number").length >= 2)
+    .map((s) => ({ ...s, pts: s.tl.filter((p) => p && typeof p.t === "number") }));
+  if (!ss.length) return `<p class="note">Aún no hay suficientes muestras para el gráfico.</p>`;
+  const W = 268, H = 96, PAD = 4;
+  const t0 = Math.min(...ss.map((s) => s.pts[0].t));
+  const t1 = Math.max(...ss.map((s) => s.pts[s.pts.length - 1].t));
+  const dt = Math.max(1, t1 - t0);
+  const maxV = Math.max(1, ...ss.flatMap((s) => s.pts.map((p) => Math.max(p.nodes || 0, p.links || 0))));
   const x = (p) => PAD + ((p.t - t0) / dt) * (W - 2 * PAD);
   const y = (v) => H - PAD - (v / maxV) * (H - 2 * PAD);
-  const path = (k) => pts.map((p, i) => `${i ? "L" : "M"}${x(p).toFixed(1)},${y(p[k] || 0).toFixed(1)}`).join(" ");
-  const hhmm = (t) => { const d = new Date(t); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:6px">
-    <path d="${path("links")}" fill="none" stroke="#ff7a1a" stroke-width="1.8"/>
-    <path d="${path("nodes")}" fill="none" stroke="#3ad07a" stroke-width="1.8"/>
-    <path d="${path("snr")}" fill="none" stroke="#3b6ed6" stroke-width="1.2" stroke-dasharray="3,3"/>
-  </svg>
+  const path = (pts, k) => pts.map((p, i) => `${i ? "L" : "M"}${x(p).toFixed(1)},${y(p[k] || 0).toFixed(1)}`).join(" ");
+  const body = ss.map((s) => `
+    <path d="${path(s.pts, "links")}" fill="none" stroke="${s.color}" stroke-width="1.9" ${s.dash ? `stroke-dasharray="4,3"` : ""}/>
+    <path d="${path(s.pts, "nodes")}" fill="none" stroke="${s.color}" stroke-width="1" opacity=".5" ${s.dash ? `stroke-dasharray="2,3"` : ""}/>`).join("");
+  const leyenda = ss.map((s) => `<span style="color:${s.color}">${s.dash ? "┅" : "━"}</span> ${esc(s.label)}`).join(" · ");
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:6px">${body}</svg>
   <div class="snr-lbl"><span>${hhmm(t0)}</span><span>máx ${maxV}</span><span>${hhmm(t1)}</span></div>
-  <div class="note" style="margin-top:4px">
-    <span style="color:#ff7a1a">━</span> enlaces vivos ·
-    <span style="color:#3ad07a">━</span> nodos vivos ·
-    <span style="color:#3b6ed6">┅</span> enlaces con SNR
-  </div>`;
+  <div class="note" style="margin-top:4px">${leyenda}<br>línea gruesa = enlaces · fina = nodos</div>`;
+}
+
+// resumen de una sesión, para la tabla comparativa
+function rfResumen(d) {
+  const m = (d && d.meta) || {};
+  const links = Object.values((d && d.links) || {});
+  return {
+    label: m.label || "?", radio: m.root === "radio",
+    nodos: Object.keys((d && d.nodes) || {}).length,
+    enlaces: links.length,
+    conSnr: links.filter((l) => l.snr != null).length,
+    maxKm: m.maxKm, medKm: m.medKm,
+    desde: m.start ? hhmm(m.start) : "?", hasta: m.end ? hhmm(m.end) : "en curso",
+    // minutos con visibilidad nula: la métrica que cuantifica la ceguera
+    ceguera: (Array.isArray(d && d.tl) ? d.tl : []).filter((p) => p && !p.links && !p.nodes).length,
+    muestras: (Array.isArray(d && d.tl) ? d.tl : []).length,
+  };
 }
 
 function renderRf() {
@@ -1474,7 +1504,27 @@ function renderRf() {
     <div class="stat"><div class="n">${m.maxKm != null ? fmtKm(m.maxKm) : "—"}</div><div class="l">Enlace más largo</div></div>
   </div></div>`;
 
-  h += `<div class="sec"><h2>Evolución</h2>${rfChart(rfData.tl)}</div>`;
+  const series = [{ label: (m.root === "radio" ? "📻 " : "🌐 ") + (m.label || rfSel), color: "#ff7a1a", tl: rfData.tl }];
+  if (rfDataB) series.push({ label: ((rfDataB.meta || {}).root === "radio" ? "📻 " : "🌐 ") + ((rfDataB.meta || {}).label || rfCmp), color: "#3ad07a", tl: rfDataB.tl, dash: true });
+  h += `<div class="sec"><h2>Evolución${rfDataB ? " (comparada)" : ""}</h2>${rfChart(series)}</div>`;
+
+  // tabla comparativa: es donde se lee la conclusión del ejercicio
+  if (rfDataB) {
+    const A = rfResumen(rfData), B = rfResumen(rfDataB);
+    const fila = (k, a, b) => `<tr><td style="color:var(--muted)">${k}</td><td style="text-align:right"><b>${a}</b></td><td style="text-align:right;color:#3ad07a">${b}</td></tr>`;
+    h += `<div class="sec"><h2>Comparación</h2><table class="ntable" style="width:100%">
+      <thead><tr><th></th><th style="text-align:right">${esc(A.radio ? "📻 radio" : "🌐 MQTT")}</th><th style="text-align:right">${esc(B.radio ? "📻 radio" : "🌐 MQTT")}</th></tr></thead><tbody>
+      ${fila("ventana", A.desde + "–" + A.hasta, B.desde + "–" + B.hasta)}
+      ${fila("nodos", A.nodos, B.nodos)}
+      ${fila("enlaces", A.enlaces, B.enlaces)}
+      ${fila("con SNR", A.conSnr, B.conSnr)}
+      ${fila("enlace más largo", A.maxKm != null ? fmtKm(A.maxKm) : "—", B.maxKm != null ? fmtKm(B.maxKm) : "—")}
+      ${fila("muestras sin nada", `${A.ceguera}/${A.muestras}`, `${B.ceguera}/${B.muestras}`)}
+      </tbody></table>`;
+    const ciego = A.ceguera > A.muestras * 0.2 || B.ceguera > B.muestras * 0.2;
+    if (ciego) h += `<p class="note" style="margin-top:8px">Las <b>muestras sin nada</b> son los minutos en que esa fuente no vio absolutamente nada. Si una fuente queda en cero mientras la otra sigue registrando, la malla estaba <b>funcionando pero no era observable</b> por esa vía — que es justo lo que revela un apagón de MQTT.</p>`;
+    h += `</div>`;
+  }
 
   // el dato que responde "hasta dónde llega el RF"
   const largos = links.filter((l) => typeof l.km === "number").sort((a, b) => b.km - a.km).slice(0, 12);
@@ -1737,6 +1787,7 @@ $("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("
 $("proto-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; switchProto(b.dataset.proto); });
 // Capturas RF
 $("rf-sel").addEventListener("change", (e) => rfLoadSession(e.target.value));
+$("rf-cmp").addEventListener("change", (e) => rfLoadCompare(e.target.value));
 $("rf-map").addEventListener("change", (e) => { rfShowMap = e.target.checked; redraw(); });
 // Mi nodo: elegir/olvidar
 $("mine-q").addEventListener("input", (e) => mineSuggest(e.target.value));
