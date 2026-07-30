@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-29T11:34:03.430Z",
+  "generated": "2026-07-30T11:20:57.745Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 296,
   "nodes": {
