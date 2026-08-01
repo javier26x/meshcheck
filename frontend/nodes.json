@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-07-31T11:35:28.827Z",
+  "generated": "2026-08-01T10:48:35.748Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 296,
+  "count": 297,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -205,6 +205,22 @@
         "antenna": "stock",
         "locType": "mobile",
         "desc": "Heltec v3 con modulo gps "
+      }
+    },
+    "20501k4AjcBL3F0ca7uR": {
+      "id": "20501k4AjcBL3F0ca7uR",
+      "name": "CX1AAO Movil",
+      "lat": -33.329,
+      "lon": -70.2468,
+      "placeholder": false,
+      "alias": "Raul",
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Jose Raul Olivera",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Uruguayo de paseo por Santigo de Chile y Farellones desde el 31/7 al 3/8/2026"
       }
     },
     "239IEWsWzrMfmKwN9asJ": {
@@ -2088,17 +2104,16 @@
     },
     "TsAO1lpGLnB9gNfSbGBb": {
       "id": "TsAO1lpGLnB9gNfSbGBb",
-      "name": "moko3889",
+      "name": "EPQG",
       "lat": -34.183429,
       "lon": -70.653251,
       "placeholder": false,
-      "alias": "moko",
       "role": "CLIENT",
       "meta": {
         "user": "EMILIO PAVEL QUINTEROS GONZÁLEZ",
         "power": "medium",
         "antenna": "stock",
-        "locType": "mobile"
+        "locType": "remote"
       }
     },
     "TuyPOA5o1JzDWw8WrDuU": {
