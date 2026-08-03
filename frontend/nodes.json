@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-02T10:50:35.757Z",
+  "generated": "2026-08-03T12:36:03.006Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 297,
+  "count": 298,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -4523,6 +4523,21 @@
       "role": "CLIENT",
       "meta": {
         "user": "Eduardo Villagrán Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
+    "ytfvQwpiFMCgxctv9WKa": {
+      "id": "ytfvQwpiFMCgxctv9WKa",
+      "name": "CE4RWW",
+      "lat": -35.3340443,
+      "lon": -72.4233274,
+      "placeholder": false,
+      "alias": "12",
+      "role": "CLIENT",
+      "meta": {
+        "user": "alejandro antonio becerra velozo",
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
