@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-03T12:36:03.006Z",
+  "generated": "2026-08-04T11:33:44.083Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 298,
+  "count": 299,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -1356,21 +1356,6 @@
         "locType": "residential"
       }
     },
-    "JcnUo1IB0SbWss56046T": {
-      "id": "JcnUo1IB0SbWss56046T",
-      "name": "Meshtastic_CE3ANW",
-      "lat": -33.43506,
-      "lon": -70.628222,
-      "placeholder": false,
-      "alias": "644a",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Andrés García A.",
-        "power": "medium",
-        "antenna": "stock",
-        "locType": "residential"
-      }
-    },
     "JpQwcccnTLO26PyGzbTr": {
       "id": "JpQwcccnTLO26PyGzbTr",
       "name": "DEFMT TUCCO V2",
@@ -2522,6 +2507,21 @@
         "antenna": "custom",
         "locType": "residential",
         "desc": "Nodo solar RAK autonomía 1-2 semanas sin luz solar, antena dipolo swr 1.0 "
+      }
+    },
+    "a9c1hx6nPJE3eMfyzy9t": {
+      "id": "a9c1hx6nPJE3eMfyzy9t",
+      "name": "CE3ANW",
+      "lat": -33.43462371847196,
+      "lon": -70.62810774054405,
+      "placeholder": false,
+      "alias": "26d8",
+      "role": "CLIENT",
+      "meta": {
+        "user": "AnGarcia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
       }
     },
     "aJNPHx2y7zkYAJs2HWp7": {
@@ -3735,6 +3735,21 @@
         "antenna": "directional",
         "locType": "residential",
         "desc": "Futuro nodo Cauquenes seeed + direccional "
+      }
+    },
+    "qUYjzFgECOkbAS9GtEWS": {
+      "id": "qUYjzFgECOkbAS9GtEWS",
+      "name": "Roberto movil",
+      "lat": -34.5849421983298,
+      "lon": -70.98724548708579,
+      "placeholder": false,
+      "alias": "rob1",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Roberto Leiva",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
       }
     },
     "qWBmW6ydY5RYSqcuu4U6": {
