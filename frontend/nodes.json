@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-04T11:33:44.083Z",
+  "generated": "2026-08-05T11:29:16.429Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 299,
+  "count": 300,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -2177,6 +2177,21 @@
         "antenna": "stock",
         "locType": "mobile",
         "desc": "Móvil de prueba para traqueo y comunicación en desastres"
+      }
+    },
+    "URC6Ak8pOp1Vs20B4sJV": {
+      "id": "URC6Ak8pOp1Vs20B4sJV",
+      "name": "CA3ROJ-N1",
+      "lat": -33.4528034,
+      "lon": -70.5736242,
+      "placeholder": false,
+      "alias": "R3M0",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Rodrigo Mora C.",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
       }
     },
     "Utqv69gnclpO1Zspp3qV": {
