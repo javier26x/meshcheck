@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-05T11:29:16.429Z",
+  "generated": "2026-08-06T11:33:17.029Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 300,
+  "count": 301,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -2956,6 +2956,22 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
+      }
+    },
+    "erXKfIR5ugYkDtHHSSiJ": {
+      "id": "erXKfIR5ugYkDtHHSSiJ",
+      "name": "Meshtastic BASE1COY",
+      "lat": -45.579148913486335,
+      "lon": -72.03128134310485,
+      "placeholder": false,
+      "alias": "BASE",
+      "role": "ROUTER_CLIENT",
+      "meta": {
+        "user": "Claudio Guillard",
+        "power": "high",
+        "antenna": "external",
+        "locType": "residential",
+        "desc": "Nodo de Prueba."
       }
     },
     "fCTcMO6HYUjzxcCzxHYW": {
