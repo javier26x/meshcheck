@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-07T10:10:39.693Z",
+  "generated": "2026-08-08T09:54:00.993Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 301,
+  "count": 302,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -3067,6 +3067,21 @@
         "antenna": "vertical HG-908U",
         "locType": "residential",
         "desc": "XIAO ESP32 + WIO SX1262 fijo, batería 1100mAh antena Vertical HG908U-PRO"
+      }
+    },
+    "g8UHb62k6v3fFsGzhazV": {
+      "id": "g8UHb62k6v3fFsGzhazV",
+      "name": "Meshtastic KC69",
+      "lat": -33.579721995561975,
+      "lon": -70.58843349603164,
+      "placeholder": false,
+      "alias": "KC69",
+      "role": "CLIENT",
+      "meta": {
+        "user": "kc69",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
       }
     },
     "gp13kWnWIsbGSux189xy": {
