@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-15T09:40:49.055Z",
+  "generated": "2026-08-16T09:42:05.755Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 303,
+  "count": 304,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -1677,6 +1677,21 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "mobile"
+      }
+    },
+    "NH2C86TDv6Eg2refnY6D": {
+      "id": "NH2C86TDv6Eg2refnY6D",
+      "name": "CJC-CD1DED",
+      "lat": -22.45621805484326,
+      "lon": -68.92128942808294,
+      "placeholder": false,
+      "alias": "DED1",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Marco Miranda Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
       }
     },
     "NRWgWVKs8A2MXjcbjqNp": {
