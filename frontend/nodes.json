@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-16T09:42:05.755Z",
+  "generated": "2026-08-17T09:57:14.737Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 304,
+  "count": 305,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -1689,6 +1689,21 @@
       "role": "CLIENT",
       "meta": {
         "user": "Marco Miranda Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
+    "NNbp8gSgCyWDtlTM4Wn6": {
+      "id": "NNbp8gSgCyWDtlTM4Wn6",
+      "name": "AOSE",
+      "lat": -33.491195850214595,
+      "lon": -70.61454843412017,
+      "placeholder": false,
+      "alias": "oca3",
+      "role": "CLIENT",
+      "meta": {
+        "user": "AOSE Ltda",
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
