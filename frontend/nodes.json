@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-18T09:48:43.959Z",
+  "generated": "2026-08-19T09:49:03.594Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 305,
+  "count": 307,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -1138,6 +1138,21 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
+      }
+    },
+    "GhCNWxUNWxhXrAJPCQmm": {
+      "id": "GhCNWxUNWxhXrAJPCQmm",
+      "name": "Pipo Vega",
+      "lat": -36.61569160060667,
+      "lon": -72.11590175325979,
+      "placeholder": false,
+      "alias": "Pipo",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Víctor Vega Rodríguez",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
       }
     },
     "GumxPF6uhFHOyXcIod1K": {
@@ -3002,6 +3017,22 @@
         "antenna": "external",
         "locType": "residential",
         "desc": "Nodo de Prueba."
+      }
+    },
+    "f38WQUm8ygkHdN0V00CP": {
+      "id": "f38WQUm8ygkHdN0V00CP",
+      "name": "Heltec V3",
+      "lat": -33.4023079,
+      "lon": -70.5910681,
+      "placeholder": false,
+      "alias": "ad14",
+      "role": "CLIENT_BASE",
+      "meta": {
+        "user": "adologg14",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Heltec V3"
       }
     },
     "fCTcMO6HYUjzxcCzxHYW": {
