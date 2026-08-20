@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-19T09:49:03.594Z",
+  "generated": "2026-08-20T09:49:56.897Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 307,
   "nodes": {
@@ -3021,18 +3021,17 @@
     },
     "f38WQUm8ygkHdN0V00CP": {
       "id": "f38WQUm8ygkHdN0V00CP",
-      "name": "Heltec V3",
+      "name": "ad14",
       "lat": -33.4023079,
       "lon": -70.5910681,
       "placeholder": false,
-      "alias": "ad14",
       "role": "CLIENT_BASE",
       "meta": {
         "user": "adologg14",
         "power": "medium",
         "antenna": "stock",
         "locType": "residential",
-        "desc": "Heltec V3"
+        "desc": "Heltec V3 (antena stock)"
       }
     },
     "fCTcMO6HYUjzxcCzxHYW": {
