@@ -32,14 +32,14 @@ function grab(name) {
   throw new Error("no se encontró en el script: " + name);
 }
 
-const NAMES = ["R", "haversine", "snrColor", "isRouter", "ekey", "isNominalNode", "P_NOMINAL", "BRIDGE_KM", "compact", "normName", "seenAt", "linkNeighbors", "buildGraph", "computeRoute", "visiblePredicate", "activeNodes", "ROLE_ENUM", "ROLE_STR", "roleLabel", "hexId"];
+const NAMES = ["R", "haversine", "snrColor", "isRouter", "ekey", "isNominalNode", "P_NOMINAL", "BRIDGE_KM", "compact", "normName", "seenAt", "SNR_FLOOR", "snrMargin", "marginTier", "marginColor", "ASYM_DB", "criticalNodes", "linkNeighbors", "buildGraph", "computeRoute", "visiblePredicate", "activeNodes", "ROLE_ENUM", "ROLE_STR", "roleLabel", "hexId"];
 const GRABBED = NAMES.map(grab).join("\n");
 
 // crea un scope fresco con el estado dado y devuelve las funciones
 function scope(state) {
   const st = Object.assign({ proto: "mt", useLive: true, ttlHours: 2, rangeKm: 15, hopLimit: 7, pointA: null, pointB: null, filters: { live: false, routers: false, measured: false, hideDir: false }, liveLinks: {}, liveNodes: {}, embeddedNodes: {}, hypRepeaters: [] }, state);
   const decls = Object.keys(st).map((k) => `let ${k} = __s.${k};`).join("\n");
-  const body = decls + "\n" + GRABBED + "\n; return { haversine, snrColor, roleLabel, hexId, isNominalNode, seenAt, linkNeighbors, buildGraph, computeRoute, visiblePredicate, activeNodes };";
+  const body = decls + "\n" + GRABBED + "\n; return { haversine, snrColor, roleLabel, hexId, isNominalNode, seenAt, snrMargin, marginTier, criticalNodes, linkNeighbors, buildGraph, computeRoute, visiblePredicate, activeNodes };";
   return new Function("__s", body)(st);
 }
 const ekey = (x, y) => (x < y ? x + "|" + y : y + "|" + x);
@@ -197,4 +197,48 @@ test("buildGraph: la arista inversa sin SNR no borra la medición de la directa"
   const { etype } = scope({ useLive: true, liveLinks }).buildGraph(nodes);
   const k = "a|b";
   assert.equal(etype.get(k).snr, 7, "el SNR medido debe sobrevivir a la arista inversa sin dato");
+});
+
+test("snrMargin: distancia al umbral de demodulación de LongFast (-17.5 dB)", () => {
+  const { snrMargin, marginTier } = scope({});
+  assert.equal(snrMargin(6), 23.5);
+  assert.equal(snrMargin(-17.5), 0);
+  assert.equal(snrMargin(-19.25), -1.7);           // BAJO el umbral (redondeado a 1 decimal)
+  assert.equal(snrMargin(null), null);
+  assert.equal(marginTier(23.5), "excelente");
+  assert.equal(marginTier(-1.7), "bajo el umbral");
+  assert.equal(marginTier(2), "crítico");
+  assert.equal(marginTier(10), "bueno");
+});
+
+test("buildGraph: detecta enlaces asimétricos entre sentidos", () => {
+  const now = Date.now();
+  const nodes = { a: { id: "a", lat: -33.4, lon: -70.6, t: now }, b: { id: "b", lat: -33.45, lon: -70.65, t: now } };
+  // a oye a b con 5 dB; b oye a a con -12 dB → 17 dB de diferencia
+  const liveLinks = {
+    a: { from: "a", t: now, nb: { b: { snr: 5, t: now, src: "ni" } } },
+    b: { from: "b", t: now, nb: { a: { snr: -12, t: now, src: "ni" } } },
+  };
+  const { edges, asymCount } = scope({ useLive: true, liveLinks }).buildGraph(nodes);
+  const asy = edges.filter((e) => e.asym);
+  assert.equal(asymCount, 1, "un par asimétrico (no dos, aunque haya dos aristas)");
+  assert.equal(asy[0].asym, 17);
+  // simétrico: no se marca
+  const sim = { a: { from: "a", t: now, nb: { b: { snr: 5, t: now, src: "ni" } } },
+                b: { from: "b", t: now, nb: { a: { snr: 3, t: now, src: "ni" } } } };
+  assert.equal(scope({ useLive: true, liveLinks: sim }).buildGraph(nodes).asymCount, 0);
+});
+
+test("criticalNodes: quién sostiene la red", () => {
+  const { criticalNodes } = scope({});
+  const mk = (pares) => { const a = new Map(); const add = (x, y) => { if (!a.has(x)) a.set(x, new Set()); a.get(x).add(y); }; for (const [x, y] of pares) { add(x, y); add(y, x); } return a; };
+  // cadena: los dos del medio son críticos
+  const cad = criticalNodes(mk([["A", "B"], ["B", "C"], ["C", "D"]]));
+  assert.deepEqual(cad.map((x) => x.id).sort(), ["B", "C"]);
+  // anillo: nadie es indispensable, siempre hay camino alternativo
+  assert.equal(criticalNodes(mk([["A", "B"], ["B", "C"], ["C", "D"], ["D", "A"]])).length, 0);
+  // dos grupos unidos por un puente: el puente aísla al grupo menor
+  const p = criticalNodes(mk([["a1", "a2"], ["a2", "a3"], ["a3", "a1"], ["a1", "P"], ["P", "b1"], ["b1", "b2"], ["b2", "b3"], ["b3", "b1"]]));
+  assert.equal(p[0].id, "P");
+  assert.equal(p[0].aisla, 3);
 });

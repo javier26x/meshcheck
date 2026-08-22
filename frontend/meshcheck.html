@@ -414,6 +414,17 @@
             <div class="stat"><div class="n" id="s-infra">0</div><div class="l">Repetidores</div></div>
           </div>
         </div>
+        <div class="sec" id="analisis-sec">
+          <h2>Análisis de la red <span class="hint" title="Calculado sobre los enlaces MEDIDOS (no los modelados). Cambia con el TTL y los filtros activos.">?</span></h2>
+          <div id="analisis">Elige “Malla en vivo” para analizar los enlaces medidos.</div>
+        </div>
+        <div class="sec">
+          <h2>Exportar <span class="hint" title="Descarga lo que estás viendo ahora, respetando filtros y TTL.">?</span></h2>
+          <div class="row" style="gap:6px">
+            <button class="btn ghost" id="exp-csv" style="flex:1">CSV</button>
+            <button class="btn ghost" id="exp-geo" style="flex:1">GeoJSON</button>
+          </div>
+        </div>
         <div class="sec">
           <h2>Diagnóstico del bridge</h2>
           <p class="note mono" id="diag" style="margin:0">Esperando datos…</p>
@@ -663,6 +674,21 @@ function estimatePos(id, nodes) {
 }
 
 /* ---- 6. Grafo ------------------------------------------------------------- */
+/* Margen de enlace: un SNR crudo no dice si el enlace aguanta. LongFast usa
+ * SF11, que demodula hasta ~-17.5 dB; la distancia a ese piso es lo que decide
+ * si el enlace sobrevive a lluvia, follaje o un poco de ruido extra. */
+const SNR_FLOOR = -17.5;
+const snrMargin = (snr) => (snr == null ? null : Math.round((snr - SNR_FLOOR) * 10) / 10);
+const marginTier = (m) => (m == null ? null : m < 0 ? "bajo el umbral" : m < 3 ? "crítico" : m < 8 ? "justo" : m < 15 ? "bueno" : "excelente");
+const marginColor = (m) => (m == null ? "#8f7ad6" : m < 0 ? "#ff4d4d" : m < 3 ? "#ff8c42" : m < 8 ? "#ffd23f" : m < 15 ? "#9ad04a" : "#3ad07a");
+// texto listo para tooltip/ficha
+function marginHtml(snr) {
+  const m = snrMargin(snr);
+  if (m == null) return "";
+  return ` · <span style="color:${marginColor(m)}">${m > 0 ? "+" : ""}${m} dB de margen (${marginTier(m)})</span>`;
+}
+const ASYM_DB = 6;   // diferencia entre sentidos que ya delata antenas/potencias dispares
+
 function linkNeighbors(l) {
   if (!l) return [];
   const byId = new Map();
@@ -705,7 +731,11 @@ function buildGraph(nodes) {
         // el segundo set NO debe borrar la medición
         const k = ekey(from, nb.id), pv = etype.get(k);
         const s = nb.snr != null ? (pv && pv.snr != null ? Math.max(pv.snr, nb.snr) : nb.snr) : (pv && pv.snr != null ? pv.snr : null);
-        etype.set(k, { live: true, snr: s });
+        // se guarda cada sentido por separado: comparar A→B con B→A revela el
+        // clásico "él me escucha pero yo no lo escucho" (antenas/potencias dispares)
+        const dir = (pv && pv.dir) || {};
+        if (nb.snr != null) dir[from + ">" + nb.id] = nb.snr;
+        etype.set(k, { live: true, snr: s, dir });
         realCount++;
       }
     }
@@ -718,7 +748,78 @@ function buildGraph(nodes) {
       const k = ekey(ids[i], ids[j]); if (!etype.has(k)) etype.set(k, { model: true });
     }
   }
-  return { adj, edges, etype, realCount, bridgeCount };
+  // asimetría: se marca en la arista para poder dibujarla y explicarla
+  let asymCount = 0;
+  for (const e of edges) {
+    if (!e.live) continue;
+    const t = etype.get(ekey(e.a, e.b));
+    const d = t && t.dir;
+    if (!d) continue;
+    const ab = d[e.a + ">" + e.b], ba = d[e.b + ">" + e.a];
+    if (ab == null || ba == null) continue;
+    const dif = Math.round(Math.abs(ab - ba) * 10) / 10;
+    if (dif >= ASYM_DB) { e.asym = dif; e.snrAB = ab; e.snrBA = ba; if (t) t.asym = dif; }
+  }
+  for (const e of edges) if (e.asym) asymCount++;
+  return { adj, edges, etype, realCount, bridgeCount, asymCount: Math.round(asymCount / 2) };
+}
+
+/* ---- 6b. Puntos críticos (articulación) -----------------------------------
+ * ¿Qué nodo, si se cae, deja aislados a más nodos? Tarjan sobre el grafo de
+ * enlaces MEDIDOS: es la información más accionable para decidir dónde reforzar
+ * la infraestructura. Solo tiene sentido sobre enlaces reales, no modelados. */
+function criticalNodes(adj) {
+  const disc = new Map(), low = new Map(), parent = new Map(), out = [];
+  let timer = 0;
+  const nodesList = [...adj.keys()];
+  for (const root of nodesList) {
+    if (disc.has(root)) continue;
+    // DFS iterativo: con cientos de nodos, la recursión puede desbordar
+    const stack = [[root, (adj.get(root) || new Set()).values(), 0]];
+    disc.set(root, ++timer); low.set(root, timer);
+    let rootKids = 0;
+    while (stack.length) {
+      const top = stack[stack.length - 1];
+      const [u, it] = top;
+      const nx = it.next();
+      if (nx.done) {
+        stack.pop();
+        const p = parent.get(u);
+        if (p !== undefined) {
+          low.set(p, Math.min(low.get(p), low.get(u)));
+          if (p !== root && low.get(u) >= disc.get(p)) { if (!out.includes(p)) out.push(p); }
+        }
+        continue;
+      }
+      const v = nx.value;
+      if (!disc.has(v)) {
+        if (u === root) rootKids++;
+        parent.set(v, u);
+        disc.set(v, ++timer); low.set(v, timer);
+        stack.push([v, (adj.get(v) || new Set()).values(), 0]);
+      } else if (v !== parent.get(u)) {
+        low.set(u, Math.min(low.get(u), disc.get(v)));
+      }
+    }
+    if (rootKids > 1 && !out.includes(root)) out.push(root);
+  }
+  // cuántos quedarían incomunicados si cae cada uno
+  const size = (skip) => {
+    const seen = new Set([skip]);
+    let best = 0;
+    for (const s of nodesList) {
+      if (seen.has(s)) continue;
+      let n = 0; const q = [s]; seen.add(s);
+      while (q.length) { const x = q.pop(); n++; for (const y of adj.get(x) || []) if (!seen.has(y)) { seen.add(y); q.push(y); } }
+      best = Math.max(best, n);
+    }
+    return best;
+  };
+  const total = nodesList.length;
+  return out.map((id) => {
+    const grande = size(id);
+    return { id, aisla: Math.max(0, total - 1 - grande), grado: (adj.get(id) || new Set()).size };
+  }).filter((x) => x.aisla > 0).sort((a, b) => b.aisla - a.aisla);
 }
 
 /* ---- 7. Popup de nodo (ficha completa) ------------------------------------ */
@@ -965,7 +1066,7 @@ function redraw() {
   if (!hasLive && useLive) useLive = false;
   syncToggle();
 
-  const { adj, edges, etype, realCount, bridgeCount } = buildGraph(nodes);
+  const { adj, edges, etype, realCount, bridgeCount, asymCount } = buildGraph(nodes);
   const measuredIds = new Set();
   for (const e of edges) if (e.live) { measuredIds.add(e.a); measuredIds.add(e.b); }
   const visible = visiblePredicate(measuredIds);
@@ -1026,12 +1127,15 @@ function redraw() {
       // SNR posible, que es lo que hacía el fallback ?? -20.
       const sinSnr = e.live && e.snr == null;
       poly = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], e.live
-        ? { color: sinSnr ? "#8f7ad6" : snrColor(e.snr), weight: (incident ? 2.4 : 1.6) + volW + (isSel ? 1.8 : 0), opacity: opa, dashArray: estGeom ? "4,6" : sinSnr ? "6,4" : null }
+        ? { color: sinSnr ? "#8f7ad6" : snrColor(e.snr), weight: (incident ? 2.4 : 1.6) + volW + (isSel ? 1.8 : 0), opacity: opa,
+            dashArray: estGeom ? "4,6" : sinSnr ? "6,4" : e.asym ? "12,3,3,3" : null }
         : { color: "#3a4250", weight: (isSel ? 2.8 : 1), opacity: opa, dashArray: "3,5" });
       const dkm = haversine(a, b);
       const win = liveMeta && liveMeta.winSec ? Math.round(liveMeta.winSec / 3600) : 24;
       tip = e.live
-        ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · ${sinSnr ? `<span style="color:#8f7ad6">adyacencia observada, SNR no reportado</span>` : `SNR <span class="v">${e.snr} dB</span>`} · ${srcTxt(e.src)}${e.n > 1 ? ` · <span class="v">${e.n}</span> paq/${win} h` : ""}${e.w === 1 ? ` · <span style="color:var(--router)">resolución ambigua (hash 1 byte)</span>` : ""}${estGeom ? " · geom. estimada" : ""}<br><span style="color:var(--muted);font-size:11px">${rfWhy(e.src, !sinSnr)}</span>`
+        ? `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · ${sinSnr ? `<span style="color:#8f7ad6">adyacencia observada, SNR no reportado</span>` : `SNR <span class="v">${e.snr} dB</span>${marginHtml(e.snr)}`} · ${srcTxt(e.src)}${e.n > 1 ? ` · <span class="v">${e.n}</span> paq/${win} h` : ""}${e.w === 1 ? ` · <span style="color:var(--router)">resolución ambigua (hash 1 byte)</span>` : ""}${estGeom ? " · geom. estimada" : ""}` +
+          (e.asym ? `<br><span style="color:#ff8c42">⇄ asimétrico: ${nm(e.a)}→${nm(e.b)} ${e.snrAB} dB vs ${e.snrBA} dB (${e.asym} dB de diferencia)</span><br><span style="color:var(--muted);font-size:11px">uno oye mucho mejor que el otro: antenas o potencias dispares</span>` : "") +
+          `<br><span style="color:var(--muted);font-size:11px">${rfWhy(e.src, !sinSnr)}</span>`
         : `<b>${nm(e.a)} ↔ ${nm(e.b)}</b><br><span class="v">${fmtKm(dkm)}</span> · enlace modelado (≤ ${rangeKm} km, supuesto)`;
       if (e.live) { if (sinSnr) drewNoSnr++; else drewSnr++; } else drewModel++;
     }
@@ -1193,6 +1297,7 @@ function redraw() {
   $("est-count").textContent = estCount ? `(${estCount} ubicados)` : "";
   $("bridge-count").textContent = bridgeCount ? `(${bridgeCount})` : "";
   updateStatus(hasLive);
+  if (activeTab === "red") renderAnalisis(nodes, adj, edges, asymCount);
 
   // reabrir el popup del nodo que estaba abierto (o el recién clickeado)
   if (openPopupId && markerById[openPopupId]) {
@@ -1240,7 +1345,19 @@ function renderRoute(nodes, adj, etype) {
   const mix = hops === 0 ? "" : useLive
     ? ` · ${snrHops} con SNR / ${realHops - snrHops} solo adyacencia / ${hops - realHops} estimado${hops - realHops === 1 ? "" : "s"}`
     : " · modelo";
-  sum.innerHTML = `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ${tierBadge}<br><span class="mono" style="color:var(--muted)">acceso ${fmtKm(entryDist)} · salida ${fmtKm(exitDist)}${mix}</span>`;
+  // El tramo MÁS DÉBIL decide si la ruta aguanta: una cadena de 5 saltos
+  // excelentes y uno al límite se cae con el primer chubasco.
+  let peor = null, peorPar = null;
+  for (let i = 0; i < path.length - 1; i++) {
+    const t = etype.get(ekey(path[i], path[i + 1])) || {};
+    if (!t.live || t.snr == null) continue;
+    if (peor == null || t.snr < peor) { peor = t.snr; peorPar = [path[i], path[i + 1]]; }
+  }
+  const mg = snrMargin(peor);
+  const cuello = mg == null ? "" :
+    `<br><span style="color:${marginColor(mg)}">⚠ tramo más débil: ${nm2(peorPar[0])} → ${nm2(peorPar[1])} con ${mg > 0 ? "+" : ""}${mg} dB de margen (${marginTier(mg)})</span>` +
+    (mg < 3 ? `<br><span class="note" style="color:var(--muted)">toda la ruta depende de ese salto: con lluvia o follaje puede caerse</span>` : "");
+  sum.innerHTML = `<span class="badge ok">${hops} salto${hops === 1 ? "" : "s"}</span> ${tierBadge}<br><span class="mono" style="color:var(--muted)">acceso ${fmtKm(entryDist)} · salida ${fmtKm(exitDist)}${mix}</span>${cuello}`;
 
   // tarjetas por salto
   hopsEl.insertAdjacentHTML("beforeend", `<div class="hop ep"><span class="dot" style="background:#5b8cff"></span><span class="nm">A · ${esc(pointA.label || "")}</span><span class="d">${fmtKm(entryDist)}</span></div>`);
@@ -1547,6 +1664,132 @@ function renderRf() {
 // las claves de /rf/nodes vienen saneadas igual que en el bridge
 const safeIdKey = (s) => String(s).replace(/[.#$\[\]]/g, "_").replace(/\//g, "|").slice(0, 100) || "_";
 
+/* ---- 10e. Análisis de la red ---------------------------------------------- *
+ * Todo sale de datos ya cargados. Tres preguntas que hoy nadie puede responder:
+ * qué nodos sostienen la red, cuántos registrados están realmente vivos, y si
+ * el hardware declarado en el directorio se nota en la cobertura medida. */
+function renderAnalisis(nodes, adj, edges, asymCount) {
+  const host = $("analisis");
+  if (!host) return;
+  if (!useLive) { host.innerHTML = `<p class="note">Cambia a <b>Malla en vivo</b> para analizar los enlaces medidos. En modo Modelo los enlaces son supuestos y el análisis no significaría nada.</p>`; return; }
+  let h = "";
+
+  // --- puntos críticos ---
+  const crit = criticalNodes(adj).slice(0, 8);
+  h += `<h2 style="margin-top:0">Puntos críticos</h2>`;
+  if (!crit.length) h += `<p class="note">Ningún nodo es indispensable: toda la malla medida tiene caminos alternativos. Es la mejor señal posible de robustez.</p>`;
+  else {
+    h += `<p class="note" style="margin-bottom:6px">Si uno de estos cae, ese número de nodos queda fuera del grupo mayor:</p>`;
+    h += crit.map((c) => {
+      const n = nodes[c.id] || {};
+      return `<div class="nb-row" onclick="window.focusNode('${esc(c.id)}')" title="Ver en el mapa">
+        <b style="color:${c.aisla > 4 ? "#ff4d4d" : "var(--router)"}">${c.aisla}</b> nodo${c.aisla === 1 ? "" : "s"} · ${esc(n.name || c.id)}
+        <span class="mono" style="color:var(--muted)"> (${c.grado} vecinos)</span></div>`;
+    }).join("");
+  }
+
+  // --- enlaces asimétricos ---
+  const asy = edges.filter((e) => e.asym).filter((e, i, a) => a.findIndex((x) => ekey(x.a, x.b) === ekey(e.a, e.b)) === i)
+    .sort((a, b) => b.asym - a.asym).slice(0, 6);
+  h += `<h2 style="margin-top:14px">Enlaces asimétricos <span class="hint" title="Un sentido oye mucho mejor que el otro. Suele ser diferencia de antena o de potencia entre los dos extremos.">?</span></h2>`;
+  if (!asy.length) h += `<p class="note">Ninguno con más de ${ASYM_DB} dB de diferencia entre sentidos${asymCount ? "" : " (o no tenemos ambos sentidos medidos)"}.</p>`;
+  else h += asy.map((e) => {
+    const na = (nodes[e.a] || {}).name || e.a, nb2 = (nodes[e.b] || {}).name || e.b;
+    return `<div class="nb-row" onclick="window.focusEdge('${esc(e.a)}','${esc(e.b)}')" title="Ver el enlace aislado">
+      <b style="color:#ff8c42">${e.asym} dB</b> ${esc(na)} ↔ ${esc(nb2)}
+      <span class="mono" style="color:var(--muted)"> (${e.snrAB} / ${e.snrBA} dB)</span></div>`;
+  }).join("");
+
+  // --- directorio vs realidad ---
+  const dirTotal = Object.keys(mtDirectory).length;
+  if (proto === "mt" && dirTotal) {
+    let vivos = 0, mudos = [];
+    for (const id in mtDirectory) {
+      const n = nodes[id];
+      if (n && seenAt(n)) vivos++;
+    }
+    // un nodo del directorio "fusionado" con uno vivo cambia de id: cuenta por nombre
+    const nombresVivos = new Set(Object.values(nodes).filter((n) => seenAt(n)).map((n) => normName(n.name)));
+    for (const id in mtDirectory) {
+      const d = mtDirectory[id];
+      if (!nombresVivos.has(normName(d.name)) && !(nodes[id] && seenAt(nodes[id]))) mudos.push(d);
+    }
+    const pct = Math.round(((dirTotal - mudos.length) / dirTotal) * 100);
+    h += `<h2 style="margin-top:14px">Directorio vs realidad</h2>`;
+    h += `<p class="note">De los <b>${dirTotal}</b> nodos registrados en MeshChile, <b style="color:${pct > 50 ? "#3ad07a" : "var(--router)"}">${dirTotal - mudos.length} (${pct}%)</b> dieron señal dentro del TTL actual.</p>`;
+    if (mudos.length) h += `<p class="note" style="margin-top:4px">${mudos.length} llevan más tiempo callados. Sube el TTL en Capas para ver si aparecen, o es material para depurar el padrón.</p>`;
+  }
+
+  // --- lo declarado contra lo medido ---
+  const deg = new Map();
+  for (const e of edges) if (e.live) { deg.set(e.a, (deg.get(e.a) || 0) + 1); deg.set(e.b, (deg.get(e.b) || 0) + 1); }
+  const grupos = {};
+  for (const id in nodes) {
+    const meta = (nodes[id] || {}).meta; if (!meta) continue;
+    const g = String(meta.antenna || "s/d").toLowerCase();
+    (grupos[g] = grupos[g] || []).push(deg.get(id) || 0);
+  }
+  const filas = Object.entries(grupos).filter(([, v]) => v.length >= 3)
+    .map(([k, v]) => ({ k, n: v.length, prom: v.reduce((a, b) => a + b, 0) / v.length }))
+    .sort((a, b) => b.prom - a.prom);
+  if (filas.length >= 2) {
+    h += `<h2 style="margin-top:14px">Antena declarada vs cobertura medida <span class="hint" title="Promedio de vecinos medidos por nodo, agrupado por el tipo de antena que declaró su dueño en el directorio.">?</span></h2>`;
+    h += `<table class="ntable" style="width:100%"><thead><tr><th>Antena</th><th style="text-align:right">nodos</th><th style="text-align:right">vecinos prom.</th></tr></thead><tbody>` +
+      filas.map((f) => `<tr><td>${esc(f.k)}</td><td style="text-align:right">${f.n}</td><td style="text-align:right"><b>${f.prom.toFixed(1)}</b></td></tr>`).join("") +
+      `</tbody></table><p class="note" style="margin-top:6px">Es la propia red respondiendo cuánto rinde cada tipo de antena. Ojo: también influye la ubicación, así que léelo como indicio, no como prueba.</p>`;
+  }
+  host.innerHTML = h;
+}
+
+/* ---- 10f. Exportar --------------------------------------------------------- */
+function descargar(nombre, texto, tipo) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([texto], { type: tipo }));
+  a.download = nombre; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function exportCSV() {
+  const { edges } = buildGraph(lastNodes);
+  const esc2 = (v) => (v == null ? "" : `"${String(v).replace(/"/g, '""')}"`);
+  const l = ["tipo,id_a,nombre_a,id_b,nombre_b,lat_a,lon_a,lat_b,lon_b,km,snr_db,margen_db,fuente,asimetria_db"];
+  for (const e of edges) {
+    if (!e.live && !e.bridge) continue;
+    const a = lastNodes[e.a] || {}, b = lastNodes[e.b] || {};
+    const km = a.lat != null && b.lat != null ? haversine(a, b).toFixed(2) : "";
+    l.push([e.bridge ? "puente" : "enlace", esc2(e.a), esc2(a.name), esc2(e.b), esc2(b.name),
+      a.lat ?? "", a.lon ?? "", b.lat ?? "", b.lon ?? "", km, e.snr ?? "", snrMargin(e.snr) ?? "", esc2(e.src), e.asym ?? ""].join(","));
+  }
+  const n = ["", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+  l.push("", "tipo,id,nombre,rol,lat,lon,ultima_senal_min,bateria,vecinos" + n.slice(9).join(""));
+  const now = Date.now();
+  for (const id in lastNodes) {
+    const x = lastNodes[id]; if (typeof x.lat !== "number") continue;
+    const s = seenAt(x);
+    l.push(["nodo", esc2(id), esc2(x.name), esc2(roleLabel(x.role)), x.lat, x.lon,
+      s ? Math.round((now - s) / 60000) : "", x.batt ?? "", ""].join(","));
+  }
+  descargar(`meshcheck-${proto}-${new Date().toISOString().slice(0, 10)}.csv`, l.join("\n"), "text/csv;charset=utf-8");
+}
+function exportGeoJSON() {
+  const { edges } = buildGraph(lastNodes);
+  const feats = [];
+  for (const id in lastNodes) {
+    const n = lastNodes[id]; if (typeof n.lat !== "number") continue;
+    const s = seenAt(n);
+    feats.push({ type: "Feature", geometry: { type: "Point", coordinates: [n.lon, n.lat] },
+      properties: compact({ id, nombre: n.name, rol: roleLabel(n.role), bateria: n.batt, ultima_senal: s ? new Date(s).toISOString() : undefined, estimada: n.estimated || undefined }) });
+  }
+  for (const e of edges) {
+    if (!e.live) continue;
+    const a = lastNodes[e.a], b = lastNodes[e.b];
+    if (!a || !b || typeof a.lat !== "number" || typeof b.lat !== "number") continue;
+    feats.push({ type: "Feature", geometry: { type: "LineString", coordinates: [[a.lon, a.lat], [b.lon, b.lat]] },
+      properties: compact({ a: e.a, b: e.b, snr: e.snr, margen: snrMargin(e.snr), fuente: e.src, asimetria: e.asym, km: +haversine(a, b).toFixed(2) }) });
+  }
+  descargar(`meshcheck-${proto}-${new Date().toISOString().slice(0, 10)}.geojson`,
+    JSON.stringify({ type: "FeatureCollection", features: feats }, null, 1), "application/geo+json");
+}
+
 /* ---- 11. Estado / status -------------------------------------------------- */
 function syncToggle() {
   $("btn-live").classList.toggle("active", useLive);
@@ -1774,6 +2017,7 @@ document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("cli
   if (activeTab === "lista") renderList();
   if (activeTab === "mio") renderMine();
   if (activeTab === "rf") { rfLoadList(); renderRf(); } else rfStopPoll();
+  if (activeTab === "red") redraw();
 }));
 document.querySelectorAll(".ntable th[data-sort]").forEach((th) => th.addEventListener("click", () => {
   const k = th.dataset.sort;
@@ -1787,6 +2031,8 @@ $("mode-toggle").addEventListener("click", (e) => { const b = e.target.closest("
 $("proto-toggle").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; switchProto(b.dataset.proto); });
 // Capturas RF
 $("rf-sel").addEventListener("change", (e) => rfLoadSession(e.target.value));
+$("exp-csv").addEventListener("click", exportCSV);
+$("exp-geo").addEventListener("click", exportGeoJSON);
 $("rf-cmp").addEventListener("change", (e) => rfLoadCompare(e.target.value));
 $("rf-map").addEventListener("change", (e) => { rfShowMap = e.target.checked; redraw(); });
 // Mi nodo: elegir/olvidar
