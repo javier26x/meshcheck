@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-24T10:03:41.882Z",
+  "generated": "2026-08-25T09:51:26.787Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 307,
+  "count": 309,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -1198,6 +1198,22 @@
         "power": "high",
         "antenna": "external",
         "locType": "residential"
+      }
+    },
+    "HRg0WVCs0TIDKHCp4z41": {
+      "id": "HRg0WVCs0TIDKHCp4z41",
+      "name": "tercero nodo villarrica 6phg-3",
+      "lat": -39.2715,
+      "lon": -72.215,
+      "placeholder": false,
+      "alias": "phg3",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Walter Manríquez Gebert",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "tercer nodo phg3"
       }
     },
     "Hgr6ac1fXaqXIB9BlptI": {
@@ -2986,6 +3002,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Nodo solar heltec V3. En prueba de funcionamiento."
+      }
+    },
+    "e9d3V9qYVyh44gvLTc6p": {
+      "id": "e9d3V9qYVyh44gvLTc6p",
+      "name": "nodo ce6phg_2",
+      "lat": -39.278611,
+      "lon": -72.225833,
+      "placeholder": false,
+      "alias": "phg2",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Walter Manríquez Gebert",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "segundo nodo en villarrica de ce6phg-2"
       }
     },
     "egtZ5b6qAO89lXa6ZpoA": {
