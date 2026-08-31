@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-08-25T09:51:26.787Z",
+  "generated": "2026-08-31T17:03:58.956Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 309,
+  "count": 312,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -670,6 +670,21 @@
         "antenna": "externa",
         "locType": "residential",
         "desc": "Nodo fijo Puente Alto RM."
+      }
+    },
+    "7bOzAUq5htlLTswPedPT": {
+      "id": "7bOzAUq5htlLTswPedPT",
+      "name": "CL1PAF-1 Curauma",
+      "lat": -33.138996,
+      "lon": -71.57405,
+      "placeholder": false,
+      "alias": "PAF1",
+      "role": "CLIENT_BASE",
+      "meta": {
+        "user": "Peter Fugellie",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
       }
     },
     "7frLuRvhoWLdBnc3cxfr": {
@@ -3890,6 +3905,21 @@
         "desc": "Futuro nodo Cauquenes seeed + direccional "
       }
     },
+    "qNXbmvwywdCs8NGSlNwT": {
+      "id": "qNXbmvwywdCs8NGSlNwT",
+      "name": "Olmué",
+      "lat": -32.9823542,
+      "lon": -71.1402382,
+      "placeholder": false,
+      "alias": "TDS",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Patricio TDS",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
     "qUYjzFgECOkbAS9GtEWS": {
       "id": "qUYjzFgECOkbAS9GtEWS",
       "name": "Roberto movil",
@@ -4339,6 +4369,22 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "mobile"
+      }
+    },
+    "veDNgheUVVmV8vYFq2KP": {
+      "id": "veDNgheUVVmV8vYFq2KP",
+      "name": "Weponsv Las Condes",
+      "lat": -33.4172366,
+      "lon": -70.5716027,
+      "placeholder": false,
+      "alias": "WEPN",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Weponsv",
+        "power": "high",
+        "antenna": "directional",
+        "locType": "residential",
+        "desc": "Just a guy "
       }
     },
     "vmeYRIccYUQKJGK3pgfg": {
