@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-04T13:32:16.511Z",
+  "generated": "2026-09-06T12:53:17.839Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 313,
+  "count": 318,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -796,6 +796,22 @@
         "desc": "Desde La Cisterna aprendiendo y aportando"
       }
     },
+    "AMKWpBHamSFCsrcSFjNw": {
+      "id": "AMKWpBHamSFCsrcSFjNw",
+      "name": "Nodo Movil Meshtastic",
+      "lat": -12.0884295,
+      "lon": -77.0361474,
+      "placeholder": false,
+      "alias": "🧭01",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Rubén Zambrano",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo movil para efectos de pruebas"
+      }
+    },
     "Ah5HF91wCue5ELTk0YqZ": {
       "id": "Ah5HF91wCue5ELTk0YqZ",
       "name": "dpto_gatos",
@@ -937,6 +953,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "LU1YD"
+      }
+    },
+    "Ds4HwL5cQnha0yYTnuwR": {
+      "id": "Ds4HwL5cQnha0yYTnuwR",
+      "name": "Peñalolen01",
+      "lat": -33.50952676345122,
+      "lon": -70.55993539229067,
+      "placeholder": false,
+      "alias": "PNL1",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eugenio Garcia",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Peñalolén, Tobalaba/Quebrada de Macul"
       }
     },
     "DuCuEQgSHATaUjnniiNa": {
@@ -1586,6 +1618,21 @@
         "desc": "Mesh Temuco Poniente"
       }
     },
+    "LTYKYE6PFOg6h1PfDs2c": {
+      "id": "LTYKYE6PFOg6h1PfDs2c",
+      "name": "Tomas Weisser casa",
+      "lat": -33.3670786,
+      "lon": -70.4952932,
+      "placeholder": false,
+      "alias": "Twh",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Tomás Weisser",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
     "LpW80GVvbsjzdWqAIuZz": {
       "id": "LpW80GVvbsjzdWqAIuZz",
       "name": "Viernez13",
@@ -2001,6 +2048,21 @@
         "antenna": "external",
         "locType": "non_residential",
         "desc": "Nodo instalado en las oficinas del ALMA Project del National Astronomical Observatory of Japan"
+      }
+    },
+    "RE7bsFwQMK84TNv8x9pM": {
+      "id": "RE7bsFwQMK84TNv8x9pM",
+      "name": "EPO422",
+      "lat": -33.25600974787448,
+      "lon": -70.62301904166023,
+      "placeholder": false,
+      "alias": "e422",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eric Peters",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
       }
     },
     "RQRmiBons9N9UTAx2yJ4": {
@@ -3576,6 +3638,21 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
+      }
+    },
+    "l9LVUYZDrrRpf56l180U": {
+      "id": "l9LVUYZDrrRpf56l180U",
+      "name": "Movil TW",
+      "lat": -33.3670756,
+      "lon": -70.4952911,
+      "placeholder": false,
+      "alias": "TWgp",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Tomás Weisser",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
       }
     },
     "mASrA15q2kxTqlZY3due": {
