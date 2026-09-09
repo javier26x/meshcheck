@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-06T12:53:17.839Z",
+  "generated": "2026-09-09T13:42:45.940Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 318,
+  "count": 320,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -3440,6 +3440,21 @@
         "desc": "Con Panel solar y bateria"
       }
     },
+    "jiroWUhVcTMzqfcagrMl": {
+      "id": "jiroWUhVcTMzqfcagrMl",
+      "name": "CA3PTL-HV3 | Talos",
+      "lat": -33.4728,
+      "lon": -70.642,
+      "placeholder": false,
+      "alias": "PTL0",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rodrigo Iván Núñez Torres",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
     "jyaoZAZIQ3ELPFbQ6wqF": {
       "id": "jyaoZAZIQ3ELPFbQ6wqF",
       "name": "Punta olivo ",
@@ -4399,6 +4414,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "PRobando"
+      }
+    },
+    "v9OzHCetVuI9nNwW6euk": {
+      "id": "v9OzHCetVuI9nNwW6euk",
+      "name": "EPO423",
+      "lat": -33.25599770188133,
+      "lon": -70.62301131671491,
+      "placeholder": false,
+      "alias": "56c3",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Eric Peters",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Wio Tracker L1v Pro"
       }
     },
     "vEE973VcMu3oEgGMfuQB": {
