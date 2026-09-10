@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-09T13:42:45.940Z",
+  "generated": "2026-09-10T13:36:11.924Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 320,
+  "count": 319,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -672,21 +672,6 @@
         "desc": "Nodo fijo Puente Alto RM."
       }
     },
-    "7bOzAUq5htlLTswPedPT": {
-      "id": "7bOzAUq5htlLTswPedPT",
-      "name": "CL1PAF-1 Curauma",
-      "lat": -33.138996,
-      "lon": -71.57405,
-      "placeholder": false,
-      "alias": "PAF1",
-      "role": "CLIENT_BASE",
-      "meta": {
-        "user": "Peter Fugellie",
-        "power": "medium",
-        "antenna": "stock",
-        "locType": "residential"
-      }
-    },
     "7frLuRvhoWLdBnc3cxfr": {
       "id": "7frLuRvhoWLdBnc3cxfr",
       "name": "Mi primer Nodo :)",
@@ -697,6 +682,21 @@
       "role": "CLIENT",
       "meta": {
         "user": "Abraham Ermann Ermann",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
+    "8E7rpwtzQfE3BF8JAeSD": {
+      "id": "8E7rpwtzQfE3BF8JAeSD",
+      "name": "Jano_Meli",
+      "lat": -33.693693693693696,
+      "lon": -71.22617738643716,
+      "placeholder": false,
+      "alias": "Jame",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Alexander Alender",
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
@@ -3251,21 +3251,6 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
-      }
-    },
-    "gEgbD8bmrviqoiImf845": {
-      "id": "gEgbD8bmrviqoiImf845",
-      "name": "CL1PAF-3 Curauma",
-      "lat": -33.138996,
-      "lon": -71.57405,
-      "placeholder": false,
-      "alias": "PAF3",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Peter Fugellie",
-        "power": "medium",
-        "antenna": "stock",
-        "locType": "mobile"
       }
     },
     "gp13kWnWIsbGSux189xy": {
