@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-12T12:51:06.082Z",
+  "generated": "2026-09-13T13:48:04.351Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 319,
+  "count": 320,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -3839,6 +3839,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Nodo 2 Thno"
+      }
+    },
+    "ntmwUkK0d7qsgo09AgHc": {
+      "id": "ntmwUkK0d7qsgo09AgHc",
+      "name": "cuarto nodo villarrica 6phg-4",
+      "lat": -39.29382561287437,
+      "lon": -72.17805567070616,
+      "placeholder": false,
+      "alias": "phg4",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Walter Manríquez Gebert",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "cuarto nodo movil desde villarrica camino a pucon km9 aprox."
       }
     },
     "oJCJnOmWqyXrI2QJ85C3": {
