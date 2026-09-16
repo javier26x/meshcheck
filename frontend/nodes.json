@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-13T13:48:04.351Z",
+  "generated": "2026-09-16T14:12:00.601Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 320,
   "nodes": {
@@ -794,22 +794,6 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Desde La Cisterna aprendiendo y aportando"
-      }
-    },
-    "AMKWpBHamSFCsrcSFjNw": {
-      "id": "AMKWpBHamSFCsrcSFjNw",
-      "name": "Nodo Movil Meshtastic",
-      "lat": -12.0884295,
-      "lon": -77.0361474,
-      "placeholder": false,
-      "alias": "🧭01",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Rubén Zambrano",
-        "power": "medium",
-        "antenna": "stock",
-        "locType": "mobile",
-        "desc": "Nodo movil para efectos de pruebas"
       }
     },
     "Ah5HF91wCue5ELTk0YqZ": {
@@ -3965,6 +3949,22 @@
         "antenna": "custom",
         "locType": "mobile",
         "desc": "haciendo pruebas"
+      }
+    },
+    "pnCjeQtE9IlyrigWEBEN": {
+      "id": "pnCjeQtE9IlyrigWEBEN",
+      "name": "Heltec",
+      "lat": -33.510094,
+      "lon": -70.595783,
+      "placeholder": false,
+      "alias": "C01",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Diego",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Siempre conectado, siempre activo"
       }
     },
     "q0ZQoTIOnmAJXiMfMofR": {
