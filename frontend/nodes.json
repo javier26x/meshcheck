@@ -1,6 +1,6 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-16T14:12:00.601Z",
+  "generated": "2026-09-18T13:35:59.598Z",
   "source": "firestore:meshtasticame/nodes",
   "count": 320,
   "nodes": {
@@ -856,6 +856,21 @@
         "power": "high",
         "antenna": "external",
         "locType": "residential"
+      }
+    },
+    "ByGR2qYn91t3cgEFNh6c": {
+      "id": "ByGR2qYn91t3cgEFNh6c",
+      "name": "CD1FUQ",
+      "lat": -27.35691045521275,
+      "lon": -70.31024215010206,
+      "placeholder": false,
+      "alias": "Otep",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rivas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile"
       }
     },
     "Cu7DFdsXS3zuHC8gPy6M": {
@@ -3286,6 +3301,21 @@
         "desc": "Nodo sector Hospital\nInstalado por CE1RLP"
       }
     },
+    "hwfmvcGhVozBRnuMANTY": {
+      "id": "hwfmvcGhVozBRnuMANTY",
+      "name": "CD1FUQ",
+      "lat": -27.356863491115273,
+      "lon": -70.31027419013311,
+      "placeholder": false,
+      "alias": "Pabl",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pablo Rivas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
     "hzVrd5uhdZO695Ji5n2G": {
       "id": "hzVrd5uhdZO695Ji5n2G",
       "name": "Meshtastic 58eb",
@@ -3653,22 +3683,6 @@
         "antenna": "external",
         "locType": "residential",
         "desc": "Heltec v3, probando antenas"
-      }
-    },
-    "mDuGxGchX5TsRWVYa9d4": {
-      "id": "mDuGxGchX5TsRWVYa9d4",
-      "name": "Ambiramus",
-      "lat": -27.35749023965942,
-      "lon": -70.3101732322972,
-      "placeholder": false,
-      "alias": "otep",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Pablo Rivas",
-        "power": "medium",
-        "antenna": "stock",
-        "locType": "mobile",
-        "desc": "usuario nuevo aprendiendo"
       }
     },
     "mXp8fKd20kTbG3aL5eVx": {
@@ -4725,22 +4739,6 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "mobile"
-      }
-    },
-    "y2ihsJ01JWuZ4OtlDOZA": {
-      "id": "y2ihsJ01JWuZ4OtlDOZA",
-      "name": "Eluveitie",
-      "lat": -27.3571015,
-      "lon": -70.3101103,
-      "placeholder": false,
-      "alias": "Elu7",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Pablo Rivas",
-        "power": "medium",
-        "antenna": "stock",
-        "locType": "mobile",
-        "desc": "MÓVIL "
       }
     },
     "y6dKsWMu3e1IrNlmwJZi": {
