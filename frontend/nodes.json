@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-19T13:10:01.307Z",
+  "generated": "2026-09-24T14:12:25.557Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 320,
+  "count": 324,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -2064,6 +2064,22 @@
         "locType": "mobile"
       }
     },
+    "RQDNxzfsSU65P0Rdw2Hk": {
+      "id": "RQDNxzfsSU65P0Rdw2Hk",
+      "name": "Meshtastic CB3VS",
+      "lat": -33.5010299,
+      "lon": -70.7182011,
+      "placeholder": false,
+      "alias": "VERN",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Claudio Hernandez Aravena",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Targeta RAK4631 a 15 metros de altura acoplado a una torre de antena. En la comuna de Cerrillos."
+      }
+    },
     "RQRmiBons9N9UTAx2yJ4": {
       "id": "RQRmiBons9N9UTAx2yJ4",
       "name": "CA3GZK Base ",
@@ -2361,6 +2377,22 @@
         "antenna": "Omlidireccional 11dbi",
         "locType": "residential",
         "desc": "LilYGO TLoRa32 portátil"
+      }
+    },
+    "VLHdYTrOeP824wRpKsYg": {
+      "id": "VLHdYTrOeP824wRpKsYg",
+      "name": "Kayak 4",
+      "lat": -33.65765765765766,
+      "lon": -71.17468806998593,
+      "placeholder": false,
+      "alias": "K4",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Hernán Valdés ",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "remote",
+        "desc": "Nodo en cerro "
       }
     },
     "VPZoxgoWbTSETB7cIZhS": {
@@ -3423,6 +3455,21 @@
         "desc": "Nodo para Talca - Sector Las Rastras"
       }
     },
+    "jSGN79zoxMWq5Q41QO8s": {
+      "id": "jSGN79zoxMWq5Q41QO8s",
+      "name": "CE1GOX Gerson V3",
+      "lat": -18.438330319979904,
+      "lon": -70.28567091631909,
+      "placeholder": false,
+      "alias": "1GOX",
+      "role": "CLIENT",
+      "meta": {
+        "user": "CE1GOX",
+        "power": "high",
+        "antenna": "stock",
+        "locType": "mobile"
+      }
+    },
     "jbMDXRngVA5Iv6PKOcbb": {
       "id": "jbMDXRngVA5Iv6PKOcbb",
       "name": "CD5AIF Torreones",
@@ -4071,6 +4118,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Condominio rodeado de muros"
+      }
+    },
+    "qpC3eug4Qoe688RKAPp0": {
+      "id": "qpC3eug4Qoe688RKAPp0",
+      "name": "ZCO - LABRANZA - M0RG4N",
+      "lat": -38.76392,
+      "lon": -72.774602,
+      "placeholder": false,
+      "alias": "0678",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Manuel Baeza F.",
+        "power": "low",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo (experimental) Labranza - Hacienda Santa Maria"
       }
     },
     "r5DoDE6LrN2V4Odv7VAa": {
