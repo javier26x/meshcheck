@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-24T14:12:25.557Z",
+  "generated": "2026-09-27T14:41:53.046Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 324,
+  "count": 327,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -313,6 +313,22 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
+      }
+    },
+    "3OdAdQL5BnoPJYo7tCQQ": {
+      "id": "3OdAdQL5BnoPJYo7tCQQ",
+      "name": "CD2KSI_BASE",
+      "lat": -33.618884,
+      "lon": -71.599369,
+      "placeholder": false,
+      "alias": "DEBI",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Vivian Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo de pruebas fijo en casa"
       }
     },
     "3PCjscreQCYdBCtstqoS": {
@@ -1216,6 +1232,21 @@
         "locType": "mobile"
       }
     },
+    "H9k0DIR8cDZWRZcgoqKj": {
+      "id": "H9k0DIR8cDZWRZcgoqKj",
+      "name": "CLLC_LAS_CONDES",
+      "lat": -33.4131289,
+      "lon": -70.5992676,
+      "placeholder": false,
+      "alias": "CLLC",
+      "role": "CLIENT",
+      "meta": {
+        "user": "David Alejandro Ayala Castro",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "residential"
+      }
+    },
     "HFzuZCJKjCkKIY9GDh6X": {
       "id": "HFzuZCJKjCkKIY9GDh6X",
       "name": "FpmCL V3",
@@ -1338,6 +1369,22 @@
         "antenna": "external",
         "locType": "mobile",
         "desc": "Nodo portátil \nHeltec E213"
+      }
+    },
+    "IYCIfZiUAn6OUV9dlLNU": {
+      "id": "IYCIfZiUAn6OUV9dlLNU",
+      "name": "Meshtastic f51c",
+      "lat": -33.6106023,
+      "lon": -70.6012629,
+      "placeholder": false,
+      "alias": "f51c",
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "hector moreno echeverria",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "HELTEC_V3"
       }
     },
     "IydpPIgUD4ea2T14bZkc": {
