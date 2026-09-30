@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-09-28T17:39:13.602Z",
+  "generated": "2026-09-30T15:55:01.795Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 327,
+  "count": 329,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -623,6 +623,22 @@
         "power": "medium",
         "antenna": "stock",
         "locType": "residential"
+      }
+    },
+    "7Gi6ci4E5nuMjcdIOSPT": {
+      "id": "7Gi6ci4E5nuMjcdIOSPT",
+      "name": "pedro ce4ks",
+      "lat": -36.6140144914675,
+      "lon": -72.11649258615788,
+      "placeholder": false,
+      "alias": "Pdr",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pedro Ponce",
+        "power": "medium",
+        "antenna": "custom",
+        "locType": "mobile",
+        "desc": "Nodo movil ubicado en mi mochila, se mueve dentro de chillan urbano"
       }
     },
     "7KqQkHFtXZfpQZfKeBfI": {
@@ -2047,6 +2063,22 @@
         "power": "medium",
         "antenna": "external",
         "locType": "mobile"
+      }
+    },
+    "PVdBWt9ZRZ11jr4Nu0Jd": {
+      "id": "PVdBWt9ZRZ11jr4Nu0Jd",
+      "name": "pedro ce4ks_base",
+      "lat": -36.61402408171236,
+      "lon": -72.11650099525211,
+      "placeholder": false,
+      "alias": "PdrB",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Pedro Ponce",
+        "power": "medium",
+        "antenna": "custom",
+        "locType": "residential",
+        "desc": "Nodo fijo en torre de radioaficionado a 15 mts de altura, a energia solar. "
       }
     },
     "QXMDB27ePwV7yu3ZjA1f": {
@@ -4106,6 +4138,22 @@
         "desc": "Futuro nodo Cauquenes seeed + direccional "
       }
     },
+    "qDYu2blBINiqPOW2P4Ux": {
+      "id": "qDYu2blBINiqPOW2P4Ux",
+      "name": "M0RG4N v3",
+      "lat": -38.763924,
+      "lon": -72.77458,
+      "placeholder": false,
+      "alias": "0678",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Juan Manuel Baeza F.",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "Nodo de Pruebas."
+      }
+    },
     "qNXbmvwywdCs8NGSlNwT": {
       "id": "qNXbmvwywdCs8NGSlNwT",
       "name": "Olmué",
@@ -4165,22 +4213,6 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "Condominio rodeado de muros"
-      }
-    },
-    "qpC3eug4Qoe688RKAPp0": {
-      "id": "qpC3eug4Qoe688RKAPp0",
-      "name": "ZCO - LABRANZA - M0RG4N",
-      "lat": -38.76392,
-      "lon": -72.774602,
-      "placeholder": false,
-      "alias": "0678",
-      "role": "CLIENT",
-      "meta": {
-        "user": "Juan Manuel Baeza F.",
-        "power": "low",
-        "antenna": "stock",
-        "locType": "residential",
-        "desc": "Nodo (experimental) Labranza - Hacienda Santa Maria"
       }
     },
     "r5DoDE6LrN2V4Odv7VAa": {
