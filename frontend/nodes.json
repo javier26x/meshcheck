@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-10-03T14:18:49.291Z",
+  "generated": "2026-10-05T18:27:52.775Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 329,
+  "count": 330,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -473,18 +473,18 @@
     },
     "52nIQmRJlbbuuF3fPj58": {
       "id": "52nIQmRJlbbuuF3fPj58",
-      "name": "UWA Dv1",
+      "name": "BB-28",
       "lat": -36.7743104,
       "lon": -73.0988035,
       "placeholder": false,
-      "alias": "0f71",
+      "alias": "BB28",
       "role": "CLIENT",
       "meta": {
         "user": "Zackpls",
         "power": "medium",
-        "antenna": "stock",
+        "antenna": "Omnidireccional 10dbi",
         "locType": "mobile",
-        "desc": "modelo wio tracker L1 PRO"
+        "desc": "Wio Seeed Tracker L1 Pro"
       }
     },
     "5Ppllkm63bHdBemI9Zxv": {
@@ -2534,6 +2534,22 @@
         "antenna": "external",
         "locType": "non_residential",
         "desc": "Nodo desatendido sector centro Antofagasta Radio club La Portada"
+      }
+    },
+    "WVhUx5uSsRxWaj7YkRQc": {
+      "id": "WVhUx5uSsRxWaj7YkRQc",
+      "name": "BB-29",
+      "lat": -36.7892595,
+      "lon": -73.0995412,
+      "placeholder": false,
+      "alias": "BB29",
+      "role": "CLIENT_MUTE",
+      "meta": {
+        "user": "Zackpls",
+        "power": "medium",
+        "antenna": "external",
+        "locType": "mobile",
+        "desc": "Lilygo T-Deck Plus"
       }
     },
     "WmhnwIdwb7ojgjfsBSDK": {
