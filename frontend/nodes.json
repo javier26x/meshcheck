@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-10-05T18:27:52.775Z",
+  "generated": "2026-10-06T15:57:07.999Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 330,
+  "count": 331,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -439,6 +439,22 @@
         "antenna": "stock",
         "locType": "residential",
         "desc": "NODO QUINTERO-LONCURA"
+      }
+    },
+    "4nSqRgLvpR6ygUgljflG": {
+      "id": "4nSqRgLvpR6ygUgljflG",
+      "name": "NODOMOVIL01",
+      "lat": -33.6289563,
+      "lon": -71.6079893,
+      "placeholder": false,
+      "alias": "VMMC",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Vivian Morales",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "mobile",
+        "desc": "Nodo móvil de pruebas"
       }
     },
     "4oL3U2Ulr9S7XZilWQdu": {
