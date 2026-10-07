@@ -1,8 +1,8 @@
 {
   "_note": "Generado por tools/fetch_nodes.mjs. Snapshot base de MeshCheck Live.",
-  "generated": "2026-10-06T15:57:07.999Z",
+  "generated": "2026-10-07T16:28:10.666Z",
   "source": "firestore:meshtasticame/nodes",
-  "count": 331,
+  "count": 333,
   "nodes": {
     "007lDAGFnDatIS9wjesw": {
       "id": "007lDAGFnDatIS9wjesw",
@@ -3395,6 +3395,21 @@
         "locType": "residential"
       }
     },
+    "gYQxDVhBCxxATkjamnuk": {
+      "id": "gYQxDVhBCxxATkjamnuk",
+      "name": "ICONEX",
+      "lat": -33.10677282880083,
+      "lon": -71.57329567113115,
+      "placeholder": false,
+      "alias": "ICX",
+      "role": "CLIENT",
+      "meta": {
+        "user": "Renato Espoz L.",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential"
+      }
+    },
     "gp13kWnWIsbGSux189xy": {
       "id": "gp13kWnWIsbGSux189xy",
       "name": "KakoPedreros4484",
@@ -4416,6 +4431,22 @@
         "antenna": "external",
         "locType": "mobile",
         "desc": "Nodo movil "
+      }
+    },
+    "sWprQFKyTBtPUPYyXuVZ": {
+      "id": "sWprQFKyTBtPUPYyXuVZ",
+      "name": "Meshtastic JotaR",
+      "lat": -33.4474947,
+      "lon": -70.6183533,
+      "placeholder": false,
+      "alias": "jota",
+      "role": "CLIENT",
+      "meta": {
+        "user": "José Rojas",
+        "power": "medium",
+        "antenna": "stock",
+        "locType": "residential",
+        "desc": "myplace@huascar.providencia"
       }
     },
     "sYLumzI9eFW5zRvA12lo": {
